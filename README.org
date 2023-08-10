@@ -1,0 +1,19 @@
+#+Title:  Readme for StatsHelp package
+#+Author: Dirk Oliver Theis, Theoretical Computer Science, University of Tartu, Estonia
+
+Julia package that helps with statistics for random processes
+
+
+** TODO [0/1]
+
+- [ ]  Add Todo's
+
+
+** Version History
+
+/Time goes up!/
+
+
++ *v0.1.0*  Initial version
+
+EOF
