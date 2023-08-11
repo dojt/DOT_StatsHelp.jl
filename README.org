@@ -1,19 +1,28 @@
-#+Title:  Readme for StatsHelp package
-#+Author: Dirk Oliver Theis, Theoretical Computer Science, University of Tartu, Estonia
+#+TITLE:  Readme for StatsHelp package
+#+AUTHOR: Dirk Oliver Theis, Theoretical Computer Science, University of Tartu, Estonia
 
 Julia package that helps with statistics for random processes
 
 
-** TODO [0/1]
+The source code in this repository is based on Emacs' Org-mode literate programming.  The actual editable text is
+the file
+#+BEGIN_EXPORT ascii
+DOT_StatsHelp.org
+#+END_EXPORT
 
-- [ ]  Add Todo's
+All discussion of the code and the development progress is there.
 
+This file contains only the version history.
 
 ** Version History
 
 /Time goes up!/
 
 
-+ *v0.1.0*  Initial version
++ *v0.1.0*  Initial version -- dosn't do anything yet 😅
 
 EOF
+
+# Local Variables:
+# fill-column: 115
+# End:
