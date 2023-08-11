@@ -47,19 +47,25 @@
    structure.
 
 
-* TODO Progress [0/4]
+* TODO Progress [1/5]
 
-     + [-] Set up repository [1/5]
+     + [X] Set up repository [6/6]
 
        - [X] Create repository
-       - [ ] Make it Org
-       - [ ] Set up TOML files
-       - [ ] Make version v0.1
-       - [ ] Register on ~DOT_JuliaPackages~
+       - [X] Make it Org
+       - [X] Set up TOML files
+       - [X] Copy content from ShiftRules/SPSA ~Stats~
+       - [X] Make version v0.1
+       - [X] Register on ~DOT_JuliaPackages~
 
-     + [ ] Copy content from ShiftRules/SPSA ~Stats~
+     + [ ] Make it work, basically [0/2]
 
-     + [ ] Make it type independent: Array or primitive.
+       - [ ] Work source code
+       - [ ] Maybe some unit tests?
+
+     + [ ] Work the many-runs
+
+     + [ ] Make it type independent,  array or primitive?
 
      + [ ] Write the [[summary][Summary]]
 
@@ -122,71 +128,97 @@
 
 ** Basic types
 
-    The following types are made available to the user:
+    The following basic type is made available to the user:
 
     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
       export Stats
     #+END_SRC
 
-    An object of this type collects information about the stochastic convergence of the mean of the gradient
-    estimates to the true gradient, at a (fixed) given point 𝑥⃗; I'll explain it in the sub-sections below.
+    An object of this type collects information about the stochastic convergence of the empirical mean of random
+    ~Array~ objects to a known(!) limit.
 
 *** The ~Stats~-type with constructor
 
-     The stats collecting type looks like this:
+     Let's define the basic stats collecting type:
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       struct Stats{𝐑,V}              # `V` stands for valency of the tensor
-           # Input
-           true_μ        ::Array{ℝ, V}
+       struct Stats{𝐑,V}              # `V` is an integer: the valency of the tensor
+           # Input for run
+           curr_true_μ  ::Array{ℝ, V} #                      size: `steps`
 
-           # Output
-           empirical_μ   ::Array{𝐑, V}
+           # Output of run
+           curr_emp_μ   ::Array{𝐑, V} #                      size: `steps`
 
-           err2²         ::Vector{ℝ}  # 2-norm of tensor; \
-           err1          ::Vector{ℝ}  # 1-norm  ~          | ultimate lengths:
-           err∞          ::Vector{ℝ}  # ∞-norm  ~         /   `outer_reps`
-           empirical_var ::Ref{𝐑}
+           # Overall output
+           err2²        ::Array{ℝ,2}  # 2-norm of tensor; \
+           err1         ::Array{ℝ,2}  # 1-norm  ~          | size: `steps` ✕ `runs`
+           err∞         ::Array{ℝ,2}  # ∞-norm  ~         /
+           emp_var      ::Vector{𝐑}   #                      size: `runs`
 
            # Transient data
-           _ws           ::Array{𝐑,V}
+           _ws           ::Array{𝐑,V} #                      size: `steps`
+
+           # Counters
+           𝐬             ::Ref{Int}   # current step idx (start from 1, as usual)
+           𝐫             ::Ref{Int}   # current run  idx (start from 1)
        end
      #+END_SRC
 
-     It's the user's responsibility to create it (using the following constructor).  The object must then be passed
-     to the ~spsa!()~ function, which fills it with data.  After completion, the user can retrieve:
+     ~V~ is the valency of the tensor, i.e., ~V~$=1$ for a vectors, ~V~$=2$ for matrices, etc, but also ~V~$=0$ for
+     almost [fn:: It's not the same type in Julia.] scalars.
 
-       + The square error over the time (i.e., repetitions) in the array ~err2²~
-       + The 1-norm of the error over time in the array                  ~err1~
-       + The infty-norm of the error over time in the array              ~err∞~
-       + The empirical variance of the estimator (a scalar) in           ~empirical_var[]~
+**** Basic usage
+
+     The user must stick to the following order of instructions for using the ~Stats~ type:
+
+       1. create an object of the type using the [[Constructor][constructor]] below;
+       2. start a new run
+          1. fill run with data using the [[append][~append!()~ function]] repeatedly, once for every "step"
+          2. call the [[finalize][~finalize_run!()~ function]] to for tidying up the run
+          3. retrieve the stored stats for the run
+       3. Goto (2)
+
+     In #4, user can retrieve:
+
+       + The square error over the steps of the run ------- , in the array           ~err2²[end,run]~
+       + The 1-norm of the error over the steps ------- , in the array               ~err1[end,run]~
+       + The infty-norm of the error over the steps ------- , in the array           ~err∞[end,run]~
+       + The empirical variance of the estimator (a scalar) for the run ------- , in ~emp_var[run]~
+
+**** Constructor
 
      The constructor takes the following arguments.
 
-       + The exact mean ~true_μ~.
-       + A hint for how many iterations to expect (for alloc'ing).
+       + The size of the array;
+       + The number of steps in each run;
+       + The number of runs.
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       function Stats(true_μ ::Array{ℝ,V}, ::Type{𝐑}
+       function Stats(sz ::NTuple{V,Int}
                       ;
-                      iterations_hint :: Int          )::Stats{𝐑,V}   where{𝐑<:Real,V}
+                      steps :: Int,
+                      runs  :: Int       )::Stats{𝐑,V}   where{𝐑<:Real,V}
 
-           empirical_μ   = Array{𝐑,V}(undef, size(true_μ) )  ; empirical_μ .= 𝐑(0)
-           _ws           = Array{𝐑,V}(undef, size(true_μ) )
+           curr_true_μ   = Array{𝐑,V}(undef, sz )
+           curr_emp_μ    = Array{𝐑,V}(undef, sz )        ; curr_emp_μ   .= 𝐑(0)
+           _ws           = Array{𝐑,V}(undef, sz )
 
-           err2² = sizehint!(ℝ[], iterations_hint)
-           err1  = sizehint!(ℝ[], iterations_hint)
-           err∞  = sizehint!(ℝ[], iterations_hint)
-           empirical_var = Ref{𝐑}(0.0)
+           err2²         = Array{ℝ,2}(undef, steps,runs)
+           err1          = Array{ℝ,2}(undef, steps,runs)
+           err∞          = Array{ℝ,2}(undef, steps,runs)
+           emp_var       = Array{𝐑,1}(undef, runs)       ; emp_var .= 𝐑(0)
 
-           return Stats{𝐑,V}(true_μ,
-                             empirical_μ, err2², err1, err∞, empirical_var,
+           return Stats{𝐑,V}(curr_true_μ,
+                             curr_emp_μ, err2², err1, err∞, emp_var,
                              _ws)
        end
      #+END_SRC
 
-*** Implementation details
-**** Adding a new data point
+*** TODO Starting a new run: ~start_run~()~
+
+       + The exact mean ~true_μ~.
+
+*** Adding data of a step: ~append!()~<<append>>
 
       * [ ] Double-check calculation of empirical variance
 
@@ -223,7 +255,7 @@
             # Updating variance
             #
             # We record the simple biased estimate of the empirical variance, and
-            # correct it in the `finalize()` function.
+            # correct it in the `finalize_run!()` function.
 
             empirical_var[] = n⋅empirical_var[]/(n+1) + norm²( 𝐸 - empirical_μ )/(n+1)
 
@@ -231,10 +263,12 @@
         end #^ append!()
       #+END_SRC
 
-**** Finalizing stats collection
+*** Finalizing a run: ~finalize_run!()~ <<finalize>>
 
       The ~finalize~()~ function must be called after all data points have been added.  It removes the bias from the
       empirical variance, and makes some debug-checks.
+
+      Moreover, the memory for the true mean, ~true_μ~, and for the work space, ~_ws~, are released.
 
       #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
         function finalize!(s ::Stats{𝐑,V}) ::Nothing                  where{𝐑,V}
@@ -250,6 +284,7 @@
             let n=length(err2²)
                 empirical_var[] *= (n-1)/n
             end
+
             nothing;
         end #^ finalize!(::Stats)
       #+END_SRC
