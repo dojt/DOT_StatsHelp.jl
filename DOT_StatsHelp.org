@@ -187,7 +187,12 @@
 
      .... using the following functions:
 
+
 ***** TODO export
+***** TODO init s,r
+
+
+
 
 **** Constructor
 
