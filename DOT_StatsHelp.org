@@ -167,12 +167,12 @@
      ~V~ is the valency of the tensor, i.e., ~V~$=1$ for a vectors, ~V~$=2$ for matrices, etc, but also ~V~$=0$ for
      almost [fn:: It's not the same type in Julia.] scalars.
 
-**** Basic usage
+**** Usage
 
      The user must stick to the following order of instructions for using the ~Stats~ type:
 
        1. create an object of the type using the [[Constructor][constructor]] below;
-       2. start a new run
+       2. start a new run, using the [[start-run][~start_run!()~ function]]
           1. fill run with data using the [[append][~append!()~ function]] repeatedly, once for every "step"
           2. call the [[finalize][~finalize_run!()~ function]] to for tidying up the run
           3. retrieve the stored stats for the run
@@ -218,7 +218,7 @@
        end
      #+END_SRC
 
-*** TODO Starting a new run: ~start_run~()~
+*** TODO Starting a new run: ~start_run~()~ <<start-run>>
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
        function start_run!(s ::Stats{𝐑,V}
