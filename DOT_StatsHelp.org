@@ -1,0 +1,273 @@
+#+TITLE:  Julia Package That Helps With Statistics For Random Processes
+#+AUTHOR: Dirk Oliver Theis, University of Tartu, Estonia
+#+EMAIL:  dotheis@ut.ee
+#+DATE:   Fri Aug 11 11:19:58 CEST 2023
+
+#+STARTUP: latexpreview
+#+BIBLIOGRAPHY: ../../DOT_LaTeX/dirks.bib
+#+PROPERTY: header-args :eval never :comments link :exports code
+
+* Copyright Notice
+
+   The following copyright notice applies to this Org-file, as well as the Julia source file generated from it.
+
+   #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+     #########################################################################
+     #                                                                       #
+     # Copyright and Licensing Information                                   #
+     # -----------------------------------                                   #
+     #                                                                       #
+     # Copyright lies with the University of Tartu, Estonia, and with the    #
+     # author.                                                               #
+     #                                                                       #
+     # Permission is hereby granted to use and modify the source code under  #
+     # the terms of the Apache v2.0 license.                                 #
+     #                                                                       #
+     #                                                                       #
+     # Author:                                                               #
+     #                                                                       #
+     #        Dirk Oliver Theis                                              #
+     #        Assoc. Prof. Theoretical Computer Science                      #
+     #        University of Tartu                                            #
+     #        Estonia                                                        #
+     #                                                                       #
+     #########################################################################
+   #+END_SRC
+
+
+* What's This File About?
+** TODO Summary of what this software does <<summary>>
+** Literate programming
+
+   This document is a "literate program", i.e., plain text interspersed with actual Julia programming language
+   source code.  The source code is extracted ("tangled") into the files [fn:: ~src/DOT_StatsHelp.jl~] and [fn::
+   ~tmp/runtests.jl~], from where it can be run etc.
+
+   Literate programming allows me to organize source code, documentation, and tests in a hierarchical document
+   structure.
+
+
+* TODO Progress [0/4]
+
+     + [-] Set up repository [1/5]
+
+       - [X] Create repository
+       - [ ] Make it Org
+       - [ ] Set up TOML files
+       - [ ] Make version v0.1
+       - [ ] Register on ~DOT_JuliaPackages~
+
+     + [ ] Copy content from ShiftRules/SPSA ~Stats~
+
+     + [ ] Make it type independent: Array or primitive.
+
+     + [ ] Write the [[summary][Summary]]
+
+
+* Literate Source Code for the Package
+
+** File headers
+
+    #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+      ###########################################################################
+      #                                                                         #
+      #  THIS IS A MACHINE-GENERATED FILE.  DO NOT EDIT IT.                     #
+      #                                                                         #
+      #  (The actual source code is in the Org file.)                           #
+      #                                                                         #
+      ###########################################################################
+    #+END_SRC
+
+    #+BEGIN_SRC julia :tangle test/runtests.jl
+      ###########################################################################
+      #                                                                         #
+      #  THIS IS A MACHINE-GENERATED FILE.  DO NOT EDIT IT.                     #
+      #                                                                         #
+      #  (The actual source code is in the Org file.)                           #
+      #                                                                         #
+      ###########################################################################
+
+      using Test
+      using DOT_StatsHelp
+    #+END_SRC
+
+
+** Generic test based on ~JET.jl~
+
+    #+BEGIN_SRC julia :tangle test/runtests.jl
+      using JET
+      using JSON # Only for ignoring by JET
+
+      @testset verbose=true "DOT_StatsHelp.jl testing:  via JET.jl" begin
+          test_package(DOT_StatsHelp, ignored_modules=(AnyFrameModule(JSON.Parser),) )
+      end
+    #+END_SRC
+
+
+** Module definition & imports
+
+    #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+      module DOT_StatsHelp
+    #+END_SRC
+
+    Imports
+
+    #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+      using DOT_NiceMath            # `⋅` = `*`  etc
+      using DOT_NiceMath.Numbers64  # ℝ, ℤ, ℚ
+
+      using LinearAlgebra: norm2, norm1, normInf as norm∞, norm_sqr as norm²
+    #+END_SRC
+
+
+** Basic types
+
+    The following types are made available to the user:
+
+    #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+      export Stats
+    #+END_SRC
+
+    An object of this type collects information about the stochastic convergence of the mean of the gradient
+    estimates to the true gradient, at a (fixed) given point 𝑥⃗; I'll explain it in the sub-sections below.
+
+*** The ~Stats~-type with constructor
+
+     The stats collecting type looks like this:
+
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       struct Stats{𝐑,V}              # `V` stands for valency of the tensor
+           # Input
+           true_μ        ::Array{ℝ, V}
+
+           # Output
+           empirical_μ   ::Array{𝐑, V}
+
+           err2²         ::Vector{ℝ}  # 2-norm of tensor; \
+           err1          ::Vector{ℝ}  # 1-norm  ~          | ultimate lengths:
+           err∞          ::Vector{ℝ}  # ∞-norm  ~         /   `outer_reps`
+           empirical_var ::Ref{𝐑}
+
+           # Transient data
+           _ws           ::Array{𝐑,V}
+       end
+     #+END_SRC
+
+     It's the user's responsibility to create it (using the following constructor).  The object must then be passed
+     to the ~spsa!()~ function, which fills it with data.  After completion, the user can retrieve:
+
+       + The square error over the time (i.e., repetitions) in the array ~err2²~
+       + The 1-norm of the error over time in the array                  ~err1~
+       + The infty-norm of the error over time in the array              ~err∞~
+       + The empirical variance of the estimator (a scalar) in           ~empirical_var[]~
+
+     The constructor takes the following arguments.
+
+       + The exact mean ~true_μ~.
+       + A hint for how many iterations to expect (for alloc'ing).
+
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       function Stats(true_μ ::Array{ℝ,V}, ::Type{𝐑}
+                      ;
+                      iterations_hint :: Int          )::Stats{𝐑,V}   where{𝐑<:Real,V}
+
+           empirical_μ   = Array{𝐑,V}(undef, size(true_μ) )  ; empirical_μ .= 𝐑(0)
+           _ws           = Array{𝐑,V}(undef, size(true_μ) )
+
+           err2² = sizehint!(ℝ[], iterations_hint)
+           err1  = sizehint!(ℝ[], iterations_hint)
+           err∞  = sizehint!(ℝ[], iterations_hint)
+           empirical_var = Ref{𝐑}(0.0)
+
+           return Stats{𝐑,V}(true_μ,
+                             empirical_μ, err2², err1, err∞, empirical_var,
+                             _ws)
+       end
+     #+END_SRC
+
+*** Implementation details
+**** Adding a new data point
+
+      * [ ] Double-check calculation of empirical variance
+
+      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+        import Base: append!
+        function append!(s ::Stats{𝐑,V}
+                         ;
+                         𝐸 ::Array{ℝ,V} ) ::Nothing  where{𝐑,V}
+
+            (;true_μ, err2², err1, err∞, empirical_μ, empirical_var, _ws) = s
+
+            @assert length(err2²) == length(err1) ==
+                    length(err∞)
+
+            n = length(err2²)
+
+            let new_μ        = _ws
+                new_μ       .= n⋅empirical_μ/(n+1) .+ 𝐸/(n+1)
+                empirical_μ .= new_μ
+            end
+
+            #
+            # Updating `mean…err`
+            #
+            let err  = _ws
+                err .= true_μ - empirical_μ
+
+                push!( err2², norm²(err) )
+                push!( err1,  norm1(err) )
+                push!( err∞,  norm∞(err) )
+            end #^ let
+
+            #
+            # Updating variance
+            #
+            # We record the simple biased estimate of the empirical variance, and
+            # correct it in the `finalize()` function.
+
+            empirical_var[] = n⋅empirical_var[]/(n+1) + norm²( 𝐸 - empirical_μ )/(n+1)
+
+            nothing;
+        end #^ append!()
+      #+END_SRC
+
+**** Finalizing stats collection
+
+      The ~finalize~()~ function must be called after all data points have been added.  It removes the bias from the
+      empirical variance, and makes some debug-checks.
+
+      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+        function finalize!(s ::Stats{𝐑,V}) ::Nothing                  where{𝐑,V}
+
+            (;err2², err1, err∞, empirical_var) = s
+
+            @assert length(err2²) ==
+                    length(err1)  == length(err∞)
+
+            #
+            # Un-bias empirical variance:
+            #
+            let n=length(err2²)
+                empirical_var[] *= (n-1)/n
+            end
+            nothing;
+        end #^ finalize!(::Stats)
+      #+END_SRC
+
+
+** End of module
+
+    #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+      end #^ module SPSA_Shift
+    #+END_SRC
+
+    That's it!
+
+
+* End of the Org File
+
+I'm saying good-bye with some well-meant file-local Emacs variables!
+
+# Local Variables:
+# fill-column: 115
+# End:
