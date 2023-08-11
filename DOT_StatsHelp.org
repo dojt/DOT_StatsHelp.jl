@@ -185,6 +185,10 @@
        + The infty-norm of the error over the steps ------- , in the array           ~err∞[end,run]~
        + The empirical variance of the estimator (a scalar) for the run ------- , in ~emp_var[run]~
 
+     .... using the following functions:
+
+***** TODO export
+
 **** Constructor
 
      The constructor takes the following arguments.
@@ -215,6 +219,16 @@
      #+END_SRC
 
 *** TODO Starting a new run: ~start_run~()~
+
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       function start_run!(s ::Stats{𝐑,V}
+                           ;
+                           true_μ ::Array{ℝ,V} ) ::Nothing  where{𝐑,V}
+
+           ...
+               ...
+               ...
+     #+END_SRC
 
        + The exact mean ~true_μ~.
 
