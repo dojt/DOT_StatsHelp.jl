@@ -71,7 +71,7 @@
 
      + [X] Describe the functions
 
-     + [ ]  Unit tests?
+     + [ ] Add unit tests
 
      + [ ] Write the [[summary][Summary]]
 
