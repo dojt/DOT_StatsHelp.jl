@@ -47,7 +47,7 @@
    structure.
 
 
-* TODO Progress [1/5]
+* TODO Progress [6/8]
 
      + [X] Set up repository [6/6]
 
@@ -58,14 +58,20 @@
        - [X] Make version v0.1
        - [X] Register on ~DOT_JuliaPackages~
 
-     + [ ] Make it work, basically [0/2]
+     + [X] Make it work, basically [1/1]
 
-       - [ ] Work source code
-       - [ ] Maybe some unit tests?
+       - [X] Work source code
 
-     + [ ] Work the many-runs
+     + [X] Work the many-runs
 
-     + [ ] Make it type independent,  array or primitive?
+     + [X] Make it type independent \\
+           Solved by using valency-0 tensors.
+
+     + [X] ~export~
+
+     + [X] Describe the functions
+
+     + [ ]  Unit tests?
 
      + [ ] Write the [[summary][Summary]]
 
@@ -126,7 +132,7 @@
     #+END_SRC
 
 
-** Basic types
+** Main work
 
     The following basic type is made available to the user:
 
@@ -165,7 +171,7 @@
            function
            Stats{𝐑,V}(;
                       curr_true_μ ::Array{ℝ,V}, curr_emp_μ ::Array{𝐑,V}, emp_var ::Vector{𝐑},
-                      err2² ::Vector{ℝ}, err1 ::Vector{ℝ}, err∞ ::Vector{ℝ}, _ws ::Array{𝐑,V})
+                      err2² ::Array{ℝ,2}, err1 ::Array{ℝ,2}, err∞ ::Array{ℝ,2}, _ws ::Array{𝐑,V}) where{𝐑,V}
                new(curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, _ws,
                    0,0)
            end
@@ -198,12 +204,6 @@
 
      .... using the following functions:
 
-
-***** TODO export
-
-
-
-
 **** Constructor
 
      The constructor takes the following arguments.
@@ -216,21 +216,21 @@
        function Stats(dimension ::NTuple{V,Int}
                       ;
                       steps :: Int,
-                      runs  :: Int             )  ::Stats{𝐑,V}     where{𝐑<:Real,V}
+                      runs  :: Int,
+                      𝐑     :: Type{<:Real} = ℝ)  ::Stats     where{V}
      #+END_SRC
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
            curr_true_μ   = Array{𝐑,V}(undef, dimension )
-           curr_emp_μ    = Array{𝐑,V}(undef, dimension )        ; curr_emp_μ   .= 𝐑(0)
+           curr_emp_μ    = Array{𝐑,V}(undef, dimension )   ; curr_emp_μ   .= 𝐑(0)
            _ws           = Array{𝐑,V}(undef, dimension )
 
            err2²         = Array{ℝ,2}(undef, steps,runs)
            err1          = Array{ℝ,2}(undef, steps,runs)
            err∞          = Array{ℝ,2}(undef, steps,runs)
-           emp_var       = Array{𝐑,1}(undef, runs)       ; emp_var .= 𝐑(0)
+           emp_var       = Array{𝐑,1}(undef, runs)         ; emp_var .= 𝐑(0)
 
-           return Stats{𝐑,V}(curr_true_μ,
-                             curr_emp_μ, err2², err1, err∞, emp_var,
-                             _ws)
+           return Stats{𝐑,V}( ; curr_true_μ, curr_emp_μ,
+                                err2², err1, err∞, emp_var,  _ws)
        end
      #+END_SRC
 
@@ -257,7 +257,7 @@
            @assert size( s.curr_true_μ ) == dimension(s) == size( s.curr_emp_μ  )
 
            let steps  = numo_steps(s),
-               runs   = numo_runs(s),
+               runs   = numo_runs(s)
 
                @assert steps > 0
                @assert runs  > 0
@@ -315,6 +315,8 @@
 *** Adding data of a step: ~record_step!()~<<record-step>>
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       export record_step!
+
        function record_step!(s ::Stats{𝐑,V}
                              ;
                              𝐸 ::Array{ℝ,V} ) ::Nothing  where{𝐑,V}
@@ -351,6 +353,8 @@
      from the empirical variance.
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       export finalize_run!
+
        function finalize_run!(s ::Stats{𝐑,V}) ::Nothing                  where{𝐑,V}
      #+END_SRC
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
@@ -365,6 +369,7 @@
            nothing;
        end #^ finalize_run!()
      #+END_SRC
+
 
 ** End of module
 
