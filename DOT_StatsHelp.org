@@ -143,24 +143,32 @@
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
        struct Stats{𝐑,V}              # `V` is an integer: the valency of the tensor
-           # Input for run
-           curr_true_μ  ::Array{ℝ, V} #                      size: `steps`
+           #            Input for run
+           curr_true_μ  ::Array{ℝ, V} #                      size: dimension
 
-           # Output of run
-           curr_emp_μ   ::Array{𝐑, V} #                      size: `steps`
+           #            Output of run
+           curr_emp_μ   ::Array{𝐑, V} #                      size: dimension
 
-           # Overall output
+           #            Overall output
            err2²        ::Array{ℝ,2}  # 2-norm of tensor; \
            err1         ::Array{ℝ,2}  # 1-norm  ~          | size: `steps` ✕ `runs`
            err∞         ::Array{ℝ,2}  # ∞-norm  ~         /
            emp_var      ::Vector{𝐑}   #                      size: `runs`
 
-           # Transient data
+           #             Work space
            _ws           ::Array{𝐑,V} #                      size: `steps`
 
-           # Counters
-           𝐬             ::Ref{Int}   # current step idx (start from 1, as usual)
-           𝐫             ::Ref{Int}   # current run  idx (start from 1)
+           #             Counters
+           𝐫             ::Ref{Int}   # index of upcoming run (i.e., 0 ⪮ before first run)
+           𝐬             ::Ref{Int}   # index of upcoming step (i.e., 0 ⪮ before first step)
+
+           function
+           Stats{𝐑,V}(;
+                      curr_true_μ ::Array{ℝ,V}, curr_emp_μ ::Array{𝐑,V}, emp_var ::Vector{𝐑},
+                      err2² ::Vector{ℝ}, err1 ::Vector{ℝ}, err∞ ::Vector{ℝ}, _ws ::Array{𝐑,V})
+               new(curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, _ws,
+                   0,0)
+           end
        end
      #+END_SRC
 
@@ -172,11 +180,14 @@
      The user must stick to the following order of instructions for using the ~Stats~ type:
 
        1. create an object of the type using the [[Constructor][constructor]] below;
-       2. start a new run, using the [[start-run][~start_run!()~ function]]
-          1. fill run with data using the [[append][~append!()~ function]] repeatedly, once for every "step"
-          2. call the [[finalize][~finalize_run!()~ function]] to for tidying up the run
-          3. retrieve the stored stats for the run
-       3. Goto (2)
+       2. For each run:
+          1. Start a new run using the [[start-run][~start_run!()~ function]]
+          2. Fill run with data using the [[record-step][~record_step!()~ function]] repeatedly, once for every step
+          3. Call the [[finalize][~finalize_run!()~ function]] to for tidying up the run
+          4. Retrieve the stored stats for the run \\
+             (the empirical mean of the run is not stored, it's overwritten by the next run)
+       3. Repeat, i.e., Goto (2), for all runs
+       4. Retrieve the stored stats over all runs.
 
      In #4, user can retrieve:
 
@@ -189,7 +200,6 @@
 
 
 ***** TODO export
-***** TODO init s,r
 
 
 
@@ -198,19 +208,20 @@
 
      The constructor takes the following arguments.
 
-       + The size of the array;
+       + The dimension of the underlying tensors, e.g., ~(,)~ for valency-0 tensors;
        + The number of steps in each run;
        + The number of runs.
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       function Stats(sz ::NTuple{V,Int}
+       function Stats(dimension ::NTuple{V,Int}
                       ;
                       steps :: Int,
-                      runs  :: Int       )::Stats{𝐑,V}   where{𝐑<:Real,V}
-
-           curr_true_μ   = Array{𝐑,V}(undef, sz )
-           curr_emp_μ    = Array{𝐑,V}(undef, sz )        ; curr_emp_μ   .= 𝐑(0)
-           _ws           = Array{𝐑,V}(undef, sz )
+                      runs  :: Int             )  ::Stats{𝐑,V}     where{𝐑<:Real,V}
+     #+END_SRC
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+           curr_true_μ   = Array{𝐑,V}(undef, dimension )
+           curr_emp_μ    = Array{𝐑,V}(undef, dimension )        ; curr_emp_μ   .= 𝐑(0)
+           _ws           = Array{𝐑,V}(undef, dimension )
 
            err2²         = Array{ℝ,2}(undef, steps,runs)
            err1          = Array{ℝ,2}(undef, steps,runs)
@@ -223,91 +234,137 @@
        end
      #+END_SRC
 
-*** TODO Starting a new run: ~start_run~()~ <<start-run>>
+*** Helper functions
+
+     The following helper functions are not exported, but can be used by the desperate user.
+
+     _Info about sizes of arrays._
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       function start_run!(s ::Stats{𝐑,V}
-                           ;
-                           true_μ ::Array{ℝ,V} ) ::Nothing  where{𝐑,V}
-
-           ...
-               ...
-               ...
+       valency(        s ::Stats{𝐑,V} ) where{𝐑,V}    = V
+       dimension(      s ::Stats{𝐑,V} ) where{𝐑,V}    = size( s.curr_true_μ )
+       numo_stepsruns( s ::Stats{𝐑,V} ) where{𝐑,V}    = size( s.err2²       )
+       numo_steps(     s ::Stats{𝐑,V} ) where{𝐑,V}    = numo_stepsruns(s) |> first
+       numo_runs(      s ::Stats{𝐑,V} ) where{𝐑,V}    = numo_stepsruns(s) |> last
      #+END_SRC
 
-       + The exact mean ~true_μ~.
+     _Data integrity check_ that throws an exception if there's a problem (otherwise returns nothing).
 
-*** Adding data of a step: ~append!()~<<append>>
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       function _integrity_check(s ::Stats{𝐑,V}) ::Nothing  where{𝐑,V}
+     #+END_SRC
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+           @assert size( s.curr_true_μ ) == dimension(s) == size( s.curr_emp_μ  )
 
-      * [ ] Double-check calculation of empirical variance
+           let steps  = numo_steps(s),
+               runs   = numo_runs(s),
 
-      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-        import Base: append!
-        function append!(s ::Stats{𝐑,V}
-                         ;
-                         𝐸 ::Array{ℝ,V} ) ::Nothing  where{𝐑,V}
+               @assert steps > 0
+               @assert runs  > 0
 
-            (;true_μ, err2², err1, err∞, empirical_μ, empirical_var, _ws) = s
+               @assert 0 ≤ s.𝐫 ≤ runs
+               @assert 0 ≤ s.𝐬 ≤ steps
 
-            @assert length(err2²) == length(err1) ==
-                    length(err∞)
+               @assert size(     s.err2²       ) == (steps,runs)
+               @assert size(     s.err1        ) == (steps,runs)
+               @assert size(     s.err∞        ) == (steps,runs)
+               @assert size(     s.emp_var     ) == (runs,)
 
-            n = length(err2²)
+               @assert size(     s._ws         ) == (steps,)
+           end #^ let
+           return nothing
+       end
+     #+END_SRC
 
-            let new_μ        = _ws
-                new_μ       .= n⋅empirical_μ/(n+1) .+ 𝐸/(n+1)
-                empirical_μ .= new_μ
-            end
+*** Starting a new run: ~start_run~()~ <<start-run>>
 
-            #
-            # Updating `mean…err`
-            #
-            let err  = _ws
-                err .= true_μ - empirical_μ
+     When a new run starts, the true mean has to be recorded, the indices 𝐫 and 𝐬 for run and step, resp., have to
+     be set up, and the empirical data has to be initialized.
 
-                push!( err2², norm²(err) )
-                push!( err1,  norm1(err) )
-                push!( err∞,  norm∞(err) )
-            end #^ let
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       export start_run!
 
-            #
-            # Updating variance
-            #
-            # We record the simple biased estimate of the empirical variance, and
-            # correct it in the `finalize_run!()` function.
+       function start_run!(s      :: Stats{𝐑,V}
+                           ;
+                           true_μ :: Array{ℝ,V} ) ::Nothing  where{𝐑,V}
+     #+END_SRC
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+           _integrity_check(s)
 
-            empirical_var[] = n⋅empirical_var[]/(n+1) + norm²( 𝐸 - empirical_μ )/(n+1)
 
-            nothing;
-        end #^ append!()
-      #+END_SRC
+           if    s.𝐫[] > 0         @assert s.𝐬[] == num_steps(s)
+           else                    @assert s.𝐬[] == 0               end
+
+           s.𝐫[] += 1            ; @assert s.𝐫[] < num_runs(s)
+           s.𝐬[]  = 0
+
+           @assert size(true_μ) == dimension(s)
+
+           let 𝐫 = s.𝐫[],
+               𝐬 = s.𝐬[]
+
+               s.curr_true_μ .= true_μ
+               s.curr_emp_μ  .= 𝐑(0)
+               s.emp_var[𝐫]   = 𝐑(0)
+
+           end
+           nothing;
+       end
+     #+END_SRC
+
+*** Adding data of a step: ~record_step!()~<<record-step>>
+
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       function record_step!(s ::Stats{𝐑,V}
+                             ;
+                             𝐸 ::Array{ℝ,V} ) ::Nothing  where{𝐑,V}
+     #+END_SRC
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+           _integrity_check(s)
+
+           (;curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, _ws) = s
+
+
+           s.𝐬[] += 1            ; @assert s.𝐬[] ≤ numo_steps(s)
+
+           let 𝐫     = s.𝐫[],
+               𝐬     = s.𝐬[],
+               steps = numo_steps(s)
+
+               curr_emp_μ  .+= 𝐸/𝐑(steps)
+               emp_var[𝐫]   += norm²( 𝐸 - curr_emp_μ )/𝐑(steps)  # will be corrected for bias in finalize_run!()
+
+
+               _ws .= curr_emp_μ - curr_true_μ
+
+               err2²[𝐬,𝐫]  = norm²(_ws)
+               err1[ 𝐬,𝐫]  = norm1(_ws)
+               err∞[ 𝐬,𝐫]  = norm∞(_ws)
+           end #^ let
+           nothing;
+       end #^ record_step!()
+     #+END_SRC
 
 *** Finalizing a run: ~finalize_run!()~ <<finalize>>
 
-      The ~finalize~()~ function must be called after all data points have been added.  It removes the bias from the
-      empirical variance, and makes some debug-checks.
+     The ~finalize_run!()~ function must be called after all data points have been added.  It removes the bias
+     from the empirical variance.
 
-      Moreover, the memory for the true mean, ~true_μ~, and for the work space, ~_ws~, are released.
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       function finalize_run!(s ::Stats{𝐑,V}) ::Nothing                  where{𝐑,V}
+     #+END_SRC
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+           _integrity_check(s)
 
-      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-        function finalize!(s ::Stats{𝐑,V}) ::Nothing                  where{𝐑,V}
+           #
+           # Un-bias empirical variance:
+           #
+           steps = numo_steps(s)
+           s.emp_var[𝐫] *= (steps-1)/steps
 
-            (;err2², err1, err∞, empirical_var) = s
-
-            @assert length(err2²) ==
-                    length(err1)  == length(err∞)
-
-            #
-            # Un-bias empirical variance:
-            #
-            let n=length(err2²)
-                empirical_var[] *= (n-1)/n
-            end
-
-            nothing;
-        end #^ finalize!(::Stats)
-      #+END_SRC
-
+           nothing;
+       end #^ finalize_run!()
+     #+END_SRC
 
 ** End of module
 
