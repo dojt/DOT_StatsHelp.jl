@@ -139,7 +139,7 @@
 
 
 ** Main work
-*** The ~Stats{𝐑,V}~-type
+*** The type ~Stats{𝐑,V}~
 
      The following basic type is made available to the user:
 
@@ -162,9 +162,9 @@
        ~NiceMath~'s ~ℝ~, which, here is ~Float64~.  If you are worried that cancellations affect the accuracy of
        the overall outcome, use something the package ~DoubleFloats~, or even, if you're patient, ~BigFloats~.
 
-     + ~V~ is a non-negative integer that gives the valency of the tensors that are being averaged, i.e., ~V~$=1$
-       for a vectors, ~V~$=2$ for matrices, etc.  With ~V~$=0$ you get
-       scalars.[fn:: Almost -- it's not the same type in Julia.]
+     + ~V~ is a non-negative integer that gives the valency of the tensors that are being averaged, i.e., ~V~ $=1$
+       for a vectors, ~V~ $=2$ for matrices, etc.  With ~V~ $=0$ you get scalars.[fn:: Almost -- it's not the same
+       type in Julia.]
 
 **** Fields and inner constructor
       #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
@@ -322,7 +322,7 @@
         end
       #+END_SRC
 
-*** Starting a new run: ~start_run~()~ <<start>>
+*** Starting a new run: ~start_run!()~ <<start>>
 
      When a new run starts, the true mean has to be recorded, the indices 𝐫 and 𝐬 for run and step, resp., have to
      be set up, and the empirical data has to be initialized.
@@ -337,10 +337,10 @@
 
 **** Working with valency-0 tensors -- aka 0-dimensional arrays
      :PROPERTIES:
-     :header-args: :tangle no :session JULIA-1 :eval yes :results output
+     :header-args: :tangle no :session JULIA-1 :eval yes :results output :exports both
      :END:
 
-     The Julia function `fill()` can create a valency-0 tensor (0-dimensional array) from a scalar:
+     The Julia function ~fill()~ can create a valency-0 tensor (0-dimensional array) from a scalar:
 
      #+BEGIN_SRC julia :tangle no
        a = fill( 3.141 )
@@ -397,7 +397,7 @@
         end #^ start_run!()
       #+END_SRC
 
-*** Adding data of a step: ~record_step!()~<<record>>
+*** Adding data of a step: ~record_step!()~ <<record>>
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
        export record_step!
