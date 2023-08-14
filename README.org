@@ -3,6 +3,12 @@
 
 Julia package that helps with statistics for random processes
 
+#+BEGIN_QUOTE
+This Julia package is part of the Julia package repository [[https://github.com/dojt/DOT_JuliaPackageRegistry][DOT_JuliaPackageRegistry]].  It relies on packages stored
+there, and can be added from there[fn:: ... as soon as the first stable version is ready.].  (The convenient way to
+do that is by through the standard Julia package [[https://github.com/GunnarFarneback/LocalRegistry.jl][LocalRegistry.jl]].
+#+END_QUOTE
+
 The source code in this repository is based on Emacs' Org-mode literate programming.  The actual editable
 source-text is the file
 #+BEGIN_CENTER
@@ -11,7 +17,7 @@ source-text is the file
 All docs, discussions of the source code, and the actual source code are in that file, and are "tangled" into the
 files in the ~./src/~ and ~./test/~ folders.
 
-This Readme file contains only the version history:
+This Readme file contains only the version history.
 
 ** Version History
 
