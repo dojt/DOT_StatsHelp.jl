@@ -1,15 +1,16 @@
 #+TITLE:  Readme for StatsHelp package
 #+AUTHOR: Dirk Oliver Theis, Theoretical Computer Science, University of Tartu, Estonia
+#+DATE: Mon Aug 14 10:43:33 CEST 2023
 
 Julia package that helps with statistics for random processes
 
 #+BEGIN_QUOTE
-This Julia package is part of the Julia package repository [[https://github.com/dojt/DOT_JuliaPackageRegistry][DOT_JuliaPackageRegistry]].  It relies on packages stored
+This Julia package is part of the Julia package repository [[https://github.com/dojt/DOT_JuliaPackageRegistry][~DOT_JuliaPackageRegistry~]].  It relies on packages stored
 there, and can be added from there[fn:1].  (The convenient way to do that is by through the standard Julia package
 [[https://github.com/GunnarFarneback/LocalRegistry.jl][LocalRegistry.jl]].
 #+END_QUOTE
 
-[fn:1] ... as soon as the first stable version is ready. [fn:: Sorry, looks like GitHub cannot render Org footnotes
+[fn:1] ... as soon as the first stable version is ready.[fn:: Sorry, looks like GitHub cannot render Org footnotes
 properly.]
 
 * Version History
@@ -23,7 +24,7 @@ properly.]
 The source code in this repository is based on Emacs' Org-mode literate programming.  The actual editable
 source-text is the file
 #+BEGIN_CENTER
-[[./DOT_StatsHelp.org][DOT_StatsHelp.org]]
+[[./DOT_StatsHelp.org][~DOT_StatsHelp.org~]]
 #+END_CENTER
 All docs, discussions of the source code, and the actual source code are in that file, and are "tangled" into the
 files in the ~./src/~ and ~./test/~ folders.
