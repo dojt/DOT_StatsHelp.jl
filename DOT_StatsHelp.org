@@ -407,30 +407,31 @@
                              𝐸 ::Array{ℝ,V} ) ::Nothing  where{𝐑,V}
      #+END_SRC
 
-**** TODO Implementation
+**** Implementation
       #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-            _integrity_check(s)
+        _integrity_check(s)
 
-            (;curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, _ws) = s
-
-
-            s.𝐬[] += 1            ; @assert s.𝐬[] ≤ numo_steps(s)
-
-            let 𝐫     = s.𝐫[],
-                𝐬     = s.𝐬[],
-                steps = numo_steps(s)
-
-                curr_emp_μ  .+= 𝐸/𝐑(steps)
-WRONG                emp_var[𝐫]   += norm²( 𝐸 - curr_emp_μ )/𝐑(steps)  # will be corrected for bias in finalize_run!()
+        (;curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, _ws) = s
 
 
-                _ws .= curr_emp_μ - curr_true_μ
+        s.𝐬[] += 1            ; @assert s.𝐬[] ≤ numo_steps(s)
 
-                err2²[𝐬,𝐫]  = norm²(_ws)
-                err1[ 𝐬,𝐫]  = norm1(_ws)
-                err∞[ 𝐬,𝐫]  = norm∞(_ws)
-            end #^ let
-            nothing;
+        let 𝐫     = s.𝐫[],
+            𝐬     = s.𝐬[],
+            steps = numo_steps(s)
+
+            emp_var[𝐫]   = (𝐬-1) ⋅ emp_var[𝐫]  / 𝐬    +   norm²( 𝐸 - curr_emp_μ ) / 𝐬 
+                          + (𝐬-1)???????????????????????????????????//
+                          # will be corrected for bias in finalize_run!()
+            curr_emp_μ  .= (𝐬-1) ⋅ curr_emp_μ / 𝐬   .+   𝐸 / 𝐬
+
+            _ws         .= curr_emp_μ - curr_true_μ
+
+            err2²[𝐬,𝐫]   = norm²(_ws)
+            err1[ 𝐬,𝐫]   = norm1(_ws)
+            err∞[ 𝐬,𝐫]   = norm∞(_ws)
+        end #^ let
+        nothing;
         end #^ record_step!()
       #+END_SRC
 
@@ -454,8 +455,11 @@ WRONG                emp_var[𝐫]   += norm²( 𝐸 - curr_emp_μ )/𝐑(steps)
           #
           # Un-bias empirical variance:
           #
-          s.emp_var[ s.𝐫[] ] *= s.𝐬[]/𝐑(s.𝐬[]-1)
+            let 𝐫     = s.𝐫[],
+                𝐬     = s.𝐬[]
 
+                s.emp_var[ 𝐫 ] *= 𝐬 / 𝐑(𝐬-1)
+            end
           nothing;
         end #^ finalize_run!()
       #+END_SRC
@@ -488,7 +492,7 @@ WRONG                emp_var[𝐫]   += norm²( 𝐸 - curr_emp_μ )/𝐑(steps)
 **** A test
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
-        function qnd_test_0(;runs=11,steps=1001)
+        function qnd_test_0(;runs=3,steps=4)
 
             data = 100*randn(steps,runs)
 
@@ -496,28 +500,29 @@ WRONG                emp_var[𝐫]   += norm²( 𝐸 - curr_emp_μ )/𝐑(steps)
 
             for run = 1:runs
 
-                start_run!(stats ; true_μ = fill(0.0) )
+                @testset "Run # $(run)" begin
+                    start_run!(stats ; true_μ = fill(0.0) )
 
-                for step = 1:steps
-                    record_step!(stats ; 𝐸 = fill(data[step,run]) )
+                    for step = 1:steps
+                        record_step!(stats ; 𝐸 = fill(data[step,run]) )
+                        @test curr_emp_μ(stats)[]  ≈ mean( @view data[1:step,run] )
+                    end
+                    finalize_run!(stats)
+
+                    @test emp_var(stats;run)   ≈ var(  @view data[:,run] )
+
+                    for step=1:steps
+                        @test  err2²(stats;run,step) ≈ mean( data[1:step,run] ) |> abs²
+                    end
+                    @test all(
+                        err1(stats;run,step)         ≈ mean( data[1:step,run] ) |> abs
+                        for step=1:steps
+                    )
+                    @test all(
+                        err∞(stats;run,step)         ≈ mean( data[1:step,run] ) |> abs
+                        for step=1:steps
+                    )
                 end
-                finalize_run!(stats)
-
-                #@test curr_emp_μ(stats)[]  ≈ mean( @view data[:,run] )
-                @test emp_var(stats;run)   ≈ var(  @view data[:,run] )
-
-                #@test all(
-                #    err2²(stats;run,step) ≈ abs²(   mean( data[s,run] for s=1:step )   )
-                #    for step=1:steps
-                #)
-                #@test all(
-                #    err1(stats;run,step) ≈ abs(     mean( data[s,run] for s=1:step )   )
-                #    for step=1:steps
-                #)
-                #@test all(
-                #    err∞(stats;run,step) ≈ maximum( mean( data[s,run] for s=1:step )   )
-                #    for step=1:steps
-                #)
 
             end #^ for run
 
