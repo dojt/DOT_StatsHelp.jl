@@ -5,9 +5,12 @@ Julia package that helps with statistics for random processes
 
 #+BEGIN_QUOTE
 This Julia package is part of the Julia package repository [[https://github.com/dojt/DOT_JuliaPackageRegistry][DOT_JuliaPackageRegistry]].  It relies on packages stored
-there, and can be added from there[fn:1].  (The convenient way to
-do that is by through the standard Julia package [[https://github.com/GunnarFarneback/LocalRegistry.jl][LocalRegistry.jl]].
+there, and can be added from there[fn:1].  (The convenient way to do that is by through the standard Julia package
+[[https://github.com/GunnarFarneback/LocalRegistry.jl][LocalRegistry.jl]].
 #+END_QUOTE
+
+[fn:1] ... as soon as the first stable version is ready. [fn:: Sorry, looks like GitHub cannot render Org footnotes
+properly.]
 
 * Version History
 
@@ -26,11 +29,6 @@ All docs, discussions of the source code, and the actual source code are in that
 files in the ~./src/~ and ~./test/~ folders.
 
 This Readme file contains only the version history.
-
-
-* Footnotes
-
-[fn:1] ... as soon as the first stable version is ready.
 
 # Local Variables:
 # fill-column: 115
