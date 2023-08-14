@@ -6,7 +6,7 @@ Julia package that helps with statistics for random processes
 
 #+BEGIN_QUOTE
 This Julia package is part of the Julia package repository [[https://github.com/dojt/DOT_JuliaPackageRegistry][~DOT_JuliaPackageRegistry~]].  It relies on packages stored
-there, and can be added from there[fn:1].  (The convenient way to do that is by through the standard Julia package
+there, and can be added from there[fn:1].  (The convenient way to do that is through the standard Julia package
 [[https://github.com/GunnarFarneback/LocalRegistry.jl][LocalRegistry.jl]].
 #+END_QUOTE
 
