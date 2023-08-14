@@ -78,6 +78,9 @@
 
      + [ ] Write the [[summary][Summary]]
 
+     + [ ] Acknowledge funding: NeQst WP4
+           - Also add that to the SPSA paper!
+
 
 * Literate Source Code for the Package
 
