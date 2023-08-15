@@ -67,11 +67,11 @@
    source code.  The source code is extracted ("tangled") into the files [fn:: ~src/DOT_StatsHelp.jl~] and [fn::
    ~tmp/runtests.jl~], from where it can be run etc.
 
-   Literate programming allows me to organize source code, documentation, and tests in a hierarchical document
-   structure.  This makes orientation in the source code so much easier 😊.
+   Literate programming allows me to organize source code, documentation, and tests in a hierarchical, text
+   document structure.  This makes orientation in the source code so much easier 😊 than in a linear source stream.
 
 
-* TODO Task Lists and Progress Reports [1/4]
+* Task Lists and Progress Reports [2/4]
 ** DONE Basics [1/1]
 
      + [X] Set up repository [6/6]
@@ -83,7 +83,7 @@
        - [X] Make version v0.1
        - [X] Register on ~DOT_JuliaPackages~
 
-** IN-PRGR Mean-estimating process [7/8]
+** DONE Mean-estimating process [8/8]
 
      + [X] Make it work, basically [1/1]
 
@@ -102,7 +102,7 @@
 
      + [X] Add unit tests
 
-     + [ ] Add more unit tests
+     + [X] Add more unit tests
 
 ** TODO Max-approximating process [0/0]
 ** TODO Finally, ... [0/2]
@@ -145,19 +145,21 @@
       #+BEGIN_SRC julia :tangle test/runtests.jl
         using DoubleFloats: Double64
 
-        using Base:          abs2     as abs²
-        using LinearAlgebra: norm_sqr as norm², norm2, norm1, normInf as norm∞
+        using LinearAlgebra: norm_sqr as norm2², norm2, norm1, normInf as norm∞
 
         using Statistics: mean, var
+
+        using DOT_NiceMath
       #+END_SRC
 
 **** Generic test based on ~JET.jl~
     #+BEGIN_SRC julia :tangle test/runtests.jl
       using JET
-      using JSON # Only for ignoring by JET
+      using JSON        # Only for ignoring by JET
+      using Polynomials # Only for ignoring by JET
 
       @testset verbose=true "DOT_StatsHelp.jl testing:  via JET.jl" begin
-          test_package(DOT_StatsHelp, ignored_modules=(AnyFrameModule(JSON.Parser),) )
+          test_package(DOT_StatsHelp, ignored_modules=(AnyFrameModule(JSON.Parser),AnyFrameModule(Polynomials),) )
       end
     #+END_SRC
 
@@ -174,7 +176,7 @@
       using DOT_NiceMath            # `⋅` = `*`  etc
       using DOT_NiceMath.Numbers64  # ℝ, ℤ, ℚ
 
-      using LinearAlgebra: norm2, norm1, normInf as norm∞, norm_sqr as norm²,
+      using LinearAlgebra: norm2, norm1, normInf as norm∞, norm_sqr as norm2²,
                            axpy!, axpby!
     #+END_SRC
 
@@ -208,6 +210,7 @@
        type in Julia.]
 
 **** Fields and inner constructor
+
       #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
             #            Input for run
             curr_true_μ  ::Array{ℝ, V} #                      size: dimension
@@ -289,10 +292,10 @@
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
        function MeanProc(dimension ::NTuple{V,Int}
-                      ;
-                      steps :: Int,
-                      runs  :: Int,
-                      𝐑     :: Type{<:Real} = ℝ)  ::MeanProc     where{V}
+                         ;
+                         steps :: Int,
+                         runs  :: Int,
+                         𝐑     :: Type{<:Real} = ℝ)  ::MeanProc     where{V}
      #+END_SRC
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
            curr_true_μ   = Array{ℝ,V}(undef, dimension )
@@ -455,12 +458,12 @@
                     #
                     # Note order between emp var and emp μ
                     #
-                    # emp_var[𝐫]   = (𝐬-1) ⋅ emp_var[𝐫]  / 𝐬    +   (𝐬-1) ⋅ norm²( curr_emp_μ - 𝐸 ) / 𝐬²
+                    # emp_var[𝐫]   = (𝐬-1) ⋅ emp_var[𝐫]  / 𝐬    +   (𝐬-1) ⋅ norm2²( curr_emp_μ - 𝐸 ) / 𝐬²
                     # curr_emp_μ  .= (𝐬-1) ⋅ curr_emp_μ / 𝐬   +   𝐸 / 𝐬
 
                     _ws         .= curr_emp_μ
                     axpby!(-1/𝐬, 𝐸,  1/𝐬, _ws)
-                    emp_var[𝐫]   = (𝐬-1) ⋅ (   emp_var[𝐫]  / 𝐬    +   norm²( _ws )   )
+                    emp_var[𝐫]   = (𝐬-1) ⋅ (   emp_var[𝐫]  / 𝐬    +   norm2²( _ws )   )
                                   # will be corrected for bias in finalize_run!()
 
                     axpby!( 1/𝐬, 𝐸, (𝐬-1)/𝐬, curr_emp_μ)
@@ -470,7 +473,7 @@
                     #
                     _ws         .= curr_emp_μ - curr_true_μ
 
-                    err2²[𝐬,𝐫]   = norm²(_ws)
+                    err2²[𝐬,𝐫]   = norm2²(_ws)
                     err1[ 𝐬,𝐫]   = norm1(_ws)
                     err∞[ 𝐬,𝐫]   = norm∞(_ws)
                 end #^ let
@@ -511,31 +514,24 @@
 **** Set up testset
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
-        using DoubleFloats: Double64
-
-        using Base:          abs2     as abs²
-        using LinearAlgebra: norm_sqr as norm², norm2, norm1, normInf as norm∞
-
-        using Statistics: mean, var
-
-        @testset verbose=true "DOT_StatsHelp.jl testing: " begin
+        @testset verbose=true "DOT_StatsHelp.jl testing: Test MeanProc{}" begin
       #+END_SRC
 
 **** Test with valency 0
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
-        function qnd_test_0(;runs=3,steps=4)
+        function test__meanestim_0(;runs=1:10,steps=2:4:20)
+            for (curr_runs,curr_steps) in Iterators.product(runs,steps)
 
-            data = 100*randn(steps,runs)
+                data = 100*randn(curr_steps,curr_runs)
 
-            mp = MeanProc( () ; steps,runs, #= 𝐑=Double64 =#)
+                mp = MeanProc( () ; steps=curr_steps, runs=curr_runs, 𝐑=Double64)
 
-            for run = 1:runs
+                for run = 1:curr_runs
 
-                @testset "Run # $(run)" begin
                     start_run!(mp ; true_μ = fill(0.0) )
 
-                    for step = 1:steps
+                    for step = 1:curr_steps
                         record_step!(mp ; 𝐸 = fill(data[step,run]) )
                         @test curr_emp_μ(mp)[]  ≈ mean( @view data[1:step,run] )
                     end
@@ -543,29 +539,129 @@
 
                     @test emp_var(mp;run)         ≈ var(  @view data[:,run] )
 
-                    for step=1:steps
+                    for step=1:curr_steps
                         @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> abs²
                     end
                     @test all(
                         err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
-                        for step=1:steps
+                        for step=1:curr_steps
                     )
                     @test all(
                         err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
-                        for step=1:steps
+                        for step=1:curr_steps
                     )
-                end
 
-            end #^ for run
+                end #^ for run
 
-        end #^ qnd_test_0()
+            end #^ for curr_...
+        end #^ test__meanestim_0()
       #+END_SRC
 
       Run it:
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
         @testset "Valency-0 tests" begin
-            qnd_test_0()
+            test__meanestim_0()
+        end
+      #+END_SRC
+
+**** Test with valency 1
+
+      #+BEGIN_SRC julia :tangle test/runtests.jl
+        function test__meanestim_1(;runs=1:3:9,steps=2:5:12)
+            for (curr_runs,curr_steps) in Iterators.product(runs,steps)
+
+                dim  = 31
+
+                data = [ randn(dim) for s=1:curr_steps, r=1:curr_runs ]
+
+                mp = MeanProc( (dim,) ; steps=curr_steps, runs=curr_runs, 𝐑=Double64)
+
+                for run = 1:curr_runs
+
+                    start_run!(mp ; true_μ = zeros(31) )
+
+                    for step = 1:curr_steps
+                        record_step!(mp ; 𝐸 = data[step,run] )
+                        @test curr_emp_μ(mp)  ≈ mean( @view data[1:step,run] )
+                    end
+                    finalize_run!(mp)
+
+                    @test emp_var(mp;run)         ≈ var( @view data[:,run] ) |> norm1 # Julia `var` returns array
+
+                    for step=1:curr_steps
+                        @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> norm2²
+                    end
+                    @test all(
+                        err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm1
+                        for step=1:curr_steps
+                    )
+                    @test all(
+                        err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm∞
+                        for step=1:curr_steps
+                    )
+
+                end #^ for run
+
+            end #^ for curr_...
+        end #^ test__meanestim_1()
+      #+END_SRC
+
+      Run it:
+
+      #+BEGIN_SRC julia :tangle test/runtests.jl
+        @testset "Valency-1 tests" begin
+            test__meanestim_1()
+        end
+      #+END_SRC
+
+**** Test with valency 2
+
+      #+BEGIN_SRC julia :tangle test/runtests.jl
+        function test__meanestim_2(;runs=1:3:9,steps=2:5:12)
+            for (curr_runs,curr_steps) in Iterators.product(runs,steps)
+
+                sz  = (7,13)
+
+                data = [ randn(sz) for s=1:curr_steps, r=1:curr_runs ]
+
+                mp = MeanProc( (sz) ; steps=curr_steps, runs=curr_runs, 𝐑=Double64)
+
+                for run = 1:curr_runs
+
+                    start_run!(mp ; true_μ = zeros(sz) )
+
+                    for step = 1:curr_steps
+                        record_step!(mp ; 𝐸 = data[step,run] )
+                        @test curr_emp_μ(mp)  ≈ mean( @view data[1:step,run] )
+                    end
+                    finalize_run!(mp)
+
+                    @test emp_var(mp;run)         ≈ var( @view data[:,run] ) |> norm1 # Julia `var` returns array
+
+                    for step=1:curr_steps
+                        @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> norm2²
+                    end
+                    @test all(
+                        err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm1
+                        for step=1:curr_steps
+                    )
+                    @test all(
+                        err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm∞
+                        for step=1:curr_steps
+                    )
+
+                end #^ for run
+
+            end #^ for curr_...
+        end #^ test__meanestim_1()
+      #+END_SRC
+
+      Run it:
+
+      #+BEGIN_SRC julia :tangle test/runtests.jl
+        @testset "Valency-2 tests" begin
+            test__meanestim_2()
         end
       #+END_SRC
 
@@ -576,7 +672,148 @@
       #+END_SRC
 
 
-** TODO Statistics of max-approximating processes
+** TODO Statistics of max-approximating processes [0/1]
+*** TSTNG Helper: ~Xtiles~ type for percentiles
+**** Description
+
+      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+        export Xtiles
+      #+END_SRC
+
+      The [[Type--Xtiles][helper-type ~Xtiles~]] counts percentiles.  An object of the type is [[Xtiles-constructor][constructed]] by giving a set of numbers
+      in $\left]0,1\right]$, and the total number or data points that will be added over its lifetime.  A call to
+      the function [[Xtiles-count_it!][~count_it!()~]] then registers a data point by increasing the frequency for the interval
+      $\left]\pi_{\ell-1},\pi_\ell\right]$ out of $\ell=1,\dots,L$ to which it belongs (where $\pi_0 := 0$).
+
+      We require that 1 is in the set of percentiles (but 0 isn't).
+
+**** Definition of the type
+
+      #+NAME: Type--Xtiles
+      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+        struct Xtiles{L}
+            𝝅     ::NTuple{L,ℝ}   # sorted increasingly
+            freqs ::Vector{ℝ}
+            runs  ::Int
+        end
+      #+END_SRC
+
+      ~freq[ℓ]~ is the frequency of the data points in the interval
+      #+BEGIN_CENTER
+                        \[
+                        \left] \pi_{\ell-1} , \pi_{\ell} \right]
+                        \]
+      #+END_CENTER
+      but with $\pi_{0} := 0$.
+
+      We require that 1 is in the set of percentiles (but 0 isn't).
+
+**** User-facing constructor
+
+      /We require that 1 is in the set of percentiles!/
+
+      #+NAME: Xtiles-constructor
+      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+        function Xtiles(_𝝅, runs::Int) ::Xtiles
+            𝝅 = collect(_𝝅)
+            sort!(𝝅)
+
+            @assert runs ≥ 1
+            @assert allunique( 𝝅 )
+            @assert 0.0 < 𝝅[1] ≤ 𝝅[end] == 1.0
+
+            L     = length(𝝅)
+            freqs = zeros(ℝ,L)
+            return Xtiles{L}((𝝅...,),freqs,runs)
+        end
+      #+END_SRC
+
+**** Store a percentage (not exported!)
+
+      #+NAME: Xtiles-count_it!
+      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+        function count_it!(xt ::Xtiles{L}, p ::ℝ)    where{L}
+            @assert 0-1e-50 ≤ p
+            @assert           p ≤ 1+1e-30
+            @assert L == length(xt.freqs)
+
+            (;𝝅,freqs,runs) = xt
+
+            ℓ = 1
+            while ℓ ≤ L   &&   𝝅[ℓ] < p
+                ℓ += 1
+            end
+            ℓ = min(ℓ,L)                  # in case of rounding errors near 1.0
+
+            freqs[ ℓ ] += 1/runs
+
+            ( ℓ=ℓ,  lo=get(𝝅,ℓ-1,0.0), hi=𝝅[ℓ] )
+        end
+      #+END_SRC
+
+**** Let's test it!
+***** Main testing function
+
+      #+BEGIN_SRC julia :tangle test/runtests.jl
+        function test__Xtiles()
+
+            function some_tests__interior(L,𝝅)
+                m = 16
+                N = m⋅L
+                xt = Xtiles(𝝅,N)
+                for ℓ = 1 : L
+                    lo = get(xt.𝝅,ℓ-1,   0.0)
+                    hi =     xt.𝝅[ℓ  ]
+                    @test lo < hi || (lo==hi && ℓ==L)
+                    for j = 1:m
+                        p =  lo + (hi-lo)⋅rand()
+                        iv = DOT_StatsHelp.count_it!(xt,p)
+                        @test iv.lo < p ≤ iv.hi
+                    end
+                end
+
+                @test sum(xt.freqs) ≈ 1
+                for ℓ = 1:L
+                    @test xt.freqs[ℓ] ≈ m/N
+                end
+            end
+
+            function some_tests__boundary(L,𝝅)
+                m = 16
+                N = m⋅L
+                xt = Xtiles(𝝅,N)
+                for j = 1:m
+                    for ℓ = 1:L
+                        lo = get(xt.𝝅,ℓ-1,   0.0)
+                        hi =     xt.𝝅[ℓ  ]
+                        @test lo < hi || (lo==hi && ℓ==L)
+                        DOT_StatsHelp.count_it!(xt,hi)
+                    end
+                end
+
+                @test sum(xt.freqs) ≈ 1
+                for ℓ = 1:L
+                    @test xt.freqs[ℓ] ≈ m/N
+                end
+            end
+
+            for L = 1:10
+                𝝅 = [ rand(L-1)
+                      1.0       ]
+                some_tests__interior(L,𝝅)
+                some_tests__boundary(L,𝝅)
+            end
+        end #^ test__Xtiles()
+      #+END_SRC
+
+***** Call the testing function
+      #+BEGIN_SRC julia :tangle test/runtests.jl
+        @testset verbose=true "DOT_StatsHelp.jl testing: Test Xtiles helper" begin
+            test__Xtiles()
+        end
+      #+END_SRC
+
+*** TODO Blah
 
 
 ** DONE End of module
