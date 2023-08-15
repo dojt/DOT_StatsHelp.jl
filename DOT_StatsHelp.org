@@ -104,7 +104,15 @@
 
      + [X] Add more unit tests
 
-** TODO Max-approximating process [0/0]
+** TODO Max-approximating process [3/5]
+
+     + [X] Get started
+     + [X] Make percentiles helper ~Xtiles~
+     + [X] Make unit tests for percentiles helper
+
+     + [ ] Copy interface defs from Mean Estim
+     + [ ] Take it from there
+
 ** TODO Finally, ... [0/2]
 
      + [ ] Write the [[summary][Summary]]
@@ -672,8 +680,8 @@
       #+END_SRC
 
 
-** TODO Statistics of max-approximating processes [0/1]
-*** TSTNG Helper: ~Xtiles~ type for percentiles
+** TODO Statistics of max-approximating processes [1/2]
+*** DONE Helper: ~Xtiles~ type for percentiles
 **** Description
 
       #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
