@@ -7,6 +7,7 @@
 #+STARTUP: show3levels
 #+BIBLIOGRAPHY: ../../DOT_LaTeX/dirks.bib
 #+PROPERTY: header-args :eval never :comments link :exports code
+#+SEQ_TODO: TODO IN-PRGR TSTNG BROKEN | DONE
 
 * Copyright Notice
 
@@ -36,8 +37,30 @@
    #+END_SRC
 
 
-* What's This File About?
-** TODO Summary of what this software does <<summary>>
+* What's This Module/Project/File About?
+** TODO Summary of what this software does [0/1] <<summary>>
+** TODO High-level usage instructions <<hl-usage>> [0/0]
+*** TODO Steps and runs [0/1]
+     The fundamental idea is to run a random process for so-and-so many /steps/, collecting information about its
+     convergence.  This is repeated for so-and-so-many /runs/, and statistics about the convergence are created.
+
+     The user must stick to the following order of instructions for using the types defined in the module:
+
+       1. create an object of the type using the [[mp-constructor][constructor]];
+       2. For each run:
+          1. Start a new run using the [[start][~start_run!()~ function]]
+          2. Fill run with data using the [[record][~record_step!()~ function]] repeatedly, once for every step
+          3. Call the [[finalize][~finalize_run!()~ function]] to for tidying up the run
+          4. Retrieve the stats that are overwritten in each run \\
+             (e.g., the empirical mean in for mean-estimating processes is kept only for the current run)
+       3. Repeat -- i.e., Goto (2) --  for all runs
+       4. Retrieve the stored stats over all runs.
+
+     The links above are to the functions for mean-estimating processes, but the user interface is identical for
+     the max-approximating processes.
+
+     + [ ] *Are they?!?*
+
 ** Literate programming
 
    This document is a "literate program", i.e., plain text interspersed with actual Julia programming language
@@ -45,10 +68,11 @@
    ~tmp/runtests.jl~], from where it can be run etc.
 
    Literate programming allows me to organize source code, documentation, and tests in a hierarchical document
-   structure.
+   structure.  This makes orientation in the source code so much easier 😊.
 
 
-* TODO Progress [6/8]
+* TODO Task Lists and Progress Reports [1/4]
+** DONE Basics [1/1]
 
      + [X] Set up repository [6/6]
 
@@ -58,6 +82,8 @@
        - [X] Copy content from ShiftRules/SPSA ~Stats~
        - [X] Make version v0.1
        - [X] Register on ~DOT_JuliaPackages~
+
+** IN-PRGR Mean-estimating process [7/8]
 
      + [X] Make it work, basically [1/1]
 
@@ -72,19 +98,23 @@
 
      + [X] Describe the functions
 
-     + [ ] *Fix mistake in emp var calculation !!*
+     + [X] *Fix mistake in emp var calculation !!*
 
-     + [ ] Add unit tests
+     + [X] Add unit tests
+
+     + [ ] Add more unit tests
+
+** TODO Max-approximating process [0/0]
+** TODO Finally, ... [0/2]
 
      + [ ] Write the [[summary][Summary]]
 
      + [ ] Acknowledge funding: NeQst WP4
-           - Also add that to the SPSA paper!
 
 
-* Literate Source Code for the Package
+* TODO Literate Source Code for the Package [4/6]
 
-** File headers
+** DONE File headers
 
     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
       ###########################################################################
@@ -110,8 +140,18 @@
     #+END_SRC
 
 
-** Generic test based on ~JET.jl~
+** DONE Set up testing
+**** Importing things
+      #+BEGIN_SRC julia :tangle test/runtests.jl
+        using DoubleFloats: Double64
 
+        using Base:          abs2     as abs²
+        using LinearAlgebra: norm_sqr as norm², norm2, norm1, normInf as norm∞
+
+        using Statistics: mean, var
+      #+END_SRC
+
+**** Generic test based on ~JET.jl~
     #+BEGIN_SRC julia :tangle test/runtests.jl
       using JET
       using JSON # Only for ignoring by JET
@@ -122,7 +162,7 @@
     #+END_SRC
 
 
-** Module definition & imports
+** DONE Module definition & imports
 
     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
       module DOT_StatsHelp
@@ -134,17 +174,18 @@
       using DOT_NiceMath            # `⋅` = `*`  etc
       using DOT_NiceMath.Numbers64  # ℝ, ℤ, ℚ
 
-      using LinearAlgebra: norm2, norm1, normInf as norm∞, norm_sqr as norm²
+      using LinearAlgebra: norm2, norm1, normInf as norm∞, norm_sqr as norm²,
+                           axpy!, axpby!
     #+END_SRC
 
 
-** Main work
-*** The type ~Stats{𝐑,V}~
+** TSTNG Statistics of mean-estimating processes
+*** The mean process type: ~MeanProc{𝐑,V}~
 
      The following basic type is made available to the user:
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       export Stats
+       export MeanProc
      #+END_SRC
 
      An object of this type collects information about the stochastic convergence of the empirical mean of random
@@ -153,12 +194,12 @@
     Let's define it.
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       struct Stats{𝐑 <: Real, V}              # `V` is an integer: the valency of the tensor
+       struct MeanProc{𝐑 <: Real, V}              # `V` is an integer: the valency of the tensor
      #+END_SRC
 
      _Parameters:_
 
-     + ~𝐑~ is the real-number type used for computations.  The user-facing [[stats-constructor][constructor]] defaults this to
+     + ~𝐑~ is the real-number type used for computations.  The user-facing [[mp-constructor][constructor]] defaults this to
        ~NiceMath~'s ~ℝ~, which, here is ~Float64~.  If you are worried that cancellations affect the accuracy of
        the overall outcome, use something the package ~DoubleFloats~, or even, if you're patient, ~BigFloats~.
 
@@ -191,7 +232,7 @@
             # Convenience constructor -- not for the user
             #
             function
-            Stats{𝐑,V}(;
+            MeanProc{𝐑,V}(;
                        curr_true_μ ::Array{ℝ,V}, curr_emp_μ ::Array{𝐑,V}, emp_var ::Vector{𝐑},
                        err2² ::Array{ℝ,2}, err1 ::Array{ℝ,2}, err∞ ::Array{ℝ,2}, _ws ::Array{𝐑,V}) where{𝐑,V}
                 new(curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, _ws,
@@ -202,26 +243,17 @@
 
 *** Usage
 
-     The user must stick to the following order of instructions for using the ~Stats~ type:
+     The [[hl-usage][high-level usage instructios]] are above.  Note that the empirical mean of a run is not stored, it's
+     overwritten by the next run.
 
-       1. create an object of the type using the [[stats-constructor][constructor]] below;
-       2. For each run:
-          1. Start a new run using the [[start][~start_run!()~ function]]
-          2. Fill run with data using the [[record][~record_step!()~ function]] repeatedly, once for every step
-          3. Call the [[finalize][~finalize_run!()~ function]] to for tidying up the run
-          4. Retrieve the stored stats for the run \\
-             (the empirical mean of the run is not stored, it's overwritten by the next run)
-       3. Repeat, i.e., Goto (2), for all runs
-       4. Retrieve the stored stats over all runs.
+     There are inquiry functions for retrieving the stats: In #4, user can retrieve:
 
-     In #4, user can retrieve:
+       + The square error over the steps of the run, e.g.,           ~err2²(  mp ; run=9, step=27)~
+       + The 1-norm of the error over the steps, e.g.,               ~err1(   mp ; run=9, step=27)~
+       + The infty-norm of the error over the steps, e.g.,           ~err∞(   mp ; run=9, step=27)~
+       + The empirical variance of the estimator for the run,, e.g., ~emp_var(mp ; run=9, step=27)~
 
-       + The square error over the steps of the run, e.g.,           ~err2²(  stats ; run=9, step=27)~
-       + The 1-norm of the error over the steps, e.g.,               ~err1(   stats ; run=9, step=27)~
-       + The infty-norm of the error over the steps, e.g.,           ~err∞(   stats ; run=9, step=27)~
-       + The empirical variance of the estimator for the run,, e.g., ~emp_var(stats ; run=9, step=27)~
-
-     For step 2.4, there's also:                                     ~curr_emp_μ(s)~
+       + For step 2.4, there's also the function:                    ~curr_emp_μ(mp)~
 
      The inquiry functions
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
@@ -233,12 +265,12 @@
      of the inquiry functions make clear how that works:
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       err2²(  s ::Stats{𝐑,V}; run ::Int, step ::Int) where{𝐑,V} = ( @assert (1,1)≤(run,step)≤(s.𝐫[],s.𝐬[]); s.err2²[step,run] )
-       err1(   s ::Stats{𝐑,V}; run ::Int, step ::Int) where{𝐑,V} = ( @assert (1,1)≤(run,step)≤(s.𝐫[],s.𝐬[]); s.err1[ step,run] )
-       err∞(   s ::Stats{𝐑,V}; run ::Int, step ::Int) where{𝐑,V} = ( @assert (1,1)≤(run,step)≤(s.𝐫[],s.𝐬[]); s.err∞[ step,run] )
-       emp_var(s ::Stats{𝐑,V}; run ::Int)             where{𝐑,V} = ( @assert 1    ≤run ≤ s.𝐫[]             ; s.emp_var[run]    )
+       err2²(  s ::MeanProc{𝐑,V}; run ::Int, step ::Int) where{𝐑,V} = ( @assert (1,1)≤(run,step)≤(s.𝐫[],s.𝐬[]); s.err2²[step,run] )
+       err1(   s ::MeanProc{𝐑,V}; run ::Int, step ::Int) where{𝐑,V} = ( @assert (1,1)≤(run,step)≤(s.𝐫[],s.𝐬[]); s.err1[ step,run] )
+       err∞(   s ::MeanProc{𝐑,V}; run ::Int, step ::Int) where{𝐑,V} = ( @assert (1,1)≤(run,step)≤(s.𝐫[],s.𝐬[]); s.err∞[ step,run] )
+       emp_var(s ::MeanProc{𝐑,V}; run ::Int)             where{𝐑,V} = ( @assert 1    ≤run ≤ s.𝐫[]             ; s.emp_var[run]    )
 
-       curr_emp_μ(s ::Stats{𝐑,V})                     where{𝐑,V} = ( @assert 1 ≤ s.𝐫[]                     ; s.curr_emp_μ      )
+       curr_emp_μ(s ::MeanProc{𝐑,V})                     where{𝐑,V} = ( @assert 1 ≤ s.𝐫[]                     ; s.curr_emp_μ      )
      #+END_SRC
 
      #+BEGIN_CENTER
@@ -247,7 +279,7 @@
      Don't forget that the empirical variance is only available after calling [[finalize][~finalize_run!()~]]
      #+END_CENTER
 
-*** User-facing constructor for ~Stats~  <<stats-constructor>>
+*** User-facing constructor for ~MeanProc~  <<mp-constructor>>
 
      The constructor takes the following arguments.
 
@@ -256,11 +288,11 @@
        + The number of runs.
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       function Stats(dimension ::NTuple{V,Int}
+       function MeanProc(dimension ::NTuple{V,Int}
                       ;
                       steps :: Int,
                       runs  :: Int,
-                      𝐑     :: Type{<:Real} = ℝ)  ::Stats     where{V}
+                      𝐑     :: Type{<:Real} = ℝ)  ::MeanProc     where{V}
      #+END_SRC
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
            curr_true_μ   = Array{ℝ,V}(undef, dimension )
@@ -272,7 +304,7 @@
            err∞          = Array{ℝ,2}(undef, steps,runs)
            emp_var       = Array{𝐑,1}(undef, runs)         ; emp_var .= 𝐑(0)
 
-           return Stats{𝐑,V}( ; curr_true_μ, curr_emp_μ,
+           return MeanProc{𝐑,V}( ; curr_true_μ, curr_emp_μ,
                                 err2², err1, err∞, emp_var,  _ws)
        end
      #+END_SRC
@@ -284,17 +316,17 @@
      _Info about sizes of arrays._
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       valency(        s ::Stats{𝐑,V} ) where{𝐑,V}    = V
-       dimension(      s ::Stats{𝐑,V} ) where{𝐑,V}    = size( s.curr_true_μ )
-       numo_stepsruns( s ::Stats{𝐑,V} ) where{𝐑,V}    = size( s.err2²       )
-       numo_steps(     s ::Stats{𝐑,V} ) where{𝐑,V}    = numo_stepsruns(s) |> first
-       numo_runs(      s ::Stats{𝐑,V} ) where{𝐑,V}    = numo_stepsruns(s) |> last
+       valency(        s ::MeanProc{𝐑,V} ) where{𝐑,V}    = V
+       dimension(      s ::MeanProc{𝐑,V} ) where{𝐑,V}    = size( s.curr_true_μ )
+       numo_stepsruns( s ::MeanProc{𝐑,V} ) where{𝐑,V}    = size( s.err2²       )
+       numo_steps(     s ::MeanProc{𝐑,V} ) where{𝐑,V}    = numo_stepsruns(s) |> first
+       numo_runs(      s ::MeanProc{𝐑,V} ) where{𝐑,V}    = numo_stepsruns(s) |> last
      #+END_SRC
 
      _Data integrity check_ that throws an exception if there's a problem (otherwise returns nothing).
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       function _integrity_check(s ::Stats{𝐑,V}) ::Nothing  where{𝐑,V}
+       function _integrity_check(s ::MeanProc{𝐑,V}) ::Nothing  where{𝐑,V}
      #+END_SRC
 
 **** Implementation
@@ -330,7 +362,7 @@
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
        export start_run!
 
-       function start_run!(s      :: Stats{𝐑,V}
+       function start_run!(s      :: MeanProc{𝐑,V}
                            ;
                            true_μ :: Array{ℝ,V} ) ::Nothing  where{𝐑,V}
      #+END_SRC
@@ -402,37 +434,48 @@
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
        export record_step!
 
-       function record_step!(s ::Stats{𝐑,V}
+       function record_step!(s ::MeanProc{𝐑,V}
                              ;
                              𝐸 ::Array{ℝ,V} ) ::Nothing  where{𝐑,V}
      #+END_SRC
 
 **** Implementation
       #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-        _integrity_check(s)
+                _integrity_check(s)
 
-        (;curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, _ws) = s
+                (;curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, _ws) = s
 
 
-        s.𝐬[] += 1            ; @assert s.𝐬[] ≤ numo_steps(s)
+                s.𝐬[] += 1            ; @assert s.𝐬[] ≤ numo_steps(s)
 
-        let 𝐫     = s.𝐫[],
-            𝐬     = s.𝐬[],
-            steps = numo_steps(s)
+                let 𝐫     = s.𝐫[],
+                    𝐬     = s.𝐬[],
+                    steps = numo_steps(s)
 
-            emp_var[𝐫]   = (𝐬-1) ⋅ emp_var[𝐫]  / 𝐬    +   norm²( 𝐸 - curr_emp_μ ) / 𝐬 
-                          + (𝐬-1)???????????????????????????????????//
-                          # will be corrected for bias in finalize_run!()
-            curr_emp_μ  .= (𝐬-1) ⋅ curr_emp_μ / 𝐬   .+   𝐸 / 𝐬
+                    #
+                    # Note order between emp var and emp μ
+                    #
+                    # emp_var[𝐫]   = (𝐬-1) ⋅ emp_var[𝐫]  / 𝐬    +   (𝐬-1) ⋅ norm²( curr_emp_μ - 𝐸 ) / 𝐬²
+                    # curr_emp_μ  .= (𝐬-1) ⋅ curr_emp_μ / 𝐬   +   𝐸 / 𝐬
 
-            _ws         .= curr_emp_μ - curr_true_μ
+                    _ws         .= curr_emp_μ
+                    axpby!(-1/𝐬, 𝐸,  1/𝐬, _ws)
+                    emp_var[𝐫]   = (𝐬-1) ⋅ (   emp_var[𝐫]  / 𝐬    +   norm²( _ws )   )
+                                  # will be corrected for bias in finalize_run!()
 
-            err2²[𝐬,𝐫]   = norm²(_ws)
-            err1[ 𝐬,𝐫]   = norm1(_ws)
-            err∞[ 𝐬,𝐫]   = norm∞(_ws)
-        end #^ let
-        nothing;
-        end #^ record_step!()
+                    axpby!( 1/𝐬, 𝐸, (𝐬-1)/𝐬, curr_emp_μ)
+
+                    #
+                    # Errors
+                    #
+                    _ws         .= curr_emp_μ - curr_true_μ
+
+                    err2²[𝐬,𝐫]   = norm²(_ws)
+                    err1[ 𝐬,𝐫]   = norm1(_ws)
+                    err∞[ 𝐬,𝐫]   = norm∞(_ws)
+                end #^ let
+                nothing;
+                end #^ record_step!()
       #+END_SRC
 
 *** Finalizing a run: ~finalize_run!()~ <<finalize>>
@@ -443,7 +486,7 @@
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
        export finalize_run!
 
-       function finalize_run!(s ::Stats{𝐑,V}) ::Nothing                  where{𝐑,V}
+       function finalize_run!(s ::MeanProc{𝐑,V}) ::Nothing                  where{𝐑,V}
      #+END_SRC
 
 **** Implementation
@@ -464,18 +507,8 @@
         end #^ finalize_run!()
       #+END_SRC
 
-
-** End of module
-
-    #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-      end #^ module SPSA_Shift
-    #+END_SRC
-
-    That's it!
-
-
-** Tests
-*** Set up environment and testset
+*** Tests for the mean process
+**** Set up testset
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
         using DoubleFloats: Double64
@@ -488,38 +521,37 @@
         @testset verbose=true "DOT_StatsHelp.jl testing: " begin
       #+END_SRC
 
-*** The tests
-**** A test
+**** Test with valency 0
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
         function qnd_test_0(;runs=3,steps=4)
 
             data = 100*randn(steps,runs)
 
-            stats = Stats( () ; steps,runs, #= 𝐑=Double64 =#)
+            mp = MeanProc( () ; steps,runs, #= 𝐑=Double64 =#)
 
             for run = 1:runs
 
                 @testset "Run # $(run)" begin
-                    start_run!(stats ; true_μ = fill(0.0) )
+                    start_run!(mp ; true_μ = fill(0.0) )
 
                     for step = 1:steps
-                        record_step!(stats ; 𝐸 = fill(data[step,run]) )
-                        @test curr_emp_μ(stats)[]  ≈ mean( @view data[1:step,run] )
+                        record_step!(mp ; 𝐸 = fill(data[step,run]) )
+                        @test curr_emp_μ(mp)[]  ≈ mean( @view data[1:step,run] )
                     end
-                    finalize_run!(stats)
+                    finalize_run!(mp)
 
-                    @test emp_var(stats;run)   ≈ var(  @view data[:,run] )
+                    @test emp_var(mp;run)         ≈ var(  @view data[:,run] )
 
                     for step=1:steps
-                        @test  err2²(stats;run,step) ≈ mean( data[1:step,run] ) |> abs²
+                        @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> abs²
                     end
                     @test all(
-                        err1(stats;run,step)         ≈ mean( data[1:step,run] ) |> abs
+                        err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
                         for step=1:steps
                     )
                     @test all(
-                        err∞(stats;run,step)         ≈ mean( data[1:step,run] ) |> abs
+                        err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
                         for step=1:steps
                     )
                 end
@@ -537,11 +569,24 @@
         end
       #+END_SRC
 
-*** End of testset
+**** End of testset
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
         end #^ testset
       #+END_SRC
+
+
+** TODO Statistics of max-approximating processes
+
+
+** DONE End of module
+
+    #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+      end #^ module SPSA_Shift
+    #+END_SRC
+
+    That's it!
+
 
 
 * End of the Org File
