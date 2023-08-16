@@ -236,8 +236,8 @@
             _ws          ::Array{𝐑,V}  #                      size: dimension
 
             #             Counters
-            𝐫            ::Ref{Int}    # index of upcoming run (i.e., 0 ⪮ before first run)
-            𝐬            ::Ref{Int}    # index of upcoming step (i.e., 0 ⪮ before first step)
+            𝐫            ::Ref{Int}    # index of current run (i.e., 0 ⪮ before first run)
+            𝐬            ::Ref{Int}    # index of current step (i.e., 0 ⪮ before first step)
 
             #
             # Convenience constructor -- not for the user
@@ -452,41 +452,41 @@
 
 **** Implementation
       #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-                _integrity_check(s)
+        _integrity_check(s)
 
-                (;curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, _ws) = s
+        (;curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, _ws) = s
 
 
-                s.𝐬[] += 1            ; @assert s.𝐬[] ≤ numo_steps(s)
+        s.𝐬[] += 1            ; @assert s.𝐬[] ≤ numo_steps(s)
 
-                let 𝐫     = s.𝐫[],
-                    𝐬     = s.𝐬[],
-                    steps = numo_steps(s)
+        let 𝐫     = s.𝐫[],
+            𝐬     = s.𝐬[],
+            steps = numo_steps(s)
 
-                    #
-                    # Note order between emp var and emp μ
-                    #
-                    # emp_var[𝐫]   = (𝐬-1) ⋅ emp_var[𝐫]  / 𝐬    +   (𝐬-1) ⋅ norm2²( curr_emp_μ - 𝐸 ) / 𝐬²
-                    # curr_emp_μ  .= (𝐬-1) ⋅ curr_emp_μ / 𝐬   +   𝐸 / 𝐬
+            #
+            # Note order between emp var and emp μ
+            #
+            # emp_var[𝐫]   = (𝐬-1) ⋅ emp_var[𝐫]  / 𝐬    +   (𝐬-1) ⋅ norm2²( curr_emp_μ - 𝐸 ) / 𝐬²
+            # curr_emp_μ  .= (𝐬-1) ⋅ curr_emp_μ / 𝐬   +   𝐸 / 𝐬
 
-                    _ws         .= curr_emp_μ
-                    axpby!(-1/𝐬, 𝐸,  1/𝐬, _ws)
-                    emp_var[𝐫]   = (𝐬-1) ⋅ (   emp_var[𝐫]  / 𝐬    +   norm2²( _ws )   )
-                                  # will be corrected for bias in finalize_run!()
+            _ws         .= curr_emp_μ
+            axpby!(-1/𝐬, 𝐸,  1/𝐬, _ws)
+            emp_var[𝐫]   = (𝐬-1) ⋅ (   emp_var[𝐫]  / 𝐬    +   norm2²( _ws )   )
+                          # will be corrected for bias in finalize_run!()
 
-                    axpby!( 1/𝐬, 𝐸, (𝐬-1)/𝐬, curr_emp_μ)
+            axpby!( 1/𝐬, 𝐸, (𝐬-1)/𝐬, curr_emp_μ)
 
-                    #
-                    # Errors
-                    #
-                    _ws         .= curr_emp_μ - curr_true_μ
+            #
+            # Errors
+            #
+            _ws         .= curr_emp_μ - curr_true_μ
 
-                    err2²[𝐬,𝐫]   = norm2²(_ws)
-                    err1[ 𝐬,𝐫]   = norm1(_ws)
-                    err∞[ 𝐬,𝐫]   = norm∞(_ws)
-                end #^ let
-                nothing;
-                end #^ record_step!()
+            err2²[𝐬,𝐫]   = norm2²(_ws)
+            err1[ 𝐬,𝐫]   = norm1(_ws)
+            err∞[ 𝐬,𝐫]   = norm∞(_ws)
+        end #^ let
+        nothing;
+        end #^ record_step!()
       #+END_SRC
 
 *** Finalizing a run: ~finalize_run!()~ <<finalize>>
@@ -680,7 +680,7 @@
       #+END_SRC
 
 
-** TODO Statistics of max-approximating processes [1/2]
+** TODO Statistics of max-approximating processes [2/3]
 *** DONE Helper: ~Xtiles~ type for percentiles
 **** Description
 
@@ -821,7 +821,111 @@
         end
       #+END_SRC
 
-*** TODO Blah
+*** DONE The max-approx process type: ~MaxApxProc{L}~
+
+     The following basic type is made available to the user:
+
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       export MaxApxProc{L}
+     #+END_SRC
+
+     An object of this type collects information about the stochastic convergence of the maximum of random numbers
+     to a known(!) limit.
+
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       mutable struct MaxApxProc
+           #                    Input for run
+           const curr_true_max  ::ℝ
+
+           #                    Output of run
+           curr_max       ::ℝ
+
+           const 𝝅     ::NTuple{L,ℝ}   # percentile numbers, sorted increasingly (last one must be 1.0)
+           const freqs ::Array{ℝ,2}    #
+           const runs  ::Int
+
+           #                    Counters
+           𝐫                    ::Int    # index of current run (i.e., 0 ⪮ before first run)
+           𝐬                    ::Int    # index of current step (i.e., 0 ⪮ before first step)
+       end
+      #+END_SRC
+
+      ~freqs[s,:]~ is the vector of frequencies of the percentiles in ~𝝅~, empirically over all data points given
+      so far.
+
+*** TODO Usage
+*** TODO User-facing constructor for ~MaxApprox~
+*** Starting a new run: ~start_run!()~ <<maxapx-start>>
+
+     When a new run starts, the true mean has to be recorded, the indices 𝐫 and 𝐬 for run and step, resp., have to
+     be set up, and the empirical data has to be initialized.
+
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       export start_run!
+
+       function start_run!(s        :: MaxApxProc{L}
+                           ;
+                           true_max :: ℝ            ) ::Nothing  where{V}
+
+           _integrity_check(s)
+
+           if    s.𝐫 > 0           @assert s.𝐬 == numo_steps(s)
+           else                    @assert s.𝐬 == 0               end
+
+           s.𝐫 += 1              ; @assert s.𝐫 ≤ numo_runs(s)
+           s.𝐬  = 0
+
+           s.curr_true_max .= true_μ
+           s.curr_max      .= -Inf
+
+           nothing;
+       end
+     #+END_SRC
+
+*** Adding data of a step: ~record_step!()~ <<maxapx-record>>
+
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       export record_step!
+
+       function record_step!(s ::MaxApxProc{L}
+                             ;
+                             𝐸 ::ℝ            ) ::Union{ℝ,Nothing}     where{L}
+           _integrity_check(s)
+           @assert (L,s.runs) == size(xt.freqs)
+
+
+           @assert 0 ≤ 𝐸 ≤ s.true_max
+
+           (;runs,true_max,𝝅,freqs) = s
+
+           new_max ::Bool = false
+           if 𝐸 > s.curr_max
+               s.curr_max = 𝐸
+               new_max    = true
+           end
+
+           (;ℓ,lo,hi) =
+           let p = s.curr_max / true_max,
+               ℓ = 1
+               while ℓ ≤ L   &&   𝝅[ℓ] < p
+                   ℓ += 1
+               end
+               ℓ = min(ℓ,L)                    # in case of rounding errors near 1.0
+
+               s.𝐬             += 1            ; @assert s.𝐬 ≤ numo_steps(s)
+               freqs[ ℓ, s.𝐬 ] += 1/runs
+
+               ( ℓ=ℓ,  lo=get(𝝅,ℓ-1,0.0), hi=𝝅[ℓ] )
+           end #^ let
+
+           if new_max
+               @info "New max: $𝐸; ℓ=$ℓ, lo=$lo, hi=$hi"
+               return lo
+           end
+           nothing;
+       end #^ record_step!()
+     #+END_SRC
+
 
 
 ** DONE End of module
