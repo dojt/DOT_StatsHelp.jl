@@ -39,27 +39,22 @@
 
 * What's This Module/Project/File About?
 ** TODO Summary of what this software does [0/1] <<summary>>
-** TODO High-level usage instructions <<hl-usage>> [0/0]
+** TODO High-level usage instructions <<hl-usage>>
 *** TODO Steps and runs [0/1]
      The fundamental idea is to run a random process for so-and-so many /steps/, collecting information about its
      convergence.  This is repeated for so-and-so-many /runs/, and statistics about the convergence are created.
 
      The user must stick to the following order of instructions for using the types defined in the module:
 
-       1. create an object of the type using the [[mp-constructor][constructor]];
+       1. create an object of the type using a constructor ([[mp-constructor][mean]] [[max-constructor][max]])
        2. For each run:
-          1. Start a new run using the [[start][~start_run!()~ function]]
-          2. Fill run with data using the [[record][~record_step!()~ function]] repeatedly, once for every step
-          3. Call the [[finalize][~finalize_run!()~ function]] to for tidying up the run
+          1. Start a new run using the ~start_run!()~ functions ([[mp-start][mean]], [[max-start][max]])
+          2. Fill run with data using the ~record_step!()~ function repeatedly, once for every step [[mp-start][(mean]] [[max-start][max]])
+          3. Call the ~finalize_run!()~ functions to for tidying up the run [[mp-finalize][(mean]] [[max-finalize][max]])
           4. Retrieve the stats that are overwritten in each run \\
              (e.g., the empirical mean in for mean-estimating processes is kept only for the current run)
        3. Repeat -- i.e., Goto (2) --  for all runs
        4. Retrieve the stored stats over all runs.
-
-     The links above are to the functions for mean-estimating processes, but the user interface is identical for
-     the max-approximating processes.
-
-     + [ ] *Are they?!?*
 
 ** Literate programming
 
@@ -120,7 +115,7 @@
      + [ ] Acknowledge funding: NeQst WP4
 
 
-* TODO Literate Source Code for the Package [4/6]
+* TODO Literate Source Code for the Package [5/6]
 
 ** DONE File headers
 
@@ -142,15 +137,17 @@
       #  (The actual source code is in the Org file.)                           #
       #                                                                         #
       ###########################################################################
-
-      using Test
-      using DOT_StatsHelp
     #+END_SRC
 
 
 ** DONE Set up testing
 **** Importing things
       #+BEGIN_SRC julia :tangle test/runtests.jl
+        using DOT_StatsHelp
+
+        using Test
+
+
         using DoubleFloats: Double64
 
         using LinearAlgebra: norm_sqr as norm2², norm2, norm1, normInf as norm∞
@@ -158,6 +155,7 @@
         using Statistics: mean, var
 
         using DOT_NiceMath
+        using DOT_StatsHelp.Numbers64     # === DOT_NiceMath.Numbers64 -- just making sure we get the same!
       #+END_SRC
 
 **** Generic test based on ~JET.jl~
@@ -172,7 +170,7 @@
     #+END_SRC
 
 
-** DONE Module definition & imports
+** DONE Module definition, import, and recurrent exports
 
     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
       module DOT_StatsHelp
@@ -188,8 +186,16 @@
                            axpy!, axpby!
     #+END_SRC
 
+    Exports of functions with several methods
 
-** TSTNG Statistics of mean-estimating processes
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       export start_run!
+       export record_step!
+       export finalize_run!
+     #+END_SRC
+
+
+** DONE Statistics of mean-estimating processes
 *** The mean process type: ~MeanProc{𝐑,V}~
 
      The following basic type is made available to the user:
@@ -233,7 +239,7 @@
             emp_var      ::Vector{𝐑}   #                      size: `runs`
 
             #             Work space
-            _ws          ::Array{𝐑,V}  #                      size: dimension
+            ␣ws          ::Array{𝐑,V}  #                      size: dimension
 
             #             Counters
             𝐫            ::Ref{Int}    # index of current run (i.e., 0 ⪮ before first run)
@@ -245,8 +251,8 @@
             function
             MeanProc{𝐑,V}(;
                        curr_true_μ ::Array{ℝ,V}, curr_emp_μ ::Array{𝐑,V}, emp_var ::Vector{𝐑},
-                       err2² ::Array{ℝ,2}, err1 ::Array{ℝ,2}, err∞ ::Array{ℝ,2}, _ws ::Array{𝐑,V}) where{𝐑,V}
-                new(curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, _ws,
+                       err2² ::Array{ℝ,2}, err1 ::Array{ℝ,2}, err∞ ::Array{ℝ,2}, ␣ws ::Array{𝐑,V}) where{𝐑,V}
+                new(curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, ␣ws,
                     0,0)
             end
         end
@@ -308,15 +314,17 @@
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
            curr_true_μ   = Array{ℝ,V}(undef, dimension )
            curr_emp_μ    = Array{𝐑,V}(undef, dimension )   ; curr_emp_μ   .= 𝐑(0)
-           _ws           = Array{𝐑,V}(undef, dimension )
+           ␣ws           = Array{𝐑,V}(undef, dimension )
 
            err2²         = Array{ℝ,2}(undef, steps,runs)
            err1          = Array{ℝ,2}(undef, steps,runs)
            err∞          = Array{ℝ,2}(undef, steps,runs)
            emp_var       = Array{𝐑,1}(undef, runs)         ; emp_var .= 𝐑(0)
 
-           return MeanProc{𝐑,V}( ; curr_true_μ, curr_emp_μ,
-                                err2², err1, err∞, emp_var,  _ws)
+           s = MeanProc{𝐑,V}( ; curr_true_μ, curr_emp_μ,
+                                err2², err1, err∞, emp_var,  ␣ws)
+           ␣integrity_check(s)
+           return s
        end
      #+END_SRC
 
@@ -337,7 +345,7 @@
      _Data integrity check_ that throws an exception if there's a problem (otherwise returns nothing).
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       function _integrity_check(s ::MeanProc{𝐑,V}) ::Nothing  where{𝐑,V}
+       function ␣integrity_check(s ::MeanProc{𝐑,V}) ::Nothing  where{𝐑,V}
      #+END_SRC
 
 **** Implementation
@@ -353,26 +361,25 @@
 
                 @assert 0 ≤ s.𝐫[] ≤ runs
                 @assert 0 ≤ s.𝐬[] ≤ steps
+                @assert s.𝐫[] ≥ 1 || s.𝐬[] == 0
 
                 @assert size(     s.err2²       ) == (steps,runs)
                 @assert size(     s.err1        ) == (steps,runs)
                 @assert size(     s.err∞        ) == (steps,runs)
                 @assert size(     s.emp_var     ) == (runs,)
 
-                @assert size(     s._ws         ) == dim
+                @assert size(     s.␣ws         ) == dim
             end #^ let
             return nothing
         end
       #+END_SRC
 
-*** Starting a new run: ~start_run!()~ <<start>>
+*** Starting a new run: ~start_run!()~ <<mp-start>>
 
      When a new run starts, the true mean has to be recorded, the indices 𝐫 and 𝐬 for run and step, resp., have to
      be set up, and the empirical data has to be initialized.
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       export start_run!
-
        function start_run!(s      :: MeanProc{𝐑,V}
                            ;
                            true_μ :: Array{ℝ,V} ) ::Nothing  where{𝐑,V}
@@ -417,7 +424,7 @@
 
 **** Implementation of ~start_run!()~
       #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-            _integrity_check(s)
+            ␣integrity_check(s)
 
 
             if    s.𝐫[] > 0         @assert s.𝐬[] == numo_steps(s)
@@ -440,11 +447,9 @@
         end #^ start_run!()
       #+END_SRC
 
-*** Adding data of a step: ~record_step!()~ <<record>>
+*** Adding data of a step: ~record_step!()~ <<mp-record>>
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       export record_step!
-
        function record_step!(s ::MeanProc{𝐑,V}
                              ;
                              𝐸 ::Array{ℝ,V} ) ::Nothing  where{𝐑,V}
@@ -452,9 +457,9 @@
 
 **** Implementation
       #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-        _integrity_check(s)
+        ␣integrity_check(s)
 
-        (;curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, _ws) = s
+        (;curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, ␣ws) = s
 
 
         s.𝐬[] += 1            ; @assert s.𝐬[] ≤ numo_steps(s)
@@ -469,9 +474,9 @@
             # emp_var[𝐫]   = (𝐬-1) ⋅ emp_var[𝐫]  / 𝐬    +   (𝐬-1) ⋅ norm2²( curr_emp_μ - 𝐸 ) / 𝐬²
             # curr_emp_μ  .= (𝐬-1) ⋅ curr_emp_μ / 𝐬   +   𝐸 / 𝐬
 
-            _ws         .= curr_emp_μ
-            axpby!(-1/𝐬, 𝐸,  1/𝐬, _ws)
-            emp_var[𝐫]   = (𝐬-1) ⋅ (   emp_var[𝐫]  / 𝐬    +   norm2²( _ws )   )
+            ␣ws         .= curr_emp_μ
+            axpby!(-1/𝐬, 𝐸,  1/𝐬, ␣ws)
+            emp_var[𝐫]   = (𝐬-1) ⋅ (   emp_var[𝐫]  / 𝐬    +   norm2²( ␣ws )   )
                           # will be corrected for bias in finalize_run!()
 
             axpby!( 1/𝐬, 𝐸, (𝐬-1)/𝐬, curr_emp_μ)
@@ -479,42 +484,40 @@
             #
             # Errors
             #
-            _ws         .= curr_emp_μ - curr_true_μ
+            ␣ws         .= curr_emp_μ - curr_true_μ
 
-            err2²[𝐬,𝐫]   = norm2²(_ws)
-            err1[ 𝐬,𝐫]   = norm1(_ws)
-            err∞[ 𝐬,𝐫]   = norm∞(_ws)
+            err2²[𝐬,𝐫]   = norm2²(␣ws)
+            err1[ 𝐬,𝐫]   = norm1(␣ws)
+            err∞[ 𝐬,𝐫]   = norm∞(␣ws)
         end #^ let
         nothing;
         end #^ record_step!()
       #+END_SRC
 
-*** Finalizing a run: ~finalize_run!()~ <<finalize>>
+*** Finalizing a run: ~finalize_run!()~ <<mp-finalize>>
 
      The ~finalize_run!()~ function must be called after all data points have been added.  It removes the bias
      from the empirical variance.
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       export finalize_run!
-
        function finalize_run!(s ::MeanProc{𝐑,V}) ::Nothing                  where{𝐑,V}
      #+END_SRC
 
 **** Implementation
       #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-          _integrity_check(s)
+            ␣integrity_check(s)
 
-          @assert s.𝐬[] == numo_steps(s)
+            @assert s.𝐬[] == numo_steps(s)
 
-          #
-          # Un-bias empirical variance:
-          #
+            #
+            # Un-bias empirical variance:
+            #
             let 𝐫     = s.𝐫[],
                 𝐬     = s.𝐬[]
 
                 s.emp_var[ 𝐫 ] *= 𝐬 / 𝐑(𝐬-1)
             end
-          nothing;
+            nothing;
         end #^ finalize_run!()
       #+END_SRC
 
@@ -680,31 +683,33 @@
       #+END_SRC
 
 
-** TODO Statistics of max-approximating processes [2/3]
-*** DONE Helper: ~Xtiles~ type for percentiles
+** IN-PRGR Statistics of max-approximating processes [0/9]
+*** TSTNG Helper-functions for percentiles
 **** Description
 
-      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-        export Xtiles
-      #+END_SRC
-
-      The [[Type--Xtiles][helper-type ~Xtiles~]] counts percentiles.  An object of the type is [[Xtiles-constructor][constructed]] by giving a set of numbers
-      in $\left]0,1\right]$, and the total number or data points that will be added over its lifetime.  A call to
-      the function [[Xtiles-count_it!][~count_it!()~]] then registers a data point by increasing the frequency for the interval
-      $\left]\pi_{\ell-1},\pi_\ell\right]$ out of $\ell=1,\dots,L$ to which it belongs (where $\pi_0 := 0$).
+      The ~␣xtiles_count!()~ counts percentiles: A call to the function [[␣xtiles_count!()][~␣xtiles_count!()~]] then registers a data
+      point by increasing the frequency for the interval $\left]\pi_{\ell-1},\pi_\ell\right]$ out of
+      $\ell=1,\dots,L$ to which it belongs (where $\pi_0 := 0$).
 
       We require that 1 is in the set of percentiles (but 0 isn't).
 
-**** Definition of the type
+      This is how to use it.
+      + make a percentiles tuple using the function [[␣xtiles_make()][~␣xtiles_make()~]]
+      + initialize the frequency vector with zeros
+      + repeatedly call  [[␣xtiles_count!()][~␣xtiles_count!()~]], for every data point -- which must be in [0,1]
+      + the frequency vector will contain the percentiles.
 
-      #+NAME: Type--Xtiles
-      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-        struct Xtiles{L}
-            𝝅     ::NTuple{L,ℝ}   # sorted increasingly
-            freqs ::Vector{ℝ}
-            runs  ::Int
+      Here's a pseudo-example:
+
+      #+BEGIN_SRC julia :tangle no
+        𝝅     = ␣xtiles_make( [0.5, 0.8,0.9,0.99, 0.999, 1.0])  # 1 ∈ 𝝅  is required!!
+        freqs = zeros(ℝ, length(𝝅))
+        for j = 1:runs
+            pⱼ = gimme_data_point(j)
+            ␣xtiles_count!(freqs, 𝝅 ; pⱼ , Δ=1/runs)
         end
       #+END_SRC
+
 
       ~freq[ℓ]~ is the frequency of the data points in the interval
       #+BEGIN_CENTER
@@ -716,36 +721,36 @@
 
       We require that 1 is in the set of percentiles (but 0 isn't).
 
-**** User-facing constructor
+**** Create percentiles tuple list
 
       /We require that 1 is in the set of percentiles!/
 
-      #+NAME: Xtiles-constructor
+      #+NAME: ␣xtiles_make()
       #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-        function Xtiles(_𝝅, runs::Int) ::Xtiles
+        function ␣xtiles_make(_𝝅) ::Tuple
             𝝅 = collect(_𝝅)
             sort!(𝝅)
 
-            @assert runs ≥ 1
             @assert allunique( 𝝅 )
             @assert 0.0 < 𝝅[1] ≤ 𝝅[end] == 1.0
 
-            L     = length(𝝅)
-            freqs = zeros(ℝ,L)
-            return Xtiles{L}((𝝅...,),freqs,runs)
+            L = length(𝝅) # just saying...
+            return (𝝅...,)
         end
       #+END_SRC
 
-**** Store a percentage (not exported!)
+**** Store a percentage
 
-      #+NAME: Xtiles-count_it!
+      #+NAME: ␣xtiles_count!()
       #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-        function count_it!(xt ::Xtiles{L}, p ::ℝ)    where{L}
+        function ␣xtiles_count!(freqs ::AbstractArray{ℝ},
+                                𝝅     ::NTuple{L,ℝ}
+                                ;
+                                p     ::ℝ,
+                                Δ     ::ℝ                 )::NamedTuple    where{L}
             @assert 0-1e-50 ≤ p
             @assert           p ≤ 1+1e-30
-            @assert L == length(xt.freqs)
-
-            (;𝝅,freqs,runs) = xt
+            @assert L == length(freqs)
 
             ℓ = 1
             while ℓ ≤ L   &&   𝝅[ℓ] < p
@@ -753,9 +758,9 @@
             end
             ℓ = min(ℓ,L)                  # in case of rounding errors near 1.0
 
-            freqs[ ℓ ] += 1/runs
+            freqs[ ℓ ] += Δ
 
-            ( ℓ=ℓ,  lo=get(𝝅,ℓ-1,0.0), hi=𝝅[ℓ] )
+            return ( ℓ=ℓ,  lo=get(𝝅,ℓ-1,0.0), hi=𝝅[ℓ] )
         end
       #+END_SRC
 
@@ -763,53 +768,59 @@
 ***** Main testing function
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
-        function test__Xtiles()
+        function test__xtiles()
 
-            function some_tests__interior(L,𝝅)
-                m = 16
-                N = m⋅L
-                xt = Xtiles(𝝅,N)
+            function some_tests__interior(_𝝅)
+                L     = length(_𝝅)
+                m     = 16
+                N     = m⋅L
+                𝝅     = DOT_StatsHelp.␣xtiles_make(_𝝅)
+                freqs = zeros(ℝ,L)
+
                 for ℓ = 1 : L
-                    lo = get(xt.𝝅,ℓ-1,   0.0)
-                    hi =     xt.𝝅[ℓ  ]
+                    lo = get(𝝅,ℓ-1,   0.0)
+                    hi =     𝝅[ℓ  ]
                     @test lo < hi || (lo==hi && ℓ==L)
                     for j = 1:m
                         p =  lo + (hi-lo)⋅rand()
-                        iv = DOT_StatsHelp.count_it!(xt,p)
+                        iv = DOT_StatsHelp.␣xtiles_count!(freqs,𝝅 ; p, Δ=1/N)
                         @test iv.lo < p ≤ iv.hi
                     end
                 end
 
-                @test sum(xt.freqs) ≈ 1
+                @test sum(freqs) ≈ 1
                 for ℓ = 1:L
-                    @test xt.freqs[ℓ] ≈ m/N
+                    @test freqs[ℓ] ≈ m/N
                 end
             end
 
-            function some_tests__boundary(L,𝝅)
-                m = 16
-                N = m⋅L
-                xt = Xtiles(𝝅,N)
+            function some_tests__boundary(_𝝅)
+                L     = length(_𝝅)
+                m     = 16
+                N     = m⋅L
+                𝝅     = DOT_StatsHelp.␣xtiles_make(_𝝅)
+                freqs = zeros(ℝ,L)
+
                 for j = 1:m
                     for ℓ = 1:L
-                        lo = get(xt.𝝅,ℓ-1,   0.0)
-                        hi =     xt.𝝅[ℓ  ]
+                        lo = get(𝝅,ℓ-1,   0.0)
+                        hi =     𝝅[ℓ  ]
                         @test lo < hi || (lo==hi && ℓ==L)
-                        DOT_StatsHelp.count_it!(xt,hi)
+                        DOT_StatsHelp.␣xtiles_count!(freqs,𝝅 ; p=hi, Δ=1/N)
                     end
                 end
 
-                @test sum(xt.freqs) ≈ 1
+                @test sum(freqs) ≈ 1
                 for ℓ = 1:L
-                    @test xt.freqs[ℓ] ≈ m/N
+                    @test freqs[ℓ] ≈ m/N
                 end
             end
 
             for L = 1:10
                 𝝅 = [ rand(L-1)
                       1.0       ]
-                some_tests__interior(L,𝝅)
-                some_tests__boundary(L,𝝅)
+                some_tests__interior(𝝅)
+                some_tests__boundary(𝝅)
             end
         end #^ test__Xtiles()
       #+END_SRC
@@ -817,36 +828,34 @@
 ***** Call the testing function
       #+BEGIN_SRC julia :tangle test/runtests.jl
         @testset verbose=true "DOT_StatsHelp.jl testing: Test Xtiles helper" begin
-            test__Xtiles()
+            test__xtiles()
         end
       #+END_SRC
 
-*** DONE The max-approx process type: ~MaxApxProc{L}~
+*** TSTNG The max-approx process type: ~MaxProc{L}~
 
      The following basic type is made available to the user:
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       export MaxApxProc{L}
+       export MaxProc
      #+END_SRC
 
      An object of this type collects information about the stochastic convergence of the maximum of random numbers
      to a known(!) limit.
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       mutable struct MaxApxProc
-           #                    Input for run
-           const curr_true_max  ::ℝ
+       mutable struct MaxProc{L}
+           # consts
+           const 𝝅         ::NTuple{L,ℝ}   # percentile numbers, sorted increasingly (last one must be 1.0)
+           const freqs     ::Array{ℝ,2}    #
+           const steps     ::Int
+           const runs      ::Int
 
-           #                    Output of run
-           curr_max       ::ℝ
-
-           const 𝝅     ::NTuple{L,ℝ}   # percentile numbers, sorted increasingly (last one must be 1.0)
-           const freqs ::Array{ℝ,2}    #
-           const runs  ::Int
-
-           #                    Counters
-           𝐫                    ::Int    # index of current run (i.e., 0 ⪮ before first run)
-           𝐬                    ::Int    # index of current step (i.e., 0 ⪮ before first step)
+           # mutables
+           true_max  ::ℝ
+           curr_max  ::ℝ
+           𝐫         ::Int    # index of current run (i.e., 0 ⪮ before first run)
+           𝐬         ::Int    # index of current step (i.e., 0 ⪮ before first step)
        end
       #+END_SRC
 
@@ -854,20 +863,69 @@
       so far.
 
 *** TODO Usage
-*** TODO User-facing constructor for ~MaxApprox~
-*** Starting a new run: ~start_run!()~ <<maxapx-start>>
+*** TSTNG User-facing constructor for ~MaxApprox~ <<max-constructor>>
+
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       function MaxProc(_𝝅
+                        ;
+                        steps :: Int,
+                        runs  :: Int )  ::MaxProc
+     #+END_SRC
+
+     About the arguments
+
+     + ~_𝝅~ must be a list (array, tuple, generator, ...) or percentiles, as type-~ℝ~ numbers in $\left]0,1\right]$.  *It
+       must include 1=100%,* but it must not include 0.
+
+**** Implementation
+
+      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+            𝝅     = ␣xtiles_make(_𝝅)
+            L     = length(𝝅)
+            freqs = Array{ℝ,2}(undef,steps,L)
+            s     = MaxProc{L}(𝝅, freqs, steps, runs, Inf, Inf, 0,0)
+            ␣integrity_check(s)
+            return s
+        end
+      #+END_SRC
+
+*** TSTNG Helper functions and integrity check
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       numo_stepsruns( s ::MaxProc{L} ) where{L}    = ( numo_steps(s) , numo_runs(s) )
+       numo_steps(     s ::MaxProc{L} ) where{L}    = s.steps
+       numo_runs(      s ::MaxProc{L} ) where{L}    = s.runs
+      #+END_SRC
+
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       function ␣integrity_check(s ::MaxProc{L}) ::Nothing where{L}
+           @assert L           == length(s.𝝅)  "Crazy bug!!"
+           @assert 0 < s.𝝅[1] < s.𝝅[end] == 1.0
+           @assert (L,s.steps) == size(s.freqs)
+           @assert s.steps     == numo_steps(s)
+           @assert s.runs      == numo_runs(s)
+           @assert s.steps ≥ 1
+           @assert s.runs  ≥ 1
+
+           @assert 0 ≤ s.𝐬 ≤ s.steps
+           @assert 0 ≤ s.𝐫 ≤ s.runs
+           @assert s.𝐫 ≥ 1 || s.𝐬 == 0
+
+           @assert s.curr_max ≤ s.true_max
+
+           nothing;
+       end
+     #+END_SRC
+
+*** TSTNG Starting a new run: ~start_run!()~ <<max-start>>
 
      When a new run starts, the true mean has to be recorded, the indices 𝐫 and 𝐬 for run and step, resp., have to
      be set up, and the empirical data has to be initialized.
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       export start_run!
-
-       function start_run!(s        :: MaxApxProc{L}
+       function start_run!(s        :: MaxProc{L}
                            ;
-                           true_max :: ℝ            ) ::Nothing  where{V}
-
-           _integrity_check(s)
+                           true_max :: ℝ            ) ::Nothing  where{L}
+           ␣integrity_check(s)
 
            if    s.𝐫 > 0           @assert s.𝐬 == numo_steps(s)
            else                    @assert s.𝐬 == 0               end
@@ -875,24 +933,20 @@
            s.𝐫 += 1              ; @assert s.𝐫 ≤ numo_runs(s)
            s.𝐬  = 0
 
-           s.curr_true_max .= true_μ
-           s.curr_max      .= -Inf
+           s.true_max = true_max
+           s.curr_max = -Inf
 
            nothing;
        end
      #+END_SRC
 
-*** Adding data of a step: ~record_step!()~ <<maxapx-record>>
+*** TSTNG Adding data of a step: ~record_step!()~ <<max-record>>
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       export record_step!
-
-       function record_step!(s ::MaxApxProc{L}
+       function record_step!(s ::MaxProc{L}
                              ;
                              𝐸 ::ℝ            ) ::Union{ℝ,Nothing}     where{L}
-           _integrity_check(s)
-           @assert (L,s.runs) == size(xt.freqs)
-
+           ␣integrity_check(s)
 
            @assert 0 ≤ 𝐸 ≤ s.true_max
 
@@ -904,19 +958,10 @@
                new_max    = true
            end
 
-           (;ℓ,lo,hi) =
-           let p = s.curr_max / true_max,
-               ℓ = 1
-               while ℓ ≤ L   &&   𝝅[ℓ] < p
-                   ℓ += 1
-               end
-               ℓ = min(ℓ,L)                    # in case of rounding errors near 1.0
-
-               s.𝐬             += 1            ; @assert s.𝐬 ≤ numo_steps(s)
-               freqs[ ℓ, s.𝐬 ] += 1/runs
-
-               ( ℓ=ℓ,  lo=get(𝝅,ℓ-1,0.0), hi=𝝅[ℓ] )
-           end #^ let
+           s.𝐬        += 1            ; @assert s.𝐬 ≤ numo_steps(s)
+           freqsₛ    =  @view freqs[:,s.𝐬]
+           (;ℓ,lo,hi) =  ␣xtiles_count!(freqsₛ, 𝝅
+                                       ; p = s.curr_max / true_max,  Δ=1/runs)
 
            if new_max
                @info "New max: $𝐸; ℓ=$ℓ, lo=$lo, hi=$hi"
@@ -926,6 +971,20 @@
        end #^ record_step!()
      #+END_SRC
 
+*** TSTNG Finalizing a run: ~finalize_run!()~ <<max-finalize>>
+
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       function finalize_run!(s ::MaxProc{L}) ::Nothing         where{L}
+           ␣integrity_check(s)
+
+           @assert s.𝐬 == numo_steps(s)
+           @assert 0 ≤ s.curr_max
+
+           nothing; # ... else needs to be done
+       end #^ finalize_run!()
+     #+END_SRC
+
+*** TODO Tests for the max process
 
 
 ** DONE End of module
