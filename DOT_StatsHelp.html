@@ -1,0 +1,1663 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-08-18 Fri 18:01 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Julia Package That Helps With Statistics For Random Processes</title>
+<meta name="author" content="Dirk Oliver Theis, University of Tartu, Estonia" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Julia Package That Helps With Statistics For Random Processes</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgda8a72a">1. Copyright Notice</a></li>
+<li><a href="#org23ed0ab">2. What's This Module/Project/File About?</a>
+<ul>
+<li><a href="#org2114e8e">2.1. <span class="todo TODO">TODO</span> Summary of what this software does <code>[0/1]</code> </a></li>
+<li><a href="#org821e3a6">2.2. <span class="todo TODO">TODO</span> High-level usage instructions </a>
+<ul>
+<li><a href="#org5acaa2a">2.2.1. <span class="todo TODO">TODO</span> Steps and runs <code>[0/1]</code></a></li>
+</ul>
+</li>
+<li><a href="#org9868e7f">2.3. Literate programming</a></li>
+<li><a href="#orgb0978f7">2.4. Acknowledgments</a></li>
+</ul>
+</li>
+<li><a href="#org515b472">3. Task Lists and Progress Reports <code>[2/4]</code></a>
+<ul>
+<li><a href="#org7c96fb5">3.1. <span class="done DONE">DONE</span> Basics <code>[1/1]</code></a></li>
+<li><a href="#org340c83c">3.2. <span class="done DONE">DONE</span> Mean-estimating process <code>[8/8]</code></a></li>
+<li><a href="#org19bcb6e">3.3. <span class="todo TODO">TODO</span> Max-approximating process <code>[6/7]</code></a></li>
+<li><a href="#orgd511a76">3.4. <span class="todo TODO">TODO</span> Finally, &#x2026; <code>[1/2]</code></a></li>
+</ul>
+</li>
+<li><a href="#orgcc41255">4. <span class="todo TODO">TODO</span> Literate Source Code for the Package <code>[5/6]</code></a>
+<ul>
+<li><a href="#orgefc7973">4.1. <span class="done DONE">DONE</span> File headers</a></li>
+<li><a href="#org32f237d">4.2. <span class="done DONE">DONE</span> Set up testing</a></li>
+<li><a href="#orgaeaf7d1">4.3. <span class="done DONE">DONE</span> Module definition, import, and recurrent exports</a></li>
+<li><a href="#org016ecdb">4.4. <span class="done DONE">DONE</span> Statistics of mean-estimating processes</a>
+<ul>
+<li><a href="#orgfa839fe">4.4.1. The mean process type: <code>MeanProc{𝐑,V}</code></a></li>
+<li><a href="#orgb74e358">4.4.2. Usage</a></li>
+<li><a href="#orgc7ff6f9">4.4.3. User-facing constructor for <code>MeanProc</code>  </a></li>
+<li><a href="#orgc85cc89">4.4.4. Helper functions and integrity check</a></li>
+<li><a href="#orga05150c">4.4.5. Starting a new run: <code>start_run!()</code> </a></li>
+<li><a href="#org1b06254">4.4.6. Adding data of a step: <code>record_step!()</code> </a></li>
+<li><a href="#orgc73b735">4.4.7. Finalizing a run: <code>finalize_run!()</code> </a></li>
+<li><a href="#org470333f">4.4.8. Tests for the mean process</a></li>
+</ul>
+</li>
+<li><a href="#orgc630724">4.5. <span class="todo IN_PRGR">IN-PRGR</span> Statistics of max-approximating processes <code>[0/9]</code></a>
+<ul>
+<li><a href="#org52e80b5">4.5.1. <span class="todo TSTNG">TSTNG</span> Helper-functions for percentiles</a></li>
+<li><a href="#orgb1ff060">4.5.2. <span class="todo TSTNG">TSTNG</span> The max-approx process type: <code>MaxProc{L}</code></a></li>
+<li><a href="#org2ab5381">4.5.3. <span class="todo TODO">TODO</span> Usage</a></li>
+<li><a href="#orge6f7b7b">4.5.4. <span class="todo TSTNG">TSTNG</span> User-facing constructor for <code>MaxApprox</code> </a></li>
+<li><a href="#org1bc7cce">4.5.5. <span class="todo TSTNG">TSTNG</span> Helper functions and integrity check</a></li>
+<li><a href="#orge22f49a">4.5.6. <span class="todo TSTNG">TSTNG</span> Starting a new run: <code>start_run!()</code> </a></li>
+<li><a href="#orgb6a4c5b">4.5.7. <span class="todo TSTNG">TSTNG</span> Adding data of a step: <code>record_step!()</code> </a></li>
+<li><a href="#org299cd6a">4.5.8. <span class="todo TSTNG">TSTNG</span> Finalizing a run: <code>finalize_run!()</code> </a></li>
+<li><a href="#org938814f">4.5.9. <span class="todo TODO">TODO</span> Tests for the max process</a></li>
+</ul>
+</li>
+<li><a href="#org339d809">4.6. <span class="done DONE">DONE</span> End of module</a></li>
+</ul>
+</li>
+<li><a href="#orgeb3574f">5. End of the Org File</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgda8a72a" class="outline-2">
+<h2 id="orgda8a72a"><span class="section-number-2">1.</span> Copyright Notice</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The following copyright notice applies to this Org-file, as well as the Julia source file generated from it.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #006400; background-color: #ffffe0;">#########################################################################</span>
+<span style="color: #006400; background-color: #ffffe0;">#                                                                       </span><span style="color: #006400; background-color: #ffffe0;">#</span>
+<span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">Copyright and Licensing Information                                   #</span>
+<span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">-----------------------------------                                   #</span>
+<span style="color: #006400; background-color: #ffffe0;">#                                                                       </span><span style="color: #006400; background-color: #ffffe0;">#</span>
+<span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">Copyright lies with the University of Tartu, Estonia, and with the    #</span>
+<span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">author.                                                               #</span>
+<span style="color: #006400; background-color: #ffffe0;">#                                                                       </span><span style="color: #006400; background-color: #ffffe0;">#</span>
+<span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">Permission is hereby granted to use and modify the source code under  #</span>
+<span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">the terms of the Apache v2.0 license.                                 #</span>
+<span style="color: #006400; background-color: #ffffe0;">#                                                                       </span><span style="color: #006400; background-color: #ffffe0;">#</span>
+<span style="color: #006400; background-color: #ffffe0;">#                                                                       </span><span style="color: #006400; background-color: #ffffe0;">#</span>
+<span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">Author:                                                               #</span>
+<span style="color: #006400; background-color: #ffffe0;">#                                                                       </span><span style="color: #006400; background-color: #ffffe0;">#</span>
+<span style="color: #006400; background-color: #ffffe0;">#        </span><span style="color: #006400; background-color: #ffffe0;">Dirk Oliver Theis                                              #</span>
+<span style="color: #006400; background-color: #ffffe0;">#        </span><span style="color: #006400; background-color: #ffffe0;">Assoc. Prof. Theoretical Computer Science                      #</span>
+<span style="color: #006400; background-color: #ffffe0;">#        </span><span style="color: #006400; background-color: #ffffe0;">University of Tartu                                            #</span>
+<span style="color: #006400; background-color: #ffffe0;">#        </span><span style="color: #006400; background-color: #ffffe0;">Estonia                                                        #</span>
+<span style="color: #006400; background-color: #ffffe0;">#                                                                       </span><span style="color: #006400; background-color: #ffffe0;">#</span>
+<span style="color: #006400; background-color: #ffffe0;">#########################################################################</span>
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org23ed0ab" class="outline-2">
+<h2 id="org23ed0ab"><span class="section-number-2">2.</span> What's This Module/Project/File About?</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org2114e8e" class="outline-3">
+<h3 id="org2114e8e"><span class="section-number-3">2.1.</span> <span class="todo TODO">TODO</span> Summary of what this software does <code>[0/1]</code> <a id="org8e33e54"></a></h3>
+</div>
+<div id="outline-container-org821e3a6" class="outline-3">
+<h3 id="org821e3a6"><span class="section-number-3">2.2.</span> <span class="todo TODO">TODO</span> High-level usage instructions <a id="org72c7e82"></a></h3>
+<div class="outline-text-3" id="text-2-2">
+</div>
+<div id="outline-container-org5acaa2a" class="outline-4">
+<h4 id="org5acaa2a"><span class="section-number-4">2.2.1.</span> <span class="todo TODO">TODO</span> Steps and runs <code>[0/1]</code></h4>
+<div class="outline-text-4" id="text-2-2-1">
+<p>
+The fundamental idea is to run a random process for so-and-so many <i>steps</i>, collecting information about its
+convergence.  This is repeated for so-and-so-many <i>runs</i>, and statistics about the convergence are created.
+</p>
+
+<p>
+The user must stick to the following order of instructions for using the types defined in the module:
+</p>
+
+<ol class="org-ol">
+<li>create an object of the type using a constructor (<a href="#org0fcded5">mean</a> <a href="#org8009244">max</a>)</li>
+<li>For each run:
+<ol class="org-ol">
+<li>Start a new run using the <code>start_run!()</code> functions (<a href="#orgf58e304">mean</a>, <a href="#org13f80ba">max</a>)</li>
+<li>Fill run with data using the <code>record_step!()</code> function repeatedly, once for every step <a href="#orgf58e304">(mean</a> <a href="#org13f80ba">max</a>)</li>
+<li>Call the <code>finalize_run!()</code> functions to for tidying up the run <a href="#orgbf1c060">(mean</a> <a href="#orgce221c8">max</a>)</li>
+<li>Retrieve the stats that are overwritten in each run <br />
+(e.g., the empirical mean in for mean-estimating processes is kept only for the current run)</li>
+</ol></li>
+<li>Repeat &#x2013; i.e., Goto (2) &#x2013;  for all runs</li>
+<li>Retrieve the stored stats over all runs.</li>
+</ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9868e7f" class="outline-3">
+<h3 id="org9868e7f"><span class="section-number-3">2.3.</span> Literate programming</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+This document is a "literate program", i.e., plain text interspersed with actual Julia programming language
+source code.  The source code is extracted ("tangled") into the files <sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup> and <sup><a id="fnr.2" class="footref" href="#fn.2" role="doc-backlink">2</a></sup>, from where it can be run etc.
+</p>
+
+<p>
+Literate programming allows me to organize source code, documentation, and tests in a hierarchical, text
+document structure.  This makes orientation in the source code so much easier 😊 than in a linear source stream.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb0978f7" class="outline-3">
+<h3 id="orgb0978f7"><span class="section-number-3">2.4.</span> Acknowledgments</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+The author was partly funded by <b>Norges Forskningsråd</b> through the <a href="https://www.sintef.no/en/projects/2022/neqst-quantum-computing-applied-to-industrial-optimization-problems/">NeQst</a> project: <i>Quantum Computing Applied to
+Industrial Optimization Problems,</i> project № 332023; part of this software will be utilized within Work Package
+4, <i>Assessing Quantum Advantage</i>.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org515b472" class="outline-2">
+<h2 id="org515b472"><span class="section-number-2">3.</span> Task Lists and Progress Reports <code>[2/4]</code></h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org7c96fb5" class="outline-3">
+<h3 id="org7c96fb5"><span class="section-number-3">3.1.</span> <span class="done DONE">DONE</span> Basics <code>[1/1]</code></h3>
+<div class="outline-text-3" id="text-3-1">
+<ul class="org-ul">
+<li class="on"><code>[X]</code> Set up repository <code>[6/6]</code>
+
+<ul class="org-ul">
+<li class="on"><code>[X]</code> Create repository</li>
+<li class="on"><code>[X]</code> Make it Org</li>
+<li class="on"><code>[X]</code> Set up TOML files</li>
+<li class="on"><code>[X]</code> Copy content from ShiftRules/SPSA <code>Stats</code></li>
+<li class="on"><code>[X]</code> Make version v0.1</li>
+<li class="on"><code>[X]</code> Register on <code>DOT_JuliaPackages</code></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org340c83c" class="outline-3">
+<h3 id="org340c83c"><span class="section-number-3">3.2.</span> <span class="done DONE">DONE</span> Mean-estimating process <code>[8/8]</code></h3>
+<div class="outline-text-3" id="text-3-2">
+<ul class="org-ul">
+<li class="on"><code>[X]</code> Make it work, basically <code>[1/1]</code>
+
+<ul class="org-ul">
+<li class="on"><code>[X]</code> Work source code</li>
+</ul></li>
+
+<li class="on"><code>[X]</code> Work the many-runs</li>
+
+<li class="on"><code>[X]</code> Make it type independent <br />
+Solved by using valency-0 tensors.</li>
+
+<li class="on"><code>[X]</code> <code>export</code></li>
+
+<li class="on"><code>[X]</code> Describe the functions</li>
+
+<li class="on"><code>[X]</code> <b>Fix mistake in emp var calculation !!</b></li>
+
+<li class="on"><code>[X]</code> Add unit tests</li>
+
+<li class="on"><code>[X]</code> Add more unit tests</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org19bcb6e" class="outline-3">
+<h3 id="org19bcb6e"><span class="section-number-3">3.3.</span> <span class="todo TODO">TODO</span> Max-approximating process <code>[6/7]</code></h3>
+<div class="outline-text-3" id="text-3-3">
+<ul class="org-ul">
+<li class="on"><code>[X]</code> Get started</li>
+<li class="on"><code>[X]</code> Make percentiles helper <code>Xtiles</code></li>
+<li class="on"><code>[X]</code> Make unit tests for percentiles helper</li>
+
+<li class="on"><code>[X]</code> Copy interface defs from Mean Estim</li>
+<li class="on"><code>[X]</code> Take it from there</li>
+<li class="on"><code>[X]</code> Get JET.jl-based testing running</li>
+<li class="off"><code>[&#xa0;]</code> Make unit tests</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgd511a76" class="outline-3">
+<h3 id="orgd511a76"><span class="section-number-3">3.4.</span> <span class="todo TODO">TODO</span> Finally, &#x2026; <code>[1/2]</code></h3>
+<div class="outline-text-3" id="text-3-4">
+<ul class="org-ul">
+<li class="off"><code>[&#xa0;]</code> Write the <a href="#org8e33e54">Summary</a></li>
+
+<li class="on"><code>[X]</code> Acknowledge funding: NeQst WP4</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgcc41255" class="outline-2">
+<h2 id="orgcc41255"><span class="section-number-2">4.</span> <span class="todo TODO">TODO</span> Literate Source Code for the Package <code>[5/6]</code></h2>
+<div class="outline-text-2" id="text-4">
+</div>
+<div id="outline-container-orgefc7973" class="outline-3">
+<h3 id="orgefc7973"><span class="section-number-3">4.1.</span> <span class="done DONE">DONE</span> File headers</h3>
+<div class="outline-text-3" id="text-4-1">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #006400; background-color: #ffffe0;">###########################################################################</span>
+<span style="color: #006400; background-color: #ffffe0;">#                                                                         </span><span style="color: #006400; background-color: #ffffe0;">#</span>
+<span style="color: #006400; background-color: #ffffe0;">#  </span><span style="color: #006400; background-color: #ffffe0;">THIS IS A MACHINE-GENERATED FILE.  DO NOT EDIT IT.                     #</span>
+<span style="color: #006400; background-color: #ffffe0;">#                                                                         </span><span style="color: #006400; background-color: #ffffe0;">#</span>
+<span style="color: #006400; background-color: #ffffe0;">#  </span><span style="color: #006400; background-color: #ffffe0;">(The actual source code is in the Org file.)                           #</span>
+<span style="color: #006400; background-color: #ffffe0;">#                                                                         </span><span style="color: #006400; background-color: #ffffe0;">#</span>
+<span style="color: #006400; background-color: #ffffe0;">###########################################################################</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #006400; background-color: #ffffe0;">###########################################################################</span>
+<span style="color: #006400; background-color: #ffffe0;">#                                                                         </span><span style="color: #006400; background-color: #ffffe0;">#</span>
+<span style="color: #006400; background-color: #ffffe0;">#  </span><span style="color: #006400; background-color: #ffffe0;">THIS IS A MACHINE-GENERATED FILE.  DO NOT EDIT IT.                     #</span>
+<span style="color: #006400; background-color: #ffffe0;">#                                                                         </span><span style="color: #006400; background-color: #ffffe0;">#</span>
+<span style="color: #006400; background-color: #ffffe0;">#  </span><span style="color: #006400; background-color: #ffffe0;">(The actual source code is in the Org file.)                           #</span>
+<span style="color: #006400; background-color: #ffffe0;">#                                                                         </span><span style="color: #006400; background-color: #ffffe0;">#</span>
+<span style="color: #006400; background-color: #ffffe0;">###########################################################################</span>
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org32f237d" class="outline-3">
+<h3 id="org32f237d"><span class="section-number-3">4.2.</span> <span class="done DONE">DONE</span> Set up testing</h3>
+<div class="outline-text-3" id="text-4-2">
+</div>
+<ol class="org-ol">
+<li><a id="orgf02f6a3"></a>Importing things<br />
+<div class="outline-text-5" id="text-4-2-0-1">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">using</span> DOT_StatsHelp
+
+<span style="color: #a020f0;">using</span> Test
+
+
+<span style="color: #a020f0;">using</span> DoubleFloats: Double64
+
+<span style="color: #a020f0;">using</span> LinearAlgebra: norm_sqr as norm2&#178;, norm2, norm1, normInf as norm&#8734;
+
+<span style="color: #a020f0;">using</span> Statistics: mean, var
+
+<span style="color: #a020f0;">using</span> DOT_NiceMath
+<span style="color: #a020f0;">using</span> DOT_StatsHelp.Numbers64     <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">=== DOT_NiceMath.Numbers64 -- just making sure we get the same!</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org6031cdb"></a>Generic test based on <code>JET.jl</code><br />
+<div class="outline-text-5" id="text-4-2-0-2">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">using</span> JET
+<span style="color: #a020f0;">using</span> JSON        <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">Only for ignoring by JET</span>
+<span style="color: #a020f0;">using</span> Polynomials <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">Only for ignoring by JET</span>
+
+<span style="color: #483d8b;">@testset</span> verbose=<span style="color: #008b8b;">true</span> <span style="color: #8b2252;">"DOT_StatsHelp.jl testing:  via JET.jl"</span> <span style="color: #a020f0;">begin</span>
+    test_package(DOT_StatsHelp, ignored_modules=(AnyFrameModule(JSON.Parser),AnyFrameModule(Polynomials),) )
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+
+
+<div id="outline-container-orgaeaf7d1" class="outline-3">
+<h3 id="orgaeaf7d1"><span class="section-number-3">4.3.</span> <span class="done DONE">DONE</span> Module definition, import, and recurrent exports</h3>
+<div class="outline-text-3" id="text-4-3">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">module</span> DOT_StatsHelp
+</pre>
+</div>
+
+<p>
+Imports
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">using</span> DOT_NiceMath            <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">`&#8901;` = `*`  etc</span>
+<span style="color: #a020f0;">using</span> DOT_NiceMath.Numbers64  <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">&#8477;, &#8484;, &#8474;</span>
+
+<span style="color: #a020f0;">using</span> LinearAlgebra: norm2, norm1, normInf as norm&#8734;, norm_sqr as norm2&#178;,
+                     axpy!, axpby!
+</pre>
+</div>
+
+<p>
+Exports of functions with several methods
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">export</span> start_run!
+<span style="color: #a020f0;">export</span> record_step!
+<span style="color: #a020f0;">export</span> finalize_run!
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org016ecdb" class="outline-3">
+<h3 id="org016ecdb"><span class="section-number-3">4.4.</span> <span class="done DONE">DONE</span> Statistics of mean-estimating processes</h3>
+<div class="outline-text-3" id="text-4-4">
+</div>
+<div id="outline-container-orgfa839fe" class="outline-4">
+<h4 id="orgfa839fe"><span class="section-number-4">4.4.1.</span> The mean process type: <code>MeanProc{𝐑,V}</code></h4>
+<div class="outline-text-4" id="text-4-4-1">
+<p>
+The following basic type is made available to the user:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">export</span> MeanProc
+</pre>
+</div>
+
+<p>
+An object of this type collects information about the stochastic convergence of the empirical mean of random
+<code>Array</code> objects to a known(!) limit.
+</p>
+
+<p>
+Let's define it.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">struct</span> <span style="color: #228b22;">MeanProc</span>{&#119825; &lt;: <span style="color: #228b22;">Real</span>, V}              <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">`V` is an integer: the valency of the tensor</span>
+</pre>
+</div>
+
+<p>
+<span class="underline">Parameters:</span>
+</p>
+
+<ul class="org-ul">
+<li><code>𝐑</code> is the real-number type used for computations.  The user-facing <a href="#org0fcded5">constructor</a> defaults this to
+<code>NiceMath</code>'s <code>ℝ</code>, which, here is <code>Float64</code>.  If you are worried that cancellations affect the accuracy of
+the overall outcome, use something the package <code>DoubleFloats</code>, or even, if you're patient, <code>BigFloats</code>.</li>
+
+<li><code>V</code> is a non-negative integer that gives the valency of the tensors that are being averaged, i.e., <code>V</code> \(=1\)
+for a vectors, <code>V</code> \(=2\) for matrices, etc.  With <code>V</code> \(=0\) you get scalars.<sup><a id="fnr.3" class="footref" href="#fn.3" role="doc-backlink">3</a></sup></li>
+</ul>
+</div>
+
+<ol class="org-ol">
+<li><a id="org68b4790"></a>Fields and inner constructor<br />
+<div class="outline-text-5" id="text-4-4-1-1">
+<div class="org-src-container">
+<pre class="src src-julia">    <span style="color: #006400; background-color: #ffffe0;">#            </span><span style="color: #006400; background-color: #ffffe0;">Input for run</span>
+    curr_true_&#956;  ::<span style="color: #228b22;">Array</span>{&#8477;, V} <span style="color: #006400; background-color: #ffffe0;">#                      </span><span style="color: #006400; background-color: #ffffe0;">size: dimension</span>
+
+    <span style="color: #006400; background-color: #ffffe0;">#            </span><span style="color: #006400; background-color: #ffffe0;">Output of run</span>
+    curr_emp_&#956;   ::<span style="color: #228b22;">Array</span>{&#119825;, V} <span style="color: #006400; background-color: #ffffe0;">#                      </span><span style="color: #006400; background-color: #ffffe0;">size: dimension</span>
+
+    <span style="color: #006400; background-color: #ffffe0;">#            </span><span style="color: #006400; background-color: #ffffe0;">Overall output</span>
+    err2&#178;        ::<span style="color: #228b22;">Array</span>{&#8477;,2}  <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">2-norm of tensor; \</span>
+    err1         ::<span style="color: #228b22;">Array</span>{&#8477;,2}  <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">1-norm  ~          | size: `steps` &#10005; `runs`</span>
+    err&#8734;         ::<span style="color: #228b22;">Array</span>{&#8477;,2}  <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">&#8734;-norm  ~         /</span>
+    emp_var      ::<span style="color: #228b22;">Vector</span>{&#119825;}   <span style="color: #006400; background-color: #ffffe0;">#                      </span><span style="color: #006400; background-color: #ffffe0;">size: `runs`</span>
+
+    <span style="color: #006400; background-color: #ffffe0;">#             </span><span style="color: #006400; background-color: #ffffe0;">Work space</span>
+    &#9251;ws          ::<span style="color: #228b22;">Array</span>{&#119825;,V}  <span style="color: #006400; background-color: #ffffe0;">#                      </span><span style="color: #006400; background-color: #ffffe0;">size: dimension</span>
+
+    <span style="color: #006400; background-color: #ffffe0;">#             </span><span style="color: #006400; background-color: #ffffe0;">Counters</span>
+    &#119851;            ::<span style="color: #228b22;">Ref</span>{Int}    <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">index of current run (i.e., 0 &#10926; before first run)</span>
+    &#119852;            ::<span style="color: #228b22;">Ref</span>{Int}    <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">index of current step (i.e., 0 &#10926; before first step)</span>
+
+    <span style="color: #006400; background-color: #ffffe0;">#</span>
+    <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">Convenience constructor -- not for the user</span>
+    <span style="color: #006400; background-color: #ffffe0;">#</span>
+    <span style="color: #a020f0;">function</span>
+    MeanProc{&#119825;,V}(;
+               curr_true_&#956; ::<span style="color: #228b22;">Array</span>{&#8477;,V}, curr_emp_&#956; ::<span style="color: #228b22;">Array</span>{&#119825;,V}, emp_var ::<span style="color: #228b22;">Vector</span>{&#119825;},
+               err2&#178; ::<span style="color: #228b22;">Array</span>{&#8477;,2}, err1 ::<span style="color: #228b22;">Array</span>{&#8477;,2}, err&#8734; ::<span style="color: #228b22;">Array</span>{&#8477;,2}, &#9251;ws ::<span style="color: #228b22;">Array</span>{&#119825;,V}) <span style="color: #a020f0;">where</span>{&#119825;,V}
+        new(curr_true_&#956;, curr_emp_&#956;, err2&#178;, err1, err&#8734;, emp_var, &#9251;ws,
+            0,0)
+    <span style="color: #a020f0;">end</span>
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-orgb74e358" class="outline-4">
+<h4 id="orgb74e358"><span class="section-number-4">4.4.2.</span> Usage</h4>
+<div class="outline-text-4" id="text-4-4-2">
+<p>
+The <a href="#org72c7e82">high-level usage instructios</a> are above.  Note that the empirical mean of a run is not stored, it's
+overwritten by the next run.
+</p>
+
+<p>
+There are inquiry functions for retrieving the stats: In #4, user can retrieve:
+</p>
+
+<ul class="org-ul">
+<li>The square error over the steps of the run, e.g.,           <code>err2²(  mp ; run=9, step=27)</code></li>
+<li>The 1-norm of the error over the steps, e.g.,               <code>err1(   mp ; run=9, step=27)</code></li>
+<li>The infty-norm of the error over the steps, e.g.,           <code>err∞(   mp ; run=9, step=27)</code></li>
+<li>The empirical variance of the estimator for the run,, e.g., <code>emp_var(mp ; run=9, step=27)</code></li>
+
+<li>For step 2.4, there's also the function:                    <code>curr_emp_μ(mp)</code></li>
+</ul>
+
+<p>
+The inquiry functions
+</p>
+<div class="org-src-container">
+<pre class="src src-julia">
+<span style="color: #a020f0;">export</span> err2&#178;, err1, err&#8734;, emp_var, curr_emp_&#956;
+
+</pre>
+</div>
+<p>
+are inconvenient for plotting and whatnot, where direct access to the matrices is better.  The implementations
+of the inquiry functions make clear how that works:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #0000ff;">err2&#178;</span>(  s ::<span style="color: #228b22;">MeanProc</span>{&#119825;,V}; run ::<span style="color: #228b22;">Int</span>, step ::<span style="color: #228b22;">Int</span>) <span style="color: #a020f0;">where</span>{&#119825;,V} = ( <span style="color: #483d8b;">@assert</span> (1,1)&#8804;(run,step)&#8804;(s.&#119851;[],s.&#119852;[]); s.err2&#178;[step,run] )
+<span style="color: #0000ff;">err1</span>(   s ::<span style="color: #228b22;">MeanProc</span>{&#119825;,V}; run ::<span style="color: #228b22;">Int</span>, step ::<span style="color: #228b22;">Int</span>) <span style="color: #a020f0;">where</span>{&#119825;,V} = ( <span style="color: #483d8b;">@assert</span> (1,1)&#8804;(run,step)&#8804;(s.&#119851;[],s.&#119852;[]); s.err1[ step,run] )
+<span style="color: #0000ff;">err&#8734;</span>(   s ::<span style="color: #228b22;">MeanProc</span>{&#119825;,V}; run ::<span style="color: #228b22;">Int</span>, step ::<span style="color: #228b22;">Int</span>) <span style="color: #a020f0;">where</span>{&#119825;,V} = ( <span style="color: #483d8b;">@assert</span> (1,1)&#8804;(run,step)&#8804;(s.&#119851;[],s.&#119852;[]); s.err&#8734;[ step,run] )
+<span style="color: #0000ff;">emp_var</span>(s ::<span style="color: #228b22;">MeanProc</span>{&#119825;,V}; run ::<span style="color: #228b22;">Int</span>)             <span style="color: #a020f0;">where</span>{&#119825;,V} = ( <span style="color: #483d8b;">@assert</span> 1    &#8804;run &#8804; s.&#119851;[]             ; s.emp_var[run]    )
+
+<span style="color: #0000ff;">curr_emp_&#956;</span>(s ::<span style="color: #228b22;">MeanProc</span>{&#119825;,V})                     <span style="color: #a020f0;">where</span>{&#119825;,V} = ( <span style="color: #483d8b;">@assert</span> 1 &#8804; s.&#119851;[]                     ; s.curr_emp_&#956;      )
+</pre>
+</div>
+
+<div class="org-center">
+<p>
+<b>Warning!</b>
+</p>
+
+<p>
+Don't forget that the empirical variance is only available after calling <a href="#orgbf1c060"><code>finalize_run!()</code></a>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc7ff6f9" class="outline-4">
+<h4 id="orgc7ff6f9"><span class="section-number-4">4.4.3.</span> User-facing constructor for <code>MeanProc</code>  <a id="org0fcded5"></a></h4>
+<div class="outline-text-4" id="text-4-4-3">
+<p>
+The constructor takes the following arguments.
+</p>
+
+<ul class="org-ul">
+<li>The dimension of the underlying tensors, e.g., <code>()</code> for valency-0 tensors;</li>
+<li>The number of steps in each run;</li>
+<li>The number of runs.</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">MeanProc</span>(dimension ::<span style="color: #228b22;">NTuple</span>{V,Int}
+                  ;
+                  steps :: <span style="color: #228b22;">Int</span>,
+                  runs  :: <span style="color: #228b22;">Int</span>,
+                  &#119825;     :: <span style="color: #228b22;">Type</span>{&lt;:<span style="color: #228b22;">Real</span>} = &#8477;)  ::<span style="color: #228b22;">MeanProc</span>     <span style="color: #a020f0;">where</span>{V}
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-julia">    curr_true_&#956;   = Array{&#8477;,V}(<span style="color: #008b8b;">undef</span>, dimension )
+    curr_emp_&#956;    = Array{&#119825;,V}(<span style="color: #008b8b;">undef</span>, dimension )   ; curr_emp_&#956;   .= &#119825;(0)
+    &#9251;ws           = Array{&#119825;,V}(<span style="color: #008b8b;">undef</span>, dimension )
+
+    err2&#178;         = Array{&#8477;,2}(<span style="color: #008b8b;">undef</span>, steps,runs)
+    err1          = Array{&#8477;,2}(<span style="color: #008b8b;">undef</span>, steps,runs)
+    err&#8734;          = Array{&#8477;,2}(<span style="color: #008b8b;">undef</span>, steps,runs)
+    emp_var       = Array{&#119825;,1}(<span style="color: #008b8b;">undef</span>, runs)         ; emp_var .= &#119825;(0)
+
+    s = MeanProc{&#119825;,V}( ; curr_true_&#956;, curr_emp_&#956;,
+                         err2&#178;, err1, err&#8734;, emp_var,  &#9251;ws)
+    &#9251;integrity_check(s)
+    <span style="color: #a020f0;">return</span> s
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc85cc89" class="outline-4">
+<h4 id="orgc85cc89"><span class="section-number-4">4.4.4.</span> Helper functions and integrity check</h4>
+<div class="outline-text-4" id="text-4-4-4">
+<p>
+The following helper functions are not exported, but can be used by the desperate user.
+</p>
+
+<p>
+<span class="underline">Info about sizes of arrays.</span>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #0000ff;">valency</span>(        s ::<span style="color: #228b22;">MeanProc</span>{&#119825;,V} ) <span style="color: #a020f0;">where</span>{&#119825;,V}    = V
+<span style="color: #0000ff;">dimension</span>(      s ::<span style="color: #228b22;">MeanProc</span>{&#119825;,V} ) <span style="color: #a020f0;">where</span>{&#119825;,V}    = size( s.curr_true_&#956; )
+<span style="color: #0000ff;">numo_stepsruns</span>( s ::<span style="color: #228b22;">MeanProc</span>{&#119825;,V} ) <span style="color: #a020f0;">where</span>{&#119825;,V}    = size( s.err2&#178;       )
+<span style="color: #0000ff;">numo_steps</span>(     s ::<span style="color: #228b22;">MeanProc</span>{&#119825;,V} ) <span style="color: #a020f0;">where</span>{&#119825;,V}    = numo_stepsruns(s) |&gt; first
+<span style="color: #0000ff;">numo_runs</span>(      s ::<span style="color: #228b22;">MeanProc</span>{&#119825;,V} ) <span style="color: #a020f0;">where</span>{&#119825;,V}    = numo_stepsruns(s) |&gt; last
+</pre>
+</div>
+
+<p>
+<span class="underline">Data integrity check</span> that throws an exception if there's a problem (otherwise returns nothing).
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">&#9251;integrity_check</span>(s ::<span style="color: #228b22;">MeanProc</span>{&#119825;,V}) ::<span style="color: #228b22;">Nothing</span>  <span style="color: #a020f0;">where</span>{&#119825;,V}
+</pre>
+</div>
+</div>
+
+<ol class="org-ol">
+<li><a id="orgad512ae"></a>Implementation<br />
+<div class="outline-text-5" id="text-4-4-4-1">
+<div class="org-src-container">
+<pre class="src src-julia">    <span style="color: #483d8b;">@assert</span> size( s.curr_true_&#956; ) == dimension(s) == size( s.curr_emp_&#956;  )
+
+    <span style="color: #a020f0;">let</span> steps  = numo_steps(s),
+        runs   = numo_runs(s),
+        dim    = dimension(s)
+
+        <span style="color: #483d8b;">@assert</span> steps &gt; 1
+        <span style="color: #483d8b;">@assert</span> runs  &#8805; 1
+
+        <span style="color: #483d8b;">@assert</span> 0 &#8804; s.&#119851;[] &#8804; runs
+        <span style="color: #483d8b;">@assert</span> 0 &#8804; s.&#119852;[] &#8804; steps
+        <span style="color: #483d8b;">@assert</span> s.&#119851;[] &#8805; 1 || s.&#119852;[] == 0
+
+        <span style="color: #483d8b;">@assert</span> size(     s.err2&#178;       ) == (steps,runs)
+        <span style="color: #483d8b;">@assert</span> size(     s.err1        ) == (steps,runs)
+        <span style="color: #483d8b;">@assert</span> size(     s.err&#8734;        ) == (steps,runs)
+        <span style="color: #483d8b;">@assert</span> size(     s.emp_var     ) == (runs,)
+
+        <span style="color: #483d8b;">@assert</span> size(     s.&#9251;ws         ) == dim
+    <span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ let</span>
+    <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">nothing</span>
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-orga05150c" class="outline-4">
+<h4 id="orga05150c"><span class="section-number-4">4.4.5.</span> Starting a new run: <code>start_run!()</code> <a id="orgf58e304"></a></h4>
+<div class="outline-text-4" id="text-4-4-5">
+<p>
+When a new run starts, the true mean has to be recorded, the indices 𝐫 and 𝐬 for run and step, resp., have to
+be set up, and the empirical data has to be initialized.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">start_run!</span>(s      :: <span style="color: #228b22;">MeanProc</span>{&#119825;,V}
+                    ;
+                    true_&#956; :: <span style="color: #228b22;">Array</span>{&#8477;,V} ) ::<span style="color: #228b22;">Nothing</span>  <span style="color: #a020f0;">where</span>{&#119825;,V}
+</pre>
+</div>
+</div>
+
+<ol class="org-ol">
+<li><a id="orgc2f52a9"></a>Working with valency-0 tensors &#x2013; aka 0-dimensional arrays<br />
+<div class="outline-text-5" id="text-4-4-5-1">
+<p>
+The Julia function <code>fill()</code> can create a valency-0 tensor (0-dimensional array) from a scalar:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia">a = fill( 3.141 )
+</pre>
+</div>
+
+<pre class="example">
+0-dimensional Array{Float64, 0}:
+3.141
+</pre>
+
+
+<div class="org-src-container">
+<pre class="src src-julia">typeof( a )
+</pre>
+</div>
+
+<pre class="example">
+Array{Float64, 0}
+</pre>
+
+
+<div class="org-src-container">
+<pre class="src src-julia">a .- &#960;
+</pre>
+</div>
+
+<pre class="example">
+-0.0005926535897931018
+</pre>
+
+
+<div class="org-src-container">
+<pre class="src src-julia">a .-= &#960;
+</pre>
+</div>
+
+<pre class="example">
+0-dimensional Array{Float64, 0}:
+-0.0005926535897931018
+</pre>
+</div>
+</li>
+
+<li><a id="orge440ba9"></a>Implementation of <code>start_run!()</code><br />
+<div class="outline-text-5" id="text-4-4-5-2">
+<div class="org-src-container">
+<pre class="src src-julia">    &#9251;integrity_check(s)
+
+
+    <span style="color: #a020f0;">if</span>    s.&#119851;[] &gt; 0         <span style="color: #483d8b;">@assert</span> s.&#119852;[] == numo_steps(s)
+    <span style="color: #a020f0;">else</span>                    <span style="color: #483d8b;">@assert</span> s.&#119852;[] == 0               <span style="color: #a020f0;">end</span>
+
+    s.&#119851;[] += 1            ; <span style="color: #483d8b;">@assert</span> s.&#119851;[] &#8804; numo_runs(s)
+    s.&#119852;[]  = 0
+
+    <span style="color: #483d8b;">@assert</span> size(true_&#956;) == dimension(s)
+
+    <span style="color: #a020f0;">let</span> &#119851; = s.&#119851;[],
+        &#119852; = s.&#119852;[]
+
+        s.curr_true_&#956; .= true_&#956;
+        s.curr_emp_&#956;  .= &#119825;(0)
+        s.emp_var[&#119851;]   = &#119825;(0)
+
+    <span style="color: #a020f0;">end</span>
+    <span style="color: #008b8b;">nothing</span>;
+<span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ start_run!()</span>
+</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-org1b06254" class="outline-4">
+<h4 id="org1b06254"><span class="section-number-4">4.4.6.</span> Adding data of a step: <code>record_step!()</code> <a id="org9d54512"></a></h4>
+<div class="outline-text-4" id="text-4-4-6">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">record_step!</span>(s ::<span style="color: #228b22;">MeanProc</span>{&#119825;,V}
+                      ;
+                      &#119864; ::<span style="color: #228b22;">Array</span>{&#8477;,V} ) ::<span style="color: #228b22;">Nothing</span>  <span style="color: #a020f0;">where</span>{&#119825;,V}
+</pre>
+</div>
+</div>
+
+<ol class="org-ol">
+<li><a id="org754e022"></a>Implementation<br />
+<div class="outline-text-5" id="text-4-4-6-1">
+<div class="org-src-container">
+<pre class="src src-julia">&#9251;integrity_check(s)
+
+(;curr_true_&#956;, curr_emp_&#956;, err2&#178;, err1, err&#8734;, emp_var, &#9251;ws) = s
+
+
+s.&#119852;[] += 1            ; <span style="color: #483d8b;">@assert</span> s.&#119852;[] &#8804; numo_steps(s)
+
+<span style="color: #a020f0;">let</span> &#119851;     = s.&#119851;[],
+    &#119852;     = s.&#119852;[],
+    steps = numo_steps(s)
+
+    <span style="color: #006400; background-color: #ffffe0;">#</span>
+    <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">Note order between emp var and emp &#956;</span>
+    <span style="color: #006400; background-color: #ffffe0;">#</span>
+    <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">emp_var[&#119851;]   = (&#119852;-1) &#8901; emp_var[&#119851;]  / &#119852;    +   (&#119852;-1) &#8901; norm2&#178;( curr_emp_&#956; - &#119864; ) / &#119852;&#178;</span>
+    <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">curr_emp_&#956;  .= (&#119852;-1) &#8901; curr_emp_&#956; / &#119852;   +   &#119864; / &#119852;</span>
+
+    &#9251;ws         .= curr_emp_&#956;
+    axpby!(-1/&#119852;, &#119864;,  1/&#119852;, &#9251;ws)
+    emp_var[&#119851;]   = (&#119852;-1) &#8901; (   emp_var[&#119851;]  / &#119852;    +   norm2&#178;( &#9251;ws )   )
+                  <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">will be corrected for bias in finalize_run!()</span>
+
+    axpby!( 1/&#119852;, &#119864;, (&#119852;-1)/&#119852;, curr_emp_&#956;)
+
+    <span style="color: #006400; background-color: #ffffe0;">#</span>
+    <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">Errors</span>
+    <span style="color: #006400; background-color: #ffffe0;">#</span>
+    &#9251;ws         .= curr_emp_&#956; - curr_true_&#956;
+
+    err2&#178;[&#119852;,&#119851;]   = norm2&#178;(&#9251;ws)
+    err1[ &#119852;,&#119851;]   = norm1(&#9251;ws)
+    err&#8734;[ &#119852;,&#119851;]   = norm&#8734;(&#9251;ws)
+<span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ let</span>
+<span style="color: #008b8b;">nothing</span>;
+<span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ record_step!()</span>
+</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-orgc73b735" class="outline-4">
+<h4 id="orgc73b735"><span class="section-number-4">4.4.7.</span> Finalizing a run: <code>finalize_run!()</code> <a id="orgbf1c060"></a></h4>
+<div class="outline-text-4" id="text-4-4-7">
+<p>
+The <code>finalize_run!()</code> function must be called after all data points have been added.  It removes the bias
+from the empirical variance.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">finalize_run!</span>(s ::<span style="color: #228b22;">MeanProc</span>{&#119825;,V}) ::<span style="color: #228b22;">Nothing</span>                  <span style="color: #a020f0;">where</span>{&#119825;,V}
+</pre>
+</div>
+</div>
+
+<ol class="org-ol">
+<li><a id="org70d9b9a"></a>Implementation<br />
+<div class="outline-text-5" id="text-4-4-7-1">
+<div class="org-src-container">
+<pre class="src src-julia">    &#9251;integrity_check(s)
+
+    <span style="color: #483d8b;">@assert</span> s.&#119852;[] == numo_steps(s)
+
+    <span style="color: #006400; background-color: #ffffe0;">#</span>
+    <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">Un-bias empirical variance:</span>
+    <span style="color: #006400; background-color: #ffffe0;">#</span>
+    <span style="color: #a020f0;">let</span> &#119851;     = s.&#119851;[],
+        &#119852;     = s.&#119852;[]
+
+        s.emp_var[ &#119851; ] *= &#119852; / &#119825;(&#119852;-1)
+    <span style="color: #a020f0;">end</span>
+    <span style="color: #008b8b;">nothing</span>;
+<span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ finalize_run!()</span>
+</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-org470333f" class="outline-4">
+<h4 id="org470333f"><span class="section-number-4">4.4.8.</span> Tests for the mean process</h4>
+<div class="outline-text-4" id="text-4-4-8">
+</div>
+<ol class="org-ol">
+<li><a id="orgc186c95"></a>Set up testset<br />
+<div class="outline-text-5" id="text-4-4-8-1">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #483d8b;">@testset</span> verbose=<span style="color: #008b8b;">true</span> <span style="color: #8b2252;">"DOT_StatsHelp.jl testing: Test MeanProc{}"</span> <span style="color: #a020f0;">begin</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org93976cb"></a>Test with valency 0<br />
+<div class="outline-text-5" id="text-4-4-8-2">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">test__meanestim_0</span>(;runs=1:10,steps=2:4:20)
+    <span style="color: #a020f0;">for</span> (curr_runs,curr_steps) <span style="color: #a020f0;">in</span> Iterators.product(runs,steps)
+
+        data = 100*randn(curr_steps,curr_runs)
+
+        mp = MeanProc( () ; steps=curr_steps, runs=curr_runs, &#119825;=Double64)
+
+        <span style="color: #a020f0;">for</span> run <span style="color: #a020f0;">=</span> 1:curr_runs
+
+            start_run!(mp ; true_&#956; = fill(0.0) )
+
+            <span style="color: #a020f0;">for</span> step <span style="color: #a020f0;">=</span> 1:curr_steps
+                record_step!(mp ; &#119864; = fill(data[step,run]) )
+                <span style="color: #483d8b;">@test</span> curr_emp_&#956;(mp)[]  &#8776; mean( <span style="color: #483d8b;">@view</span> data[1:step,run] )
+            <span style="color: #a020f0;">end</span>
+            finalize_run!(mp)
+
+            <span style="color: #483d8b;">@test</span> emp_var(mp;run)         &#8776; var(  <span style="color: #483d8b;">@view</span> data[:,run] )
+
+            <span style="color: #a020f0;">for</span> step<span style="color: #a020f0;">=</span>1:curr_steps
+                <span style="color: #483d8b;">@test</span>  err2&#178;(mp;run,step) &#8776; mean( data[1:step,run] ) |&gt; abs&#178;
+            <span style="color: #a020f0;">end</span>
+            <span style="color: #483d8b;">@test</span> all(
+                err1(mp;run,step)         &#8776; mean( data[1:step,run] ) |&gt; abs
+                <span style="color: #a020f0;">for</span> step<span style="color: #a020f0;">=</span>1:curr_steps
+            )
+            <span style="color: #483d8b;">@test</span> all(
+                err&#8734;(mp;run,step)         &#8776; mean( data[1:step,run] ) |&gt; abs
+                <span style="color: #a020f0;">for</span> step<span style="color: #a020f0;">=</span>1:curr_steps
+            )
+
+        <span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ for run</span>
+
+    <span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ for curr_...</span>
+<span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ test__meanestim_0()</span>
+</pre>
+</div>
+
+<p>
+Run it:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #483d8b;">@testset</span> <span style="color: #8b2252;">"Valency-0 tests"</span> <span style="color: #a020f0;">begin</span>
+    test__meanestim_0()
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="orgb5d524b"></a>Test with valency 1<br />
+<div class="outline-text-5" id="text-4-4-8-3">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">test__meanestim_1</span>(;runs=1:3:9,steps=2:5:12)
+    <span style="color: #a020f0;">for</span> (curr_runs,curr_steps) <span style="color: #a020f0;">in</span> Iterators.product(runs,steps)
+
+        dim  = 31
+
+        data = [ randn(dim) <span style="color: #a020f0;">for</span> s<span style="color: #a020f0;">=</span>1:curr_steps, r=1:curr_runs ]
+
+        mp = MeanProc( (dim,) ; steps=curr_steps, runs=curr_runs, &#119825;=Double64)
+
+        <span style="color: #a020f0;">for</span> run <span style="color: #a020f0;">=</span> 1:curr_runs
+
+            start_run!(mp ; true_&#956; = zeros(31) )
+
+            <span style="color: #a020f0;">for</span> step <span style="color: #a020f0;">=</span> 1:curr_steps
+                record_step!(mp ; &#119864; = data[step,run] )
+                <span style="color: #483d8b;">@test</span> curr_emp_&#956;(mp)  &#8776; mean( <span style="color: #483d8b;">@view</span> data[1:step,run] )
+            <span style="color: #a020f0;">end</span>
+            finalize_run!(mp)
+
+            <span style="color: #483d8b;">@test</span> emp_var(mp;run)         &#8776; var( <span style="color: #483d8b;">@view</span> data[:,run] ) |&gt; norm1 <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">Julia `var` returns array</span>
+
+            <span style="color: #a020f0;">for</span> step<span style="color: #a020f0;">=</span>1:curr_steps
+                <span style="color: #483d8b;">@test</span>  err2&#178;(mp;run,step) &#8776; mean( data[1:step,run] ) |&gt; norm2&#178;
+            <span style="color: #a020f0;">end</span>
+            <span style="color: #483d8b;">@test</span> all(
+                err1(mp;run,step)         &#8776; mean( data[1:step,run] ) |&gt; norm1
+                <span style="color: #a020f0;">for</span> step<span style="color: #a020f0;">=</span>1:curr_steps
+            )
+            <span style="color: #483d8b;">@test</span> all(
+                err&#8734;(mp;run,step)         &#8776; mean( data[1:step,run] ) |&gt; norm&#8734;
+                <span style="color: #a020f0;">for</span> step<span style="color: #a020f0;">=</span>1:curr_steps
+            )
+
+        <span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ for run</span>
+
+    <span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ for curr_...</span>
+<span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ test__meanestim_1()</span>
+</pre>
+</div>
+
+<p>
+Run it:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #483d8b;">@testset</span> <span style="color: #8b2252;">"Valency-1 tests"</span> <span style="color: #a020f0;">begin</span>
+    test__meanestim_1()
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="orgdf22983"></a>Test with valency 2<br />
+<div class="outline-text-5" id="text-4-4-8-4">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">test__meanestim_2</span>(;runs=1:3:9,steps=2:5:12)
+    <span style="color: #a020f0;">for</span> (curr_runs,curr_steps) <span style="color: #a020f0;">in</span> Iterators.product(runs,steps)
+
+        sz  = (7,13)
+
+        data = [ randn(sz) <span style="color: #a020f0;">for</span> s<span style="color: #a020f0;">=</span>1:curr_steps, r=1:curr_runs ]
+
+        mp = MeanProc( (sz) ; steps=curr_steps, runs=curr_runs, &#119825;=Double64)
+
+        <span style="color: #a020f0;">for</span> run <span style="color: #a020f0;">=</span> 1:curr_runs
+
+            start_run!(mp ; true_&#956; = zeros(sz) )
+
+            <span style="color: #a020f0;">for</span> step <span style="color: #a020f0;">=</span> 1:curr_steps
+                record_step!(mp ; &#119864; = data[step,run] )
+                <span style="color: #483d8b;">@test</span> curr_emp_&#956;(mp)  &#8776; mean( <span style="color: #483d8b;">@view</span> data[1:step,run] )
+            <span style="color: #a020f0;">end</span>
+            finalize_run!(mp)
+
+            <span style="color: #483d8b;">@test</span> emp_var(mp;run)         &#8776; var( <span style="color: #483d8b;">@view</span> data[:,run] ) |&gt; norm1 <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">Julia `var` returns array</span>
+
+            <span style="color: #a020f0;">for</span> step<span style="color: #a020f0;">=</span>1:curr_steps
+                <span style="color: #483d8b;">@test</span>  err2&#178;(mp;run,step) &#8776; mean( data[1:step,run] ) |&gt; norm2&#178;
+            <span style="color: #a020f0;">end</span>
+            <span style="color: #483d8b;">@test</span> all(
+                err1(mp;run,step)         &#8776; mean( data[1:step,run] ) |&gt; norm1
+                <span style="color: #a020f0;">for</span> step<span style="color: #a020f0;">=</span>1:curr_steps
+            )
+            <span style="color: #483d8b;">@test</span> all(
+                err&#8734;(mp;run,step)         &#8776; mean( data[1:step,run] ) |&gt; norm&#8734;
+                <span style="color: #a020f0;">for</span> step<span style="color: #a020f0;">=</span>1:curr_steps
+            )
+
+        <span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ for run</span>
+
+    <span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ for curr_...</span>
+<span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ test__meanestim_1()</span>
+</pre>
+</div>
+
+<p>
+Run it:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #483d8b;">@testset</span> <span style="color: #8b2252;">"Valency-2 tests"</span> <span style="color: #a020f0;">begin</span>
+    test__meanestim_2()
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="orge9f92ba"></a>End of testset<br />
+<div class="outline-text-5" id="text-4-4-8-5">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ testset</span>
+</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+
+
+<div id="outline-container-orgc630724" class="outline-3">
+<h3 id="orgc630724"><span class="section-number-3">4.5.</span> <span class="todo IN_PRGR">IN-PRGR</span> Statistics of max-approximating processes <code>[0/9]</code></h3>
+<div class="outline-text-3" id="text-4-5">
+</div>
+<div id="outline-container-org52e80b5" class="outline-4">
+<h4 id="org52e80b5"><span class="section-number-4">4.5.1.</span> <span class="todo TSTNG">TSTNG</span> Helper-functions for percentiles</h4>
+<div class="outline-text-4" id="text-4-5-1">
+</div>
+<ol class="org-ol">
+<li><a id="orgc2d7780"></a>Description<br />
+<div class="outline-text-5" id="text-4-5-1-1">
+<p>
+The <code>␣xtiles_count!()</code> counts percentiles: A call to the function <a href="#org8cb4dc6"><code>␣xtiles_count!()</code></a> then registers a data
+point by increasing the frequency for the interval \(\left]\pi_{\ell-1},\pi_\ell\right]\) out of
+\(\ell=1,\dots,L\) to which it belongs (where \(\pi_0 := 0\)).
+</p>
+
+<p>
+We require that 1 is in the set of percentiles (but 0 isn't).
+</p>
+
+<p>
+This is how to use it.
+</p>
+<ul class="org-ul">
+<li>make a percentiles tuple using the function <a href="#orgad649fd"><code>␣xtiles_make()</code></a></li>
+<li>initialize the frequency vector with zeros</li>
+<li>repeatedly call  <a href="#org8cb4dc6"><code>␣xtiles_count!()</code></a>, for every data point &#x2013; which must be in [0,1]</li>
+<li>the frequency vector will contain the percentiles.</li>
+</ul>
+
+<p>
+Here's a pseudo-example:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia">&#120645;     = &#9251;xtiles_make( [0.5, 0.8,0.9,0.99, 0.999, 1.0])  <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">1 &#8712; &#120645;  is required!!</span>
+freqs = zeros(&#8477;, length(&#120645;))
+<span style="color: #a020f0;">for</span> j <span style="color: #a020f0;">=</span> 1:runs
+    p&#11388; = gimme_data_point(j)
+    &#9251;xtiles_count!(freqs, &#120645; ; p&#11388; , &#916;=1/runs)
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+
+
+<p>
+<code>freq[ℓ]</code> is the frequency of the data points in the interval
+</p>
+<div class="org-center">
+<p>
+\[
+                        \left] \pi_{\ell-1} , \pi_{\ell} \right]
+                        \]
+</p>
+</div>
+<p>
+but with \(\pi_{0} := 0\).
+</p>
+
+<p>
+We require that 1 is in the set of percentiles (but 0 isn't).
+</p>
+</div>
+</li>
+
+<li><a id="orge17c500"></a>Create percentiles tuple list<br />
+<div class="outline-text-5" id="text-4-5-1-2">
+<p>
+<i>We require that 1 is in the set of percentiles!</i>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia" id="orgad649fd"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">&#9251;xtiles_make</span>(_&#120645;) ::<span style="color: #228b22;">Tuple</span>
+    &#120645; = collect(_&#120645;)
+    sort!(&#120645;)
+
+    <span style="color: #483d8b;">@assert</span> allunique( &#120645; )
+    <span style="color: #483d8b;">@assert</span> 0.0 &lt; &#120645;[1] &#8804; &#120645;[<span style="color: #a020f0;">end</span>] == 1.0
+
+    L = length(&#120645;) <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">just saying...</span>
+    <span style="color: #a020f0;">return</span> (&#120645;...,)
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="orgd49c9d8"></a>Store a percentage<br />
+<div class="outline-text-5" id="text-4-5-1-3">
+<div class="org-src-container">
+<pre class="src src-julia" id="org8cb4dc6"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">&#9251;xtiles_count!</span>(freqs ::<span style="color: #228b22;">AbstractArray</span>{&#8477;},
+                        &#120645;     ::<span style="color: #228b22;">NTuple</span>{L,&#8477;}
+                        ;
+                        p     ::<span style="color: #228b22;">&#8477;</span>,
+                        &#916;     ::<span style="color: #228b22;">&#8477;</span>                 )::<span style="color: #228b22;">NamedTuple</span>    <span style="color: #a020f0;">where</span>{L}
+    <span style="color: #483d8b;">@assert</span> 0-1e-50 &#8804; p
+    <span style="color: #483d8b;">@assert</span>           p &#8804; 1+1e-30
+    <span style="color: #483d8b;">@assert</span> L == length(freqs)
+
+    &#8467; = 1
+    <span style="color: #a020f0;">while</span> &#8467; &#8804; L   &amp;&amp;   &#120645;[&#8467;] &lt; p
+        &#8467; += 1
+    <span style="color: #a020f0;">end</span>
+    &#8467; = min(&#8467;,L)                  <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">in case of rounding errors near 1.0</span>
+
+    freqs[ &#8467; ] += &#916;
+
+    <span style="color: #a020f0;">return</span> ( &#8467;=&#8467;,  lo=get(&#120645;,&#8467;-1,0.0), hi=&#120645;[&#8467;] )
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org1716d78"></a>Let's test it!<br />
+<ol class="org-ol">
+<li><a id="orge2ac871"></a>Main testing function<br />
+<div class="outline-text-6" id="text-4-5-1-4-1">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">test__xtiles</span>()
+
+    <span style="color: #a020f0;">function</span> <span style="color: #0000ff;">some_tests__interior</span>(_&#120645;)
+        L     = length(_&#120645;)
+        m     = 16
+        N     = m&#8901;L
+        &#120645;     = DOT_StatsHelp.&#9251;xtiles_make(_&#120645;)
+        freqs = zeros(&#8477;,L)
+
+        <span style="color: #a020f0;">for</span> &#8467; <span style="color: #a020f0;">=</span> 1 : L
+            lo = get(&#120645;,&#8467;-1,   0.0)
+            hi =     &#120645;[&#8467;  ]
+            <span style="color: #483d8b;">@test</span> lo &lt; hi || (lo==hi &amp;&amp; &#8467;==L)
+            <span style="color: #a020f0;">for</span> j <span style="color: #a020f0;">=</span> 1:m
+                p =  lo + (hi-lo)&#8901;rand()
+                iv = DOT_StatsHelp.&#9251;xtiles_count!(freqs,&#120645; ; p, &#916;=1/N)
+                <span style="color: #483d8b;">@test</span> iv.lo &lt; p &#8804; iv.hi
+            <span style="color: #a020f0;">end</span>
+        <span style="color: #a020f0;">end</span>
+
+        <span style="color: #483d8b;">@test</span> sum(freqs) &#8776; 1
+        <span style="color: #a020f0;">for</span> &#8467; <span style="color: #a020f0;">=</span> 1:L
+            <span style="color: #483d8b;">@test</span> freqs[&#8467;] &#8776; m/N
+        <span style="color: #a020f0;">end</span>
+    <span style="color: #a020f0;">end</span>
+
+    <span style="color: #a020f0;">function</span> <span style="color: #0000ff;">some_tests__boundary</span>(_&#120645;)
+        L     = length(_&#120645;)
+        m     = 16
+        N     = m&#8901;L
+        &#120645;     = DOT_StatsHelp.&#9251;xtiles_make(_&#120645;)
+        freqs = zeros(&#8477;,L)
+
+        <span style="color: #a020f0;">for</span> j <span style="color: #a020f0;">=</span> 1:m
+            <span style="color: #a020f0;">for</span> &#8467; <span style="color: #a020f0;">=</span> 1:L
+                lo = get(&#120645;,&#8467;-1,   0.0)
+                hi =     &#120645;[&#8467;  ]
+                <span style="color: #483d8b;">@test</span> lo &lt; hi || (lo==hi &amp;&amp; &#8467;==L)
+                DOT_StatsHelp.&#9251;xtiles_count!(freqs,&#120645; ; p=hi, &#916;=1/N)
+            <span style="color: #a020f0;">end</span>
+        <span style="color: #a020f0;">end</span>
+
+        <span style="color: #483d8b;">@test</span> sum(freqs) &#8776; 1
+        <span style="color: #a020f0;">for</span> &#8467; <span style="color: #a020f0;">=</span> 1:L
+            <span style="color: #483d8b;">@test</span> freqs[&#8467;] &#8776; m/N
+        <span style="color: #a020f0;">end</span>
+    <span style="color: #a020f0;">end</span>
+
+    <span style="color: #a020f0;">for</span> L <span style="color: #a020f0;">=</span> 1:10
+        &#120645; = [ rand(L-1)
+              1.0       ]
+        some_tests__interior(&#120645;)
+        some_tests__boundary(&#120645;)
+    <span style="color: #a020f0;">end</span>
+<span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ test__Xtiles()</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="orgc92eafb"></a>Call the testing function<br />
+<div class="outline-text-6" id="text-4-5-1-4-2">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #483d8b;">@testset</span> verbose=<span style="color: #008b8b;">true</span> <span style="color: #8b2252;">"DOT_StatsHelp.jl testing: Test Xtiles helper"</span> <span style="color: #a020f0;">begin</span>
+    test__xtiles()
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+</div>
+</li>
+</ol>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-orgb1ff060" class="outline-4">
+<h4 id="orgb1ff060"><span class="section-number-4">4.5.2.</span> <span class="todo TSTNG">TSTNG</span> The max-approx process type: <code>MaxProc{L}</code></h4>
+<div class="outline-text-4" id="text-4-5-2">
+<p>
+The following basic type is made available to the user:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">export</span> MaxProc
+</pre>
+</div>
+
+<p>
+An object of this type collects information about the stochastic convergence of the maximum of random numbers
+to a known(!) limit.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">mutable struct</span> <span style="color: #228b22;">MaxProc</span>{L}
+    <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">consts</span>
+    <span style="color: #a020f0;">const</span> &#120645;         ::<span style="color: #228b22;">NTuple</span>{L,&#8477;}   <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">percentile numbers, sorted increasingly (last one must be 1.0)</span>
+    <span style="color: #a020f0;">const</span> freqs     ::<span style="color: #228b22;">Array</span>{&#8477;,2}    <span style="color: #006400; background-color: #ffffe0;">#</span>
+    <span style="color: #a020f0;">const</span> steps     ::<span style="color: #228b22;">Int</span>
+    <span style="color: #a020f0;">const</span> runs      ::<span style="color: #228b22;">Int</span>
+
+    <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">mutables</span>
+    true_max  ::<span style="color: #228b22;">&#8477;</span>
+    curr_max  ::<span style="color: #228b22;">&#8477;</span>
+    &#119851;         ::<span style="color: #228b22;">Int</span>    <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">index of current run (i.e., 0 &#10926; before first run)</span>
+    &#119852;         ::<span style="color: #228b22;">Int</span>    <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">index of current step (i.e., 0 &#10926; before first step)</span>
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+
+<p>
+<code>freqs[s,:]</code> is the vector of frequencies of the percentiles in <code>𝝅</code>, empirically over all data points given
+so far.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2ab5381" class="outline-4">
+<h4 id="org2ab5381"><span class="section-number-4">4.5.3.</span> <span class="todo TODO">TODO</span> Usage</h4>
+</div>
+<div id="outline-container-orge6f7b7b" class="outline-4">
+<h4 id="orge6f7b7b"><span class="section-number-4">4.5.4.</span> <span class="todo TSTNG">TSTNG</span> User-facing constructor for <code>MaxApprox</code> <a id="org8009244"></a></h4>
+<div class="outline-text-4" id="text-4-5-4">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">MaxProc</span>(_&#120645;
+                 ;
+                 steps :: <span style="color: #228b22;">Int</span>,
+                 runs  :: <span style="color: #228b22;">Int</span> )  ::<span style="color: #228b22;">MaxProc</span>
+</pre>
+</div>
+
+<p>
+About the arguments
+</p>
+
+<ul class="org-ul">
+<li><code>_𝝅</code> must be a list (array, tuple, generator, &#x2026;) or percentiles, as type-<code>ℝ</code> numbers in \(\left]0,1\right]\).  <b>It
+must include 1=100%,</b> but it must not include 0.</li>
+</ul>
+</div>
+
+<ol class="org-ol">
+<li><a id="orgbc7b329"></a>Implementation<br />
+<div class="outline-text-5" id="text-4-5-4-1">
+<div class="org-src-container">
+<pre class="src src-julia">    &#120645;     = &#9251;xtiles_make(_&#120645;)
+    L     = length(&#120645;)
+    freqs = Array{&#8477;,2}(<span style="color: #008b8b;">undef</span>,steps,L)
+    s     = MaxProc{L}(&#120645;, freqs, steps, runs, <span style="color: #008b8b;">Inf</span>, <span style="color: #008b8b;">Inf</span>, 0,0)
+    &#9251;integrity_check(s)
+    <span style="color: #a020f0;">return</span> s
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-org1bc7cce" class="outline-4">
+<h4 id="org1bc7cce"><span class="section-number-4">4.5.5.</span> <span class="todo TSTNG">TSTNG</span> Helper functions and integrity check</h4>
+<div class="outline-text-4" id="text-4-5-5">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #0000ff;">numo_stepsruns</span>( s ::<span style="color: #228b22;">MaxProc</span>{L} ) <span style="color: #a020f0;">where</span>{L}    = ( numo_steps(s) , numo_runs(s) )
+<span style="color: #0000ff;">numo_steps</span>(     s ::<span style="color: #228b22;">MaxProc</span>{L} ) <span style="color: #a020f0;">where</span>{L}    = s.steps
+<span style="color: #0000ff;">numo_runs</span>(      s ::<span style="color: #228b22;">MaxProc</span>{L} ) <span style="color: #a020f0;">where</span>{L}    = s.runs
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">&#9251;integrity_check</span>(s ::<span style="color: #228b22;">MaxProc</span>{L}) ::<span style="color: #228b22;">Nothing</span> <span style="color: #a020f0;">where</span>{L}
+    <span style="color: #483d8b;">@assert</span> L           == length(s.&#120645;)  <span style="color: #8b2252;">"Crazy bug!!"</span>
+    <span style="color: #483d8b;">@assert</span> 0 &lt; s.&#120645;[1] &lt; s.&#120645;[<span style="color: #a020f0;">end</span>] == 1.0
+    <span style="color: #483d8b;">@assert</span> (L,s.steps) == size(s.freqs)
+    <span style="color: #483d8b;">@assert</span> s.steps     == numo_steps(s)
+    <span style="color: #483d8b;">@assert</span> s.runs      == numo_runs(s)
+    <span style="color: #483d8b;">@assert</span> s.steps &#8805; 1
+    <span style="color: #483d8b;">@assert</span> s.runs  &#8805; 1
+
+    <span style="color: #483d8b;">@assert</span> 0 &#8804; s.&#119852; &#8804; s.steps
+    <span style="color: #483d8b;">@assert</span> 0 &#8804; s.&#119851; &#8804; s.runs
+    <span style="color: #483d8b;">@assert</span> s.&#119851; &#8805; 1 || s.&#119852; == 0
+
+    <span style="color: #483d8b;">@assert</span> s.curr_max &#8804; s.true_max
+
+    <span style="color: #008b8b;">nothing</span>;
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge22f49a" class="outline-4">
+<h4 id="orge22f49a"><span class="section-number-4">4.5.6.</span> <span class="todo TSTNG">TSTNG</span> Starting a new run: <code>start_run!()</code> <a id="org13f80ba"></a></h4>
+<div class="outline-text-4" id="text-4-5-6">
+<p>
+When a new run starts, the true mean has to be recorded, the indices 𝐫 and 𝐬 for run and step, resp., have to
+be set up, and the empirical data has to be initialized.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">start_run!</span>(s        :: <span style="color: #228b22;">MaxProc</span>{L}
+                    ;
+                    true_max :: <span style="color: #228b22;">&#8477;</span>            ) ::<span style="color: #228b22;">Nothing</span>  <span style="color: #a020f0;">where</span>{L}
+    &#9251;integrity_check(s)
+
+    <span style="color: #a020f0;">if</span>    s.&#119851; &gt; 0           <span style="color: #483d8b;">@assert</span> s.&#119852; == numo_steps(s)
+    <span style="color: #a020f0;">else</span>                    <span style="color: #483d8b;">@assert</span> s.&#119852; == 0               <span style="color: #a020f0;">end</span>
+
+    s.&#119851; += 1              ; <span style="color: #483d8b;">@assert</span> s.&#119851; &#8804; numo_runs(s)
+    s.&#119852;  = 0
+
+    s.true_max = true_max
+    s.curr_max = -<span style="color: #008b8b;">Inf</span>
+
+    <span style="color: #008b8b;">nothing</span>;
+<span style="color: #a020f0;">end</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb6a4c5b" class="outline-4">
+<h4 id="orgb6a4c5b"><span class="section-number-4">4.5.7.</span> <span class="todo TSTNG">TSTNG</span> Adding data of a step: <code>record_step!()</code> <a id="org6f168c0"></a></h4>
+<div class="outline-text-4" id="text-4-5-7">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">record_step!</span>(s ::<span style="color: #228b22;">MaxProc</span>{L}
+                      ;
+                      &#119864; ::<span style="color: #228b22;">&#8477;</span>            ) ::<span style="color: #228b22;">Union</span>{&#8477;,Nothing}     <span style="color: #a020f0;">where</span>{L}
+    &#9251;integrity_check(s)
+
+    <span style="color: #483d8b;">@assert</span> 0 &#8804; &#119864; &#8804; s.true_max
+
+    (;runs,true_max,&#120645;,freqs) = s
+
+    new_max ::<span style="color: #228b22;">Bool</span> = <span style="color: #008b8b;">false</span>
+    <span style="color: #a020f0;">if</span> &#119864; &gt; s.curr_max
+        s.curr_max = &#119864;
+        new_max    = <span style="color: #008b8b;">true</span>
+    <span style="color: #a020f0;">end</span>
+
+    s.&#119852;        += 1            ; <span style="color: #483d8b;">@assert</span> s.&#119852; &#8804; numo_steps(s)
+    freqs&#8347;    =  <span style="color: #483d8b;">@view</span> freqs[:,s.&#119852;]
+    (;&#8467;,lo,hi) =  &#9251;xtiles_count!(freqs&#8347;, &#120645;
+                                ; p = s.curr_max / true_max,  &#916;=1/runs)
+
+    <span style="color: #a020f0;">if</span> new_max
+        <span style="color: #483d8b;">@info</span> <span style="color: #8b2252;">"New max: $&#119864;; &#8467;=$&#8467;, lo=$lo, hi=$hi"</span>
+        <span style="color: #a020f0;">return</span> lo
+    <span style="color: #a020f0;">end</span>
+    <span style="color: #008b8b;">nothing</span>;
+<span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ record_step!()</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org299cd6a" class="outline-4">
+<h4 id="org299cd6a"><span class="section-number-4">4.5.8.</span> <span class="todo TSTNG">TSTNG</span> Finalizing a run: <code>finalize_run!()</code> <a id="orgce221c8"></a></h4>
+<div class="outline-text-4" id="text-4-5-8">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">finalize_run!</span>(s ::<span style="color: #228b22;">MaxProc</span>{L}) ::<span style="color: #228b22;">Nothing</span>         <span style="color: #a020f0;">where</span>{L}
+    &#9251;integrity_check(s)
+
+    <span style="color: #483d8b;">@assert</span> s.&#119852; == numo_steps(s)
+    <span style="color: #483d8b;">@assert</span> 0 &#8804; s.curr_max
+
+    <span style="color: #008b8b;">nothing</span>; <span style="color: #006400; background-color: #ffffe0;"># </span><span style="color: #006400; background-color: #ffffe0;">... else needs to be done</span>
+<span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ finalize_run!()</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org938814f" class="outline-4">
+<h4 id="org938814f"><span class="section-number-4">4.5.9.</span> <span class="todo TODO">TODO</span> Tests for the max process</h4>
+</div>
+</div>
+
+
+<div id="outline-container-org339d809" class="outline-3">
+<h3 id="org339d809"><span class="section-number-3">4.6.</span> <span class="done DONE">DONE</span> End of module</h3>
+<div class="outline-text-3" id="text-4-6">
+<div class="org-src-container">
+<pre class="src src-julia"><span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ module SPSA_Shift</span>
+</pre>
+</div>
+
+<p>
+That's it!
+</p>
+</div>
+</div>
+</div>
+
+
+
+<div id="outline-container-orgeb3574f" class="outline-2">
+<h2 id="orgeb3574f"><span class="section-number-2">5.</span> End of the Org File</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+I'm saying good-bye with some well-meant file-local Emacs variables!
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara"><code>src/DOT_StatsHelp.jl</code></p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara"><code>tmp/runtests.jl</code></p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Almost &#x2013; it's not the same
+type in Julia.</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="date">Date: Fri Aug 11 11:19:58 CEST 2023</p>
+<p class="author">Author: Dirk Oliver Theis, University of Tartu, Estonia</p>
+<p class="date">Created: 2023-08-18 Fri 18:01</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

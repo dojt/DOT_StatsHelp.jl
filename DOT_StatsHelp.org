@@ -65,6 +65,11 @@
    Literate programming allows me to organize source code, documentation, and tests in a hierarchical, text
    document structure.  This makes orientation in the source code so much easier 😊 than in a linear source stream.
 
+** Acknowledgments
+
+    The author was partly funded by *Norges Forskningsråd* through the [[https://www.sintef.no/en/projects/2022/neqst-quantum-computing-applied-to-industrial-optimization-problems/][NeQst]] project: /Quantum Computing Applied to
+    Industrial Optimization Problems,/ project № 332023; part of this software will be utilized within Work Package
+    4, /Assessing Quantum Advantage/.
 
 * Task Lists and Progress Reports [2/4]
 ** DONE Basics [1/1]
@@ -99,20 +104,22 @@
 
      + [X] Add more unit tests
 
-** TODO Max-approximating process [3/5]
+** TODO Max-approximating process [6/7]
 
      + [X] Get started
      + [X] Make percentiles helper ~Xtiles~
      + [X] Make unit tests for percentiles helper
 
-     + [ ] Copy interface defs from Mean Estim
-     + [ ] Take it from there
+     + [X] Copy interface defs from Mean Estim
+     + [X] Take it from there
+     + [X] Get JET.jl-based testing running
+     + [ ] Make unit tests
 
-** TODO Finally, ... [0/2]
+** TODO Finally, ... [1/2]
 
      + [ ] Write the [[summary][Summary]]
 
-     + [ ] Acknowledge funding: NeQst WP4
+     + [X] Acknowledge funding: NeQst WP4
 
 
 * TODO Literate Source Code for the Package [5/6]
@@ -293,7 +300,7 @@
      #+BEGIN_CENTER
      *Warning!*
 
-     Don't forget that the empirical variance is only available after calling [[finalize][~finalize_run!()~]]
+     Don't forget that the empirical variance is only available after calling [[mp-finalize][~finalize_run!()~]]
      #+END_CENTER
 
 *** User-facing constructor for ~MeanProc~  <<mp-constructor>>

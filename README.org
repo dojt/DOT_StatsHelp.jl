@@ -1,6 +1,6 @@
 #+TITLE:  Readme for StatsHelp package
 #+AUTHOR: Dirk Oliver Theis, Theoretical Computer Science, University of Tartu, Estonia
-#+DATE: Mon Aug 14 10:43:33 CEST 2023
+#+DATE: Fri Aug 18 17:39:39 CEST 2023
 
 Julia package that helps with statistics for random processes
 
@@ -10,6 +10,10 @@ there, and can be added from there[fn:1].  (The convenient way to do that is thr
 [[https://github.com/GunnarFarneback/LocalRegistry.jl][LocalRegistry.jl]].
 #+END_QUOTE
 
+Unfortunately, GitHub renders Org only incompletely.  To view the literate source text, goto the HTML export,
+[[./DOT_StatsHelp.html][DOT_StatsHelp.html]].
+
+
 [fn:1] ... as soon as the first stable version is ready.
 
 * Version History
@@ -17,9 +21,16 @@ there, and can be added from there[fn:1].  (The convenient way to do that is thr
 /Time goes up!/
 
 
-+ *v0.1.0*  Initial version -- dosn't do anything yet 😅
+** *v0.2.0*  First working-ish version
+
+    + Basic implementations for mean estimating; with tests
+
+    + Basic implementations for max approximating processes; /without/ tests
+
+** *v0.1.0*  Initial version -- dosn't do anything yet 😅
 
 ----------------------------------------------------------------------------------------------------
+
 
 * /Org/-anization of This Repository
 
@@ -30,10 +41,6 @@ there, and can be added from there[fn:1].  (The convenient way to do that is thr
   #+END_CENTER
   All docs, discussions of the source code, and the actual source code are in that file, and are "tangled" into the
   files in the ~./src/~ and ~./test/~ folders.
-
-  Unfortunately, GitHub renders Org only incompletely....
-
-  * /Maybe add an exported HTML to the repository, for convenient viewing?/
 
 # Local Variables:
 # fill-column: 115
