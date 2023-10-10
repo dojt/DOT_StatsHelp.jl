@@ -47,7 +47,7 @@ using LinearAlgebra: norm2, norm1, normInf as norm∞, norm_sqr as norm2²,
 export start_run!
 export record_step!
 export finalize_run!
-export MeanProd_Storage, write_JSON, read_JSON
+export MeanProc_Storage, write_JSON, read_JSON
 # Module definition, import, and recurrent exports:3 ends here
 
 # [[file:../DOT_StatsHelp.org::*The mean process type: ~MeanProc{𝐑,V}~][The mean process type: ~MeanProc{𝐑,V}~:1]]
