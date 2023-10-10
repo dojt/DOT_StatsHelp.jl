@@ -1,13 +1,13 @@
 #+TITLE:  Julia Package That Helps With Statistics For Random Processes
 #+AUTHOR: Dirk Oliver Theis, University of Tartu, Estonia
 #+EMAIL:  dotheis@ut.ee
-#+DATE:   Fri Aug 11 11:19:58 CEST 2023
+#+DATE:   Tue Aug 29 18:48:35 CEST 2023
 
 #+STARTUP: latexpreview
-#+STARTUP: show3levels
+#+STARTUP: show2levels
 #+BIBLIOGRAPHY: ../../DOT_LaTeX/dirks.bib
 #+PROPERTY: header-args :eval never :comments link :exports code
-#+SEQ_TODO: TODO IN-PRGR TSTNG BROKEN | DONE
+#+SEQ_TODO: TODO IN-PRGR TSTNG BROKEN | CHECK DONE
 
 * Copyright Notice
 
@@ -37,20 +37,23 @@
    #+END_SRC
 
 
-* What's This Module/Project/File About?
-** TODO Summary of what this software does [0/1] <<summary>>
-** TODO High-level usage instructions <<hl-usage>>
-*** TODO Steps and runs [0/1]
+* [0/2] What's This Module/Project/File About?
+** TODO Summary of what this software does [0/1]
+    <<summary>>
+** IN-PRGR High-level usage instructions [1/2]
+    <<hl-usage>>
+*** TODO General blah blah
+*** CHECK Steps and runs
      The fundamental idea is to run a random process for so-and-so many /steps/, collecting information about its
      convergence.  This is repeated for so-and-so-many /runs/, and statistics about the convergence are created.
 
      The user must stick to the following order of instructions for using the types defined in the module:
 
-       1. create an object of the type using a constructor ([[mp-constructor][mean]] [[max-constructor][max]])
+       1. create an object of the type using a constructor ([[mp-constructor][mean]], [[max-constructor][max]])
        2. For each run:
           1. Start a new run using the ~start_run!()~ functions ([[mp-start][mean]], [[max-start][max]])
-          2. Fill run with data using the ~record_step!()~ function repeatedly, once for every step [[mp-start][(mean]] [[max-start][max]])
-          3. Call the ~finalize_run!()~ functions to for tidying up the run [[mp-finalize][(mean]] [[max-finalize][max]])
+          2. Fill run with data using the ~record_step!()~ function repeatedly, once for every step ([[mp-record][mean]], [[max-record][max]])
+          3. Call the ~finalize_run!()~ functions to for tidying up the run [[mp-finalize][(mean]], [[max-finalize][max]])
           4. Retrieve the stats that are overwritten in each run \\
              (e.g., the empirical mean in for mean-estimating processes is kept only for the current run)
        3. Repeat -- i.e., Goto (2) --  for all runs
@@ -70,6 +73,7 @@
     The author was partly funded by *Norges Forskningsråd* through the [[https://www.sintef.no/en/projects/2022/neqst-quantum-computing-applied-to-industrial-optimization-problems/][NeQst]] project: /Quantum Computing Applied to
     Industrial Optimization Problems,/ project № 332023; part of this software will be utilized within Work Package
     4, /Assessing Quantum Advantage/.
+
 
 * Task Lists and Progress Reports [2/4]
 ** DONE Basics [1/1]
@@ -115,14 +119,17 @@
      + [X] Get JET.jl-based testing running
      + [ ] Make unit tests
 
-** TODO Finally, ... [1/2]
+** TODO Finally, ... [1/3]
 
      + [ ] Write the [[summary][Summary]]
 
      + [X] Acknowledge funding: NeQst WP4
 
+     + [ ] Remove this section, [[*Task Lists and Progress Reports]]
 
-* TODO Literate Source Code for the Package [5/6]
+
+
+* [5/6] Literate Source Code for the Package
 
 ** DONE File headers
 
@@ -169,10 +176,17 @@
     #+BEGIN_SRC julia :tangle test/runtests.jl
       using JET
       using JSON        # Only for ignoring by JET
+      using JSON3
       using Polynomials # Only for ignoring by JET
 
       @testset verbose=true "DOT_StatsHelp.jl testing:  via JET.jl" begin
-          test_package(DOT_StatsHelp, ignored_modules=(AnyFrameModule(JSON.Parser),AnyFrameModule(Polynomials),) )
+          test_package(DOT_StatsHelp,
+                       ignored_modules=(AnyFrameModule(JSON.Parser),
+                                        AnyFrameModule(Polynomials),
+                                        AnyFrameModule(JSON3),
+                                        AnyFrameModule(Base) # Hahaha.
+                                        )
+                       )
       end
     #+END_SRC
 
@@ -199,6 +213,7 @@
        export start_run!
        export record_step!
        export finalize_run!
+       export write_JSON, read_JSON
      #+END_SRC
 
 
@@ -233,35 +248,38 @@
 **** Fields and inner constructor
 
       #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-            #            Input for run
-            curr_true_μ  ::Array{ℝ, V} #                      size: dimension
+        #            Input for run
+        curr_true_μ  ::Array{ℝ, V} #                      size: dimension
 
-            #            Output of run
-            curr_emp_μ   ::Array{𝐑, V} #                      size: dimension
+        #            Output of run
+        curr_emp_μ   ::Array{𝐑, V} #                      size: dimension
 
-            #            Overall output
-            err2²        ::Array{ℝ,2}  # 2-norm of tensor; \
-            err1         ::Array{ℝ,2}  # 1-norm  ~          | size: `steps` ✕ `runs`
-            err∞         ::Array{ℝ,2}  # ∞-norm  ~         /
-            emp_var      ::Vector{𝐑}   #                      size: `runs`
+        #            Overall output
+        err2²        ::Array{ℝ,2}  # 2-norm of tensor; \
+        err1         ::Array{ℝ,2}  # 1-norm  ~          | size: `steps` ✕ `runs`
+        err∞         ::Array{ℝ,2}  # ∞-norm  ~         /
+        emp_var      ::Vector{𝐑}   #                      size: `runs`
 
-            #             Work space
-            ␣ws          ::Array{𝐑,V}  #                      size: dimension
+        #             Work space
+        ␣ws          ::Array{𝐑,V}  #                      size: dimension
 
-            #             Counters
-            𝐫            ::Ref{Int}    # index of current run (i.e., 0 ⪮ before first run)
-            𝐬            ::Ref{Int}    # index of current step (i.e., 0 ⪮ before first step)
+        #             Counters
+        𝐫            ::Ref{Int}    # index of current run (i.e., 0 ⪮ before first run)
+        𝐬            ::Ref{Int}    # index of current step (i.e., 0 ⪮ before first step)
 
-            #
-            # Convenience constructor -- not for the user
-            #
-            function
-            MeanProc{𝐑,V}(;
-                       curr_true_μ ::Array{ℝ,V}, curr_emp_μ ::Array{𝐑,V}, emp_var ::Vector{𝐑},
-                       err2² ::Array{ℝ,2}, err1 ::Array{ℝ,2}, err∞ ::Array{ℝ,2}, ␣ws ::Array{𝐑,V}) where{𝐑,V}
-                new(curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, ␣ws,
-                    0,0)
-            end
+        #
+        # Convenience constructor -- not for the user
+        #
+        function
+        MeanProc{𝐑,V}(;
+                   curr_true_μ ::Array{ℝ,V}, curr_emp_μ ::Array{𝐑,V}, emp_var ::Vector{𝐑},
+                   err2² ::Array{ℝ,2}, err1 ::Array{ℝ,2}, err∞ ::Array{ℝ,2}, ␣ws ::Array{𝐑,V}) where{𝐑,V}
+            new(curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, ␣ws,
+                0,0)
+        end
+      #+END_SRC
+
+      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
         end
       #+END_SRC
 
@@ -303,7 +321,8 @@
      Don't forget that the empirical variance is only available after calling [[mp-finalize][~finalize_run!()~]]
      #+END_CENTER
 
-*** User-facing constructor for ~MeanProc~  <<mp-constructor>>
+*** User-facing constructor for ~MeanProc~
+     <<mp-constructor>>
 
      The constructor takes the following arguments.
 
@@ -318,22 +337,30 @@
                          runs  :: Int,
                          𝐑     :: Type{<:Real} = ℝ)  ::MeanProc     where{V}
      #+END_SRC
-     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-           curr_true_μ   = Array{ℝ,V}(undef, dimension )
-           curr_emp_μ    = Array{𝐑,V}(undef, dimension )   ; curr_emp_μ   .= 𝐑(0)
-           ␣ws           = Array{𝐑,V}(undef, dimension )
 
-           err2²         = Array{ℝ,2}(undef, steps,runs)
-           err1          = Array{ℝ,2}(undef, steps,runs)
-           err∞          = Array{ℝ,2}(undef, steps,runs)
-           emp_var       = Array{𝐑,1}(undef, runs)         ; emp_var .= 𝐑(0)
+**** Implementation
 
-           s = MeanProc{𝐑,V}( ; curr_true_μ, curr_emp_μ,
-                                err2², err1, err∞, emp_var,  ␣ws)
-           ␣integrity_check(s)
-           return s
-       end
-     #+END_SRC
+      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+        curr_true_μ   = Array{ℝ,V}(undef, dimension )
+        curr_emp_μ    = Array{𝐑,V}(undef, dimension )   ; curr_emp_μ   .= 𝐑(0)
+        ␣ws           = Array{𝐑,V}(undef, dimension )
+
+        err2²         = Array{ℝ,2}(undef, steps,runs)
+        err1          = Array{ℝ,2}(undef, steps,runs)
+        err∞          = Array{ℝ,2}(undef, steps,runs)
+        emp_var       = Array{𝐑,1}(undef, runs)         ; emp_var .= 𝐑(0)
+
+        s = MeanProc{𝐑,V}( ; curr_true_μ, curr_emp_μ,
+                             err2², err1, err∞, emp_var,  ␣ws)
+        ␣integrity_check(s)
+        return s
+      #+END_SRC
+
+      That's it!
+
+      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+        end #^ MeanProc constructor
+      #+END_SRC
 
 *** Helper functions and integrity check
 
@@ -381,7 +408,8 @@
         end
       #+END_SRC
 
-*** Starting a new run: ~start_run!()~ <<mp-start>>
+*** Starting a new run: ~start_run!()~
+     <<mp-start>>
 
      When a new run starts, the true mean has to be recorded, the indices 𝐫 and 𝐬 for run and step, resp., have to
      be set up, and the empirical data has to be initialized.
@@ -454,7 +482,8 @@
         end #^ start_run!()
       #+END_SRC
 
-*** Adding data of a step: ~record_step!()~ <<mp-record>>
+*** Adding data of a step: ~record_step!()~
+     <<mp-record>>
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
        function record_step!(s ::MeanProc{𝐑,V}
@@ -501,7 +530,8 @@
         end #^ record_step!()
       #+END_SRC
 
-*** Finalizing a run: ~finalize_run!()~ <<mp-finalize>>
+*** Finalizing a run: ~finalize_run!()~
+     <<mp-finalize>>
 
      The ~finalize_run!()~ function must be called after all data points have been added.  It removes the bias
      from the empirical variance.
@@ -527,6 +557,77 @@
             nothing;
         end #^ finalize_run!()
       #+END_SRC
+*** File IO
+**** JSON-compatible helper struct for IO
+
+      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
+        @kwdef struct ␣MeanProc_IO{V}
+            dim          ::NTuple{V,Int}
+            steps_runs   ::Tuple{Int,Int}
+
+            curr_true_μ  ::Array{ℝ,1} # was: V
+            curr_emp_μ   ::Array{ℝ,1} #      V
+            err2²        ::Array{ℝ,1} #      2
+            err1         ::Array{ℝ,1} #      2
+            err∞         ::Array{ℝ,1} #      2
+
+            emp_var      ::Vector{ℝ}
+        end
+      #+END_SRC
+
+***** Constructor: ~MeanProc~ to ~␣MeanProc_IO~
+
+       #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
+         function ␣MeanProc_IO(mp ::MeanProc{ℝ,V}) ::␣MeanProc_IO{V} where{V}
+             dim                         = size( mp.curr_true_μ )
+             steps_runs ::Tuple{Int,Int} = size( mp.err2²       )
+
+             return ␣MeanProc_IO{V}(;
+                                    dim         = dim,
+                                    steps_runs  = steps_runs,
+                                    curr_true_μ = reshape(mp.curr_true_μ , (length(mp.curr_true_μ),) ),
+                                    curr_emp_μ  = reshape(mp.curr_emp_μ  , (length(mp.curr_emp_μ ),) ),
+                                    err2²       = reshape(mp.err2²       , (length(mp.err2²      ),) ),
+                                    err1        = reshape(mp.err1        , (length(mp.err1       ),) ),
+                                    err∞        = reshape(mp.err∞        , (length(mp.err∞       ),) ),
+                                    emp_var     =         mp.emp_var
+                                    )
+         end
+       #+END_SRC
+
+***** Constructor: ~␣MeanProc_IO~ to ~MeanProc~
+
+       #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
+         function MeanProc(mpio ::␣MeanProc_IO{V}) ::MeanProc{ℝ,V}    where{V}
+             return MeanProc{ℝ,V}(;
+                                  curr_true_μ = reshape(mpio.curr_true_μ , mpio.dim       ),
+                                  curr_emp_μ  = reshape(mpio.curr_emp_μ  , mpio.dim       ),
+                                  err2²       = reshape(mpio.err2²       , mpio.steps_runs),
+                                  err1        = reshape(mpio.err1        , mpio.steps_runs),
+                                  err∞        = reshape(mpio.err∞        , mpio.steps_runs),
+                                  emp_var     =         mpio.emp_var,
+                                  ␣ws         = Array{ℝ,V}( undef,  ((0 for j=1:V)...,)  )
+                                  )
+         end
+       #+END_SRC
+
+**** JSON-IO functions
+
+      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
+        using JSON3
+      #+END_SRC
+
+      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
+        function write_JSON(mp ::MeanProc{ℝ,V}) ::String      where{V}
+            return JSON3.write( ␣MeanProc_IO( mp ) )
+        end
+      #+END_SRC
+
+      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
+        function read_JSON(json ::AbstractString; V ::Int) ::MeanProc
+            return MeanProc( JSON3.read(json, ␣MeanProc_IO{V}) )
+        end
+      #+END_SRC
 
 *** Tests for the mean process
 **** Set up testset
@@ -539,39 +640,53 @@
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
         function test__meanestim_0(;runs=1:10,steps=2:4:20)
-            for (curr_runs,curr_steps) in Iterators.product(runs,steps)
+            for 𝐑 ∈ (Double64,Float64)
+                for (curr_runs,curr_steps) in Iterators.product(runs,steps)
 
-                data = 100*randn(curr_steps,curr_runs)
+                    data = 100*randn(curr_steps,curr_runs)
 
-                mp = MeanProc( () ; steps=curr_steps, runs=curr_runs, 𝐑=Double64)
+                    mp = MeanProc( () ; steps=curr_steps, runs=curr_runs, 𝐑)
 
-                for run = 1:curr_runs
+                    for run = 1:curr_runs
 
-                    start_run!(mp ; true_μ = fill(0.0) )
+                        start_run!(mp ; true_μ = fill(0.0) )
 
-                    for step = 1:curr_steps
-                        record_step!(mp ; 𝐸 = fill(data[step,run]) )
-                        @test curr_emp_μ(mp)[]  ≈ mean( @view data[1:step,run] )
-                    end
-                    finalize_run!(mp)
+                        for step = 1:curr_steps
+                            record_step!(mp ; 𝐸 = fill(data[step,run]) )
+                            @test curr_emp_μ(mp)[]  ≈ mean( @view data[1:step,run] )
+                        end
+                        finalize_run!(mp)
 
-                    @test emp_var(mp;run)         ≈ var(  @view data[:,run] )
+                        @test emp_var(mp;run)         ≈ var(  @view data[:,run] )
 
-                    for step=1:curr_steps
-                        @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> abs²
-                    end
-                    @test all(
-                        err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
                         for step=1:curr_steps
-                    )
-                    @test all(
-                        err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
+                            @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> abs²
+                        end
+                        @test all(
+                            err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
+                            for step=1:curr_steps
+                                )
+                        @test all(
+                            err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
                         for step=1:curr_steps
-                    )
+                            )
 
-                end #^ for run
+                    end #^ for run
 
-            end #^ for curr_...
+                    if 𝐑 == Float64
+                        jsonstr = write_JSON(mp)
+                        mp2     = read_JSON(jsonstr;V=0)
+
+                        @test mp.curr_true_μ  == mp2.curr_true_μ
+                        @test mp.curr_emp_μ   == mp2.curr_emp_μ
+                        @test mp.err2²        == mp2.err2²
+                        @test mp.err1         == mp2.err1
+                        @test mp.err∞         == mp2.err∞
+                        @test mp.emp_var      == mp2.emp_var
+                    end
+
+                end #^ for curr_...
+            end #^ for 𝐑
         end #^ test__meanestim_0()
       #+END_SRC
 
@@ -587,41 +702,55 @@
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
         function test__meanestim_1(;runs=1:3:9,steps=2:5:12)
-            for (curr_runs,curr_steps) in Iterators.product(runs,steps)
+            for 𝐑 ∈ (Double64,Float64)
+                for (curr_runs,curr_steps) in Iterators.product(runs,steps)
 
-                dim  = 31
+                    dim  = 31
 
-                data = [ randn(dim) for s=1:curr_steps, r=1:curr_runs ]
+                    data = [ randn(dim) for s=1:curr_steps, r=1:curr_runs ]
 
-                mp = MeanProc( (dim,) ; steps=curr_steps, runs=curr_runs, 𝐑=Double64)
+                    mp = MeanProc( (dim,) ; steps=curr_steps, runs=curr_runs, 𝐑)
 
-                for run = 1:curr_runs
+                    for run = 1:curr_runs
 
-                    start_run!(mp ; true_μ = zeros(31) )
+                        start_run!(mp ; true_μ = zeros(31) )
 
-                    for step = 1:curr_steps
-                        record_step!(mp ; 𝐸 = data[step,run] )
-                        @test curr_emp_μ(mp)  ≈ mean( @view data[1:step,run] )
-                    end
-                    finalize_run!(mp)
+                        for step = 1:curr_steps
+                            record_step!(mp ; 𝐸 = data[step,run] )
+                            @test curr_emp_μ(mp)  ≈ mean( @view data[1:step,run] )
+                        end
+                        finalize_run!(mp)
 
-                    @test emp_var(mp;run)         ≈ var( @view data[:,run] ) |> norm1 # Julia `var` returns array
+                        @test emp_var(mp;run)         ≈ var( @view data[:,run] ) |> norm1 # Julia `var` returns array
 
-                    for step=1:curr_steps
-                        @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> norm2²
-                    end
-                    @test all(
-                        err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm1
                         for step=1:curr_steps
-                    )
-                    @test all(
-                        err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm∞
-                        for step=1:curr_steps
-                    )
+                            @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> norm2²
+                        end
+                        @test all(
+                            err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm1
+                            for step=1:curr_steps
+                        )
+                        @test all(
+                            err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm∞
+                            for step=1:curr_steps
+                        )
 
-                end #^ for run
+                    end #^ for run
 
-            end #^ for curr_...
+                    if 𝐑 == Float64
+                        jsonstr = write_JSON(mp)
+                        mp2     = read_JSON(jsonstr;V=1)
+
+                        @test mp.curr_true_μ  == mp2.curr_true_μ
+                        @test mp.curr_emp_μ   == mp2.curr_emp_μ
+                        @test mp.err2²        == mp2.err2²
+                        @test mp.err1         == mp2.err1
+                        @test mp.err∞         == mp2.err∞
+                        @test mp.emp_var      == mp2.emp_var
+                    end
+
+                end #^ for curr_...
+            end #^ for 𝐑
         end #^ test__meanestim_1()
       #+END_SRC
 
@@ -637,41 +766,55 @@
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
         function test__meanestim_2(;runs=1:3:9,steps=2:5:12)
-            for (curr_runs,curr_steps) in Iterators.product(runs,steps)
+            for 𝐑 ∈ (Double64,Float64)
+                for (curr_runs,curr_steps) in Iterators.product(runs,steps)
 
-                sz  = (7,13)
+                    sz  = (7,13)
 
-                data = [ randn(sz) for s=1:curr_steps, r=1:curr_runs ]
+                    data = [ randn(sz) for s=1:curr_steps, r=1:curr_runs ]
 
-                mp = MeanProc( (sz) ; steps=curr_steps, runs=curr_runs, 𝐑=Double64)
+                    mp = MeanProc( (sz) ; steps=curr_steps, runs=curr_runs, 𝐑)
 
-                for run = 1:curr_runs
+                    for run = 1:curr_runs
 
-                    start_run!(mp ; true_μ = zeros(sz) )
+                        start_run!(mp ; true_μ = zeros(sz) )
 
-                    for step = 1:curr_steps
-                        record_step!(mp ; 𝐸 = data[step,run] )
-                        @test curr_emp_μ(mp)  ≈ mean( @view data[1:step,run] )
-                    end
-                    finalize_run!(mp)
+                        for step = 1:curr_steps
+                            record_step!(mp ; 𝐸 = data[step,run] )
+                            @test curr_emp_μ(mp)  ≈ mean( @view data[1:step,run] )
+                        end
+                        finalize_run!(mp)
 
-                    @test emp_var(mp;run)         ≈ var( @view data[:,run] ) |> norm1 # Julia `var` returns array
+                        @test emp_var(mp;run)         ≈ var( @view data[:,run] ) |> norm1 # Julia `var` returns array
 
-                    for step=1:curr_steps
-                        @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> norm2²
-                    end
-                    @test all(
-                        err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm1
                         for step=1:curr_steps
-                    )
-                    @test all(
-                        err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm∞
-                        for step=1:curr_steps
-                    )
+                            @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> norm2²
+                        end
+                        @test all(
+                            err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm1
+                            for step=1:curr_steps
+                        )
+                        @test all(
+                            err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm∞
+                            for step=1:curr_steps
+                        )
 
-                end #^ for run
+                    end #^ for run
 
-            end #^ for curr_...
+                    if 𝐑 == Float64
+                        jsonstr = write_JSON(mp)
+                        mp2     = read_JSON(jsonstr;V=2)
+
+                        @test mp.curr_true_μ  == mp2.curr_true_μ
+                        @test mp.curr_emp_μ   == mp2.curr_emp_μ
+                        @test mp.err2²        == mp2.err2²
+                        @test mp.err1         == mp2.err1
+                        @test mp.err∞         == mp2.err∞
+                        @test mp.emp_var      == mp2.emp_var
+                    end
+
+                end #^ for curr_...
+            end #^ for 𝐑
         end #^ test__meanestim_1()
       #+END_SRC
 
@@ -870,7 +1013,8 @@
       so far.
 
 *** TODO Usage
-*** TSTNG User-facing constructor for ~MaxApprox~ <<max-constructor>>
+*** TSTNG User-facing constructor for ~MaxApprox~
+     <<max-constructor>>
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
        function MaxProc(_𝝅
@@ -923,7 +1067,8 @@
        end
      #+END_SRC
 
-*** TSTNG Starting a new run: ~start_run!()~ <<max-start>>
+*** TSTNG Starting a new run: ~start_run!()~
+     <<max-start>>
 
      When a new run starts, the true mean has to be recorded, the indices 𝐫 and 𝐬 for run and step, resp., have to
      be set up, and the empirical data has to be initialized.
@@ -947,7 +1092,8 @@
        end
      #+END_SRC
 
-*** TSTNG Adding data of a step: ~record_step!()~ <<max-record>>
+*** TSTNG Adding data of a step: ~record_step!()~
+     <<max-record>>
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
        function record_step!(s ::MaxProc{L}
@@ -978,7 +1124,8 @@
        end #^ record_step!()
      #+END_SRC
 
-*** TSTNG Finalizing a run: ~finalize_run!()~ <<max-finalize>>
+*** TSTNG Finalizing a run: ~finalize_run!()~
+     <<max-finalize>>
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
        function finalize_run!(s ::MaxProc{L}) ::Nothing         where{L}

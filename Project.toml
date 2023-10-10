@@ -1,8 +1,9 @@
 name = "DOT_StatsHelp"
 uuid = "8148c48a-b060-41fd-b68c-7c28d53d7f5a"
 authors = ["dojt <dotheis.work@gmail.com>"]
-version = "0.2.0"
+version = "0.3.0"
 
 [deps]
 DOT_NiceMath = "3e56a413-cb61-4004-9b36-fbc90ffc4c6e"
+JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"

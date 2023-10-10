@@ -27,10 +27,17 @@ using DOT_StatsHelp.Numbers64     # === DOT_NiceMath.Numbers64 -- just making su
 # [[file:../DOT_StatsHelp.org::*Generic test based on ~JET.jl~][Generic test based on ~JET.jl~:1]]
 using JET
 using JSON        # Only for ignoring by JET
+using JSON3
 using Polynomials # Only for ignoring by JET
 
 @testset verbose=true "DOT_StatsHelp.jl testing:  via JET.jl" begin
-    test_package(DOT_StatsHelp, ignored_modules=(AnyFrameModule(JSON.Parser),AnyFrameModule(Polynomials),) )
+    test_package(DOT_StatsHelp,
+                 ignored_modules=(AnyFrameModule(JSON.Parser),
+                                  AnyFrameModule(Polynomials),
+                                  AnyFrameModule(JSON3),
+                                  AnyFrameModule(Base) # Hahaha.
+                                  )
+                 )
 end
 # Generic test based on ~JET.jl~:1 ends here
 
@@ -40,39 +47,53 @@ end
 
 # [[file:../DOT_StatsHelp.org::*Test with valency 0][Test with valency 0:1]]
 function test__meanestim_0(;runs=1:10,steps=2:4:20)
-    for (curr_runs,curr_steps) in Iterators.product(runs,steps)
+    for 𝐑 ∈ (Double64,Float64)
+        for (curr_runs,curr_steps) in Iterators.product(runs,steps)
 
-        data = 100*randn(curr_steps,curr_runs)
+            data = 100*randn(curr_steps,curr_runs)
 
-        mp = MeanProc( () ; steps=curr_steps, runs=curr_runs, 𝐑=Double64)
+            mp = MeanProc( () ; steps=curr_steps, runs=curr_runs, 𝐑)
 
-        for run = 1:curr_runs
+            for run = 1:curr_runs
 
-            start_run!(mp ; true_μ = fill(0.0) )
+                start_run!(mp ; true_μ = fill(0.0) )
 
-            for step = 1:curr_steps
-                record_step!(mp ; 𝐸 = fill(data[step,run]) )
-                @test curr_emp_μ(mp)[]  ≈ mean( @view data[1:step,run] )
-            end
-            finalize_run!(mp)
+                for step = 1:curr_steps
+                    record_step!(mp ; 𝐸 = fill(data[step,run]) )
+                    @test curr_emp_μ(mp)[]  ≈ mean( @view data[1:step,run] )
+                end
+                finalize_run!(mp)
 
-            @test emp_var(mp;run)         ≈ var(  @view data[:,run] )
+                @test emp_var(mp;run)         ≈ var(  @view data[:,run] )
 
-            for step=1:curr_steps
-                @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> abs²
-            end
-            @test all(
-                err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
                 for step=1:curr_steps
-            )
-            @test all(
-                err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
+                    @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> abs²
+                end
+                @test all(
+                    err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
+                    for step=1:curr_steps
+                        )
+                @test all(
+                    err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
                 for step=1:curr_steps
-            )
+                    )
 
-        end #^ for run
+            end #^ for run
 
-    end #^ for curr_...
+            if 𝐑 == Float64
+                jsonstr = write_JSON(mp)
+                mp2     = read_JSON(jsonstr;V=0)
+
+                @test mp.curr_true_μ  == mp2.curr_true_μ
+                @test mp.curr_emp_μ   == mp2.curr_emp_μ
+                @test mp.err2²        == mp2.err2²
+                @test mp.err1         == mp2.err1
+                @test mp.err∞         == mp2.err∞
+                @test mp.emp_var      == mp2.emp_var
+            end
+
+        end #^ for curr_...
+    end #^ for 𝐑
 end #^ test__meanestim_0()
 # Test with valency 0:1 ends here
 
@@ -84,41 +105,55 @@ end
 
 # [[file:../DOT_StatsHelp.org::*Test with valency 1][Test with valency 1:1]]
 function test__meanestim_1(;runs=1:3:9,steps=2:5:12)
-    for (curr_runs,curr_steps) in Iterators.product(runs,steps)
+    for 𝐑 ∈ (Double64,Float64)
+        for (curr_runs,curr_steps) in Iterators.product(runs,steps)
 
-        dim  = 31
+            dim  = 31
 
-        data = [ randn(dim) for s=1:curr_steps, r=1:curr_runs ]
+            data = [ randn(dim) for s=1:curr_steps, r=1:curr_runs ]
 
-        mp = MeanProc( (dim,) ; steps=curr_steps, runs=curr_runs, 𝐑=Double64)
+            mp = MeanProc( (dim,) ; steps=curr_steps, runs=curr_runs, 𝐑)
 
-        for run = 1:curr_runs
+            for run = 1:curr_runs
 
-            start_run!(mp ; true_μ = zeros(31) )
+                start_run!(mp ; true_μ = zeros(31) )
 
-            for step = 1:curr_steps
-                record_step!(mp ; 𝐸 = data[step,run] )
-                @test curr_emp_μ(mp)  ≈ mean( @view data[1:step,run] )
-            end
-            finalize_run!(mp)
+                for step = 1:curr_steps
+                    record_step!(mp ; 𝐸 = data[step,run] )
+                    @test curr_emp_μ(mp)  ≈ mean( @view data[1:step,run] )
+                end
+                finalize_run!(mp)
 
-            @test emp_var(mp;run)         ≈ var( @view data[:,run] ) |> norm1 # Julia `var` returns array
+                @test emp_var(mp;run)         ≈ var( @view data[:,run] ) |> norm1 # Julia `var` returns array
 
-            for step=1:curr_steps
-                @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> norm2²
-            end
-            @test all(
-                err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm1
                 for step=1:curr_steps
-            )
-            @test all(
-                err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm∞
-                for step=1:curr_steps
-            )
+                    @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> norm2²
+                end
+                @test all(
+                    err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm1
+                    for step=1:curr_steps
+                )
+                @test all(
+                    err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm∞
+                    for step=1:curr_steps
+                )
 
-        end #^ for run
+            end #^ for run
 
-    end #^ for curr_...
+            if 𝐑 == Float64
+                jsonstr = write_JSON(mp)
+                mp2     = read_JSON(jsonstr;V=1)
+
+                @test mp.curr_true_μ  == mp2.curr_true_μ
+                @test mp.curr_emp_μ   == mp2.curr_emp_μ
+                @test mp.err2²        == mp2.err2²
+                @test mp.err1         == mp2.err1
+                @test mp.err∞         == mp2.err∞
+                @test mp.emp_var      == mp2.emp_var
+            end
+
+        end #^ for curr_...
+    end #^ for 𝐑
 end #^ test__meanestim_1()
 # Test with valency 1:1 ends here
 
@@ -130,41 +165,55 @@ end
 
 # [[file:../DOT_StatsHelp.org::*Test with valency 2][Test with valency 2:1]]
 function test__meanestim_2(;runs=1:3:9,steps=2:5:12)
-    for (curr_runs,curr_steps) in Iterators.product(runs,steps)
+    for 𝐑 ∈ (Double64,Float64)
+        for (curr_runs,curr_steps) in Iterators.product(runs,steps)
 
-        sz  = (7,13)
+            sz  = (7,13)
 
-        data = [ randn(sz) for s=1:curr_steps, r=1:curr_runs ]
+            data = [ randn(sz) for s=1:curr_steps, r=1:curr_runs ]
 
-        mp = MeanProc( (sz) ; steps=curr_steps, runs=curr_runs, 𝐑=Double64)
+            mp = MeanProc( (sz) ; steps=curr_steps, runs=curr_runs, 𝐑)
 
-        for run = 1:curr_runs
+            for run = 1:curr_runs
 
-            start_run!(mp ; true_μ = zeros(sz) )
+                start_run!(mp ; true_μ = zeros(sz) )
 
-            for step = 1:curr_steps
-                record_step!(mp ; 𝐸 = data[step,run] )
-                @test curr_emp_μ(mp)  ≈ mean( @view data[1:step,run] )
-            end
-            finalize_run!(mp)
+                for step = 1:curr_steps
+                    record_step!(mp ; 𝐸 = data[step,run] )
+                    @test curr_emp_μ(mp)  ≈ mean( @view data[1:step,run] )
+                end
+                finalize_run!(mp)
 
-            @test emp_var(mp;run)         ≈ var( @view data[:,run] ) |> norm1 # Julia `var` returns array
+                @test emp_var(mp;run)         ≈ var( @view data[:,run] ) |> norm1 # Julia `var` returns array
 
-            for step=1:curr_steps
-                @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> norm2²
-            end
-            @test all(
-                err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm1
                 for step=1:curr_steps
-            )
-            @test all(
-                err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm∞
-                for step=1:curr_steps
-            )
+                    @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> norm2²
+                end
+                @test all(
+                    err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm1
+                    for step=1:curr_steps
+                )
+                @test all(
+                    err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> norm∞
+                    for step=1:curr_steps
+                )
 
-        end #^ for run
+            end #^ for run
 
-    end #^ for curr_...
+            if 𝐑 == Float64
+                jsonstr = write_JSON(mp)
+                mp2     = read_JSON(jsonstr;V=2)
+
+                @test mp.curr_true_μ  == mp2.curr_true_μ
+                @test mp.curr_emp_μ   == mp2.curr_emp_μ
+                @test mp.err2²        == mp2.err2²
+                @test mp.err1         == mp2.err1
+                @test mp.err∞         == mp2.err∞
+                @test mp.emp_var      == mp2.emp_var
+            end
+
+        end #^ for curr_...
+    end #^ for 𝐑
 end #^ test__meanestim_1()
 # Test with valency 2:1 ends here
 

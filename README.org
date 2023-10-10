@@ -21,6 +21,12 @@ Unfortunately, GitHub renders Org only incompletely.  To view the literate sourc
 /Time goes up!/
 
 
+** *v0.3.0*  Added JSON-IO to mean estimation object
+
+    + Todo: *Document it!* In particular, mention that the work space and the r,s indices are lost from exporting
+      to JSON and re-importing -- so this is cannot be used for /interrupting/ a stats collection process.
+
+
 ** *v0.2.0*  First working-ish version
 
     + Basic implementations for mean estimating; with tests
