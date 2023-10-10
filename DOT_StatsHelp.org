@@ -213,7 +213,7 @@
        export start_run!
        export record_step!
        export finalize_run!
-       export write_JSON, read_JSON
+       export MeanProd_Storage, write_JSON, read_JSON
      #+END_SRC
 
 
@@ -557,11 +557,11 @@
             nothing;
         end #^ finalize_run!()
       #+END_SRC
-*** File IO
-**** JSON-compatible helper struct for IO
+*** Storage and JSON export-import
+**** Storage struct
 
       #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
-        @kwdef struct ␣MeanProc_IO{V}
+        @kwdef struct MeanProc_Storage{V}
             dim          ::NTuple{V,Int}
             steps_runs   ::Tuple{Int,Int}
 
@@ -575,14 +575,14 @@
         end
       #+END_SRC
 
-***** Constructor: ~MeanProc~ to ~␣MeanProc_IO~
+***** Constructor: ~MeanProc~ to ~MeanProc_Storage~
 
        #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
-         function ␣MeanProc_IO(mp ::MeanProc{ℝ,V}) ::␣MeanProc_IO{V} where{V}
+         function MeanProc_Storage(mp ::MeanProc{ℝ,V}) ::MeanProc_Storage{V} where{V}
              dim                         = size( mp.curr_true_μ )
              steps_runs ::Tuple{Int,Int} = size( mp.err2²       )
 
-             return ␣MeanProc_IO{V}(;
+             return MeanProc_Storage{V}(;
                                     dim         = dim,
                                     steps_runs  = steps_runs,
                                     curr_true_μ = reshape(mp.curr_true_μ , (length(mp.curr_true_μ),) ),
@@ -595,10 +595,10 @@
          end
        #+END_SRC
 
-***** Constructor: ~␣MeanProc_IO~ to ~MeanProc~
+***** Constructor: ~MeanProc_Storage~ to ~MeanProc~
 
        #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
-         function MeanProc(mpio ::␣MeanProc_IO{V}) ::MeanProc{ℝ,V}    where{V}
+         function MeanProc(mpio ::MeanProc_Storage{V}) ::MeanProc{ℝ,V}    where{V}
              return MeanProc{ℝ,V}(;
                                   curr_true_μ = reshape(mpio.curr_true_μ , mpio.dim       ),
                                   curr_emp_μ  = reshape(mpio.curr_emp_μ  , mpio.dim       ),
@@ -619,13 +619,13 @@
 
       #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
         function write_JSON(mp ::MeanProc{ℝ,V}) ::String      where{V}
-            return JSON3.write( ␣MeanProc_IO( mp ) )
+            return JSON3.write( MeanProc_Storage( mp ) )
         end
       #+END_SRC
 
       #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
         function read_JSON(json ::AbstractString; V ::Int) ::MeanProc
-            return MeanProc( JSON3.read(json, ␣MeanProc_IO{V}) )
+            return MeanProc( JSON3.read(json, MeanProc_Storage{V}) )
         end
       #+END_SRC
 

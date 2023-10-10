@@ -47,7 +47,7 @@ using LinearAlgebra: norm2, norm1, normInf as norm∞, norm_sqr as norm2²,
 export start_run!
 export record_step!
 export finalize_run!
-export write_JSON, read_JSON
+export MeanProd_Storage, write_JSON, read_JSON
 # Module definition, import, and recurrent exports:3 ends here
 
 # [[file:../DOT_StatsHelp.org::*The mean process type: ~MeanProc{𝐑,V}~][The mean process type: ~MeanProc{𝐑,V}~:1]]
@@ -267,8 +267,8 @@ function finalize_run!(s ::MeanProc{𝐑,V}) ::Nothing                  where{�
 end #^ finalize_run!()
 # Implementation:1 ends here
 
-# [[file:../DOT_StatsHelp.org::*JSON-compatible helper struct for IO][JSON-compatible helper struct for IO:1]]
-@kwdef struct ␣MeanProc_IO{V}
+# [[file:../DOT_StatsHelp.org::*Storage struct][Storage struct:1]]
+@kwdef struct MeanProc_Storage{V}
     dim          ::NTuple{V,Int}
     steps_runs   ::Tuple{Int,Int}
 
@@ -280,14 +280,14 @@ end #^ finalize_run!()
 
     emp_var      ::Vector{ℝ}
 end
-# JSON-compatible helper struct for IO:1 ends here
+# Storage struct:1 ends here
 
-# [[file:../DOT_StatsHelp.org::*Constructor: ~MeanProc~ to ~␣MeanProc_IO~][Constructor: ~MeanProc~ to ~␣MeanProc_IO~:1]]
-function ␣MeanProc_IO(mp ::MeanProc{ℝ,V}) ::␣MeanProc_IO{V} where{V}
+# [[file:../DOT_StatsHelp.org::*Constructor: ~MeanProc~ to ~MeanProc_Storage~][Constructor: ~MeanProc~ to ~MeanProc_Storage~:1]]
+function MeanProc_Storage(mp ::MeanProc{ℝ,V}) ::MeanProc_Storage{V} where{V}
     dim                         = size( mp.curr_true_μ )
     steps_runs ::Tuple{Int,Int} = size( mp.err2²       )
 
-    return ␣MeanProc_IO{V}(;
+    return MeanProc_Storage{V}(;
                            dim         = dim,
                            steps_runs  = steps_runs,
                            curr_true_μ = reshape(mp.curr_true_μ , (length(mp.curr_true_μ),) ),
@@ -298,10 +298,10 @@ function ␣MeanProc_IO(mp ::MeanProc{ℝ,V}) ::␣MeanProc_IO{V} where{V}
                            emp_var     =         mp.emp_var
                            )
 end
-# Constructor: ~MeanProc~ to ~␣MeanProc_IO~:1 ends here
+# Constructor: ~MeanProc~ to ~MeanProc_Storage~:1 ends here
 
-# [[file:../DOT_StatsHelp.org::*Constructor: ~␣MeanProc_IO~ to ~MeanProc~][Constructor: ~␣MeanProc_IO~ to ~MeanProc~:1]]
-function MeanProc(mpio ::␣MeanProc_IO{V}) ::MeanProc{ℝ,V}    where{V}
+# [[file:../DOT_StatsHelp.org::*Constructor: ~MeanProc_Storage~ to ~MeanProc~][Constructor: ~MeanProc_Storage~ to ~MeanProc~:1]]
+function MeanProc(mpio ::MeanProc_Storage{V}) ::MeanProc{ℝ,V}    where{V}
     return MeanProc{ℝ,V}(;
                          curr_true_μ = reshape(mpio.curr_true_μ , mpio.dim       ),
                          curr_emp_μ  = reshape(mpio.curr_emp_μ  , mpio.dim       ),
@@ -312,7 +312,7 @@ function MeanProc(mpio ::␣MeanProc_IO{V}) ::MeanProc{ℝ,V}    where{V}
                          ␣ws         = Array{ℝ,V}( undef,  ((0 for j=1:V)...,)  )
                          )
 end
-# Constructor: ~␣MeanProc_IO~ to ~MeanProc~:1 ends here
+# Constructor: ~MeanProc_Storage~ to ~MeanProc~:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*JSON-IO functions][JSON-IO functions:1]]
 using JSON3
@@ -320,13 +320,13 @@ using JSON3
 
 # [[file:../DOT_StatsHelp.org::*JSON-IO functions][JSON-IO functions:2]]
 function write_JSON(mp ::MeanProc{ℝ,V}) ::String      where{V}
-    return JSON3.write( ␣MeanProc_IO( mp ) )
+    return JSON3.write( MeanProc_Storage( mp ) )
 end
 # JSON-IO functions:2 ends here
 
 # [[file:../DOT_StatsHelp.org::*JSON-IO functions][JSON-IO functions:3]]
 function read_JSON(json ::AbstractString; V ::Int) ::MeanProc
-    return MeanProc( JSON3.read(json, ␣MeanProc_IO{V}) )
+    return MeanProc( JSON3.read(json, MeanProc_Storage{V}) )
 end
 # JSON-IO functions:3 ends here
 
