@@ -47,16 +47,16 @@ using LinearAlgebra: norm2, norm1, normInf as norm∞, norm_sqr as norm2²,
 export start_run!
 export record_step!
 export finalize_run!
-export MeanProc_Storage, write_JSON, read_JSON
+export MeanProc_Full_Storage, write_JSON, read_JSON
 # Module definition, import, and recurrent exports:3 ends here
 
-# [[file:../DOT_StatsHelp.org::*The mean process type: ~MeanProc{𝐑,V}~][The mean process type: ~MeanProc{𝐑,V}~:1]]
-export MeanProc
-# The mean process type: ~MeanProc{𝐑,V}~:1 ends here
+# [[file:../DOT_StatsHelp.org::*The mean process type: ~MeanProc_Full{𝐑,V}~][The mean process type: ~MeanProc_Full{𝐑,V}~:1]]
+export MeanProc_Full
+# The mean process type: ~MeanProc_Full{𝐑,V}~:1 ends here
 
-# [[file:../DOT_StatsHelp.org::*The mean process type: ~MeanProc{𝐑,V}~][The mean process type: ~MeanProc{𝐑,V}~:2]]
-struct MeanProc{𝐑 <: Real, V}              # `V` is an integer: the valency of the tensor
-# The mean process type: ~MeanProc{𝐑,V}~:2 ends here
+# [[file:../DOT_StatsHelp.org::*The mean process type: ~MeanProc_Full{𝐑,V}~][The mean process type: ~MeanProc_Full{𝐑,V}~:2]]
+struct MeanProc_Full{𝐑 <: Real, V}              # `V` is an integer: the valency of the tensor
+# The mean process type: ~MeanProc_Full{𝐑,V}~:2 ends here
 
 # [[file:../DOT_StatsHelp.org::*Fields and inner constructor][Fields and inner constructor:1]]
 #            Input for run
@@ -82,7 +82,7 @@ emp_var      ::Vector{𝐑}   #                      size: `runs`
 # Convenience constructor -- not for the user
 #
 function
-MeanProc{𝐑,V}(;
+MeanProc_Full{𝐑,V}(;
            curr_true_μ ::Array{ℝ,V}, curr_emp_μ ::Array{𝐑,V}, emp_var ::Vector{𝐑},
            err2² ::Array{ℝ,2}, err1 ::Array{ℝ,2}, err∞ ::Array{ℝ,2}, ␣ws ::Array{𝐑,V}) where{𝐑,V}
     new(curr_true_μ, curr_emp_μ, err2², err1, err∞, emp_var, ␣ws,
@@ -99,21 +99,21 @@ export err2², err1, err∞, emp_var, curr_emp_μ
 # Usage:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Usage][Usage:2]]
-err2²(  s ::MeanProc{𝐑,V}; run ::Int, step ::Int) where{𝐑,V} = ( @assert (1,1)≤(run,step)≤(s.𝐫[],s.𝐬[]); s.err2²[step,run] )
-err1(   s ::MeanProc{𝐑,V}; run ::Int, step ::Int) where{𝐑,V} = ( @assert (1,1)≤(run,step)≤(s.𝐫[],s.𝐬[]); s.err1[ step,run] )
-err∞(   s ::MeanProc{𝐑,V}; run ::Int, step ::Int) where{𝐑,V} = ( @assert (1,1)≤(run,step)≤(s.𝐫[],s.𝐬[]); s.err∞[ step,run] )
-emp_var(s ::MeanProc{𝐑,V}; run ::Int)             where{𝐑,V} = ( @assert 1    ≤run ≤ s.𝐫[]             ; s.emp_var[run]    )
+err2²(  s ::MeanProc_Full{𝐑,V}; run ::Int, step ::Int) where{𝐑,V} = ( @assert (1,1)≤(run,step)≤(s.𝐫[],s.𝐬[]); s.err2²[step,run] )
+err1(   s ::MeanProc_Full{𝐑,V}; run ::Int, step ::Int) where{𝐑,V} = ( @assert (1,1)≤(run,step)≤(s.𝐫[],s.𝐬[]); s.err1[ step,run] )
+err∞(   s ::MeanProc_Full{𝐑,V}; run ::Int, step ::Int) where{𝐑,V} = ( @assert (1,1)≤(run,step)≤(s.𝐫[],s.𝐬[]); s.err∞[ step,run] )
+emp_var(s ::MeanProc_Full{𝐑,V}; run ::Int)             where{𝐑,V} = ( @assert 1    ≤run ≤ s.𝐫[]             ; s.emp_var[run]    )
 
-curr_emp_μ(s ::MeanProc{𝐑,V})                     where{𝐑,V} = ( @assert 1 ≤ s.𝐫[]                     ; s.curr_emp_μ      )
+curr_emp_μ(s ::MeanProc_Full{𝐑,V})                     where{𝐑,V} = ( @assert 1 ≤ s.𝐫[]                     ; s.curr_emp_μ      )
 # Usage:2 ends here
 
-# [[file:../DOT_StatsHelp.org::*User-facing constructor for ~MeanProc~][User-facing constructor for ~MeanProc~:1]]
-function MeanProc(dimension ::NTuple{V,Int}
+# [[file:../DOT_StatsHelp.org::*User-facing constructor for ~MeanProc_Full~][User-facing constructor for ~MeanProc_Full~:1]]
+function MeanProc_Full(dimension ::NTuple{V,Int}
                   ;
                   steps :: Int,
                   runs  :: Int,
-                  𝐑     :: Type{<:Real} = ℝ)  ::MeanProc     where{V}
-# User-facing constructor for ~MeanProc~:1 ends here
+                  𝐑     :: Type{<:Real} = ℝ)  ::MeanProc_Full     where{V}
+# User-facing constructor for ~MeanProc_Full~:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Implementation][Implementation:1]]
 curr_true_μ   = Array{ℝ,V}(undef, dimension )
@@ -125,26 +125,26 @@ err1          = Array{ℝ,2}(undef, steps,runs)
 err∞          = Array{ℝ,2}(undef, steps,runs)
 emp_var       = Array{𝐑,1}(undef, runs)         ; emp_var .= 𝐑(0)
 
-s = MeanProc{𝐑,V}( ; curr_true_μ, curr_emp_μ,
+s = MeanProc_Full{𝐑,V}( ; curr_true_μ, curr_emp_μ,
                      err2², err1, err∞, emp_var,  ␣ws)
 ␣integrity_check(s)
 return s
 # Implementation:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Implementation][Implementation:2]]
-end #^ MeanProc constructor
+end #^ MeanProc_Full constructor
 # Implementation:2 ends here
 
 # [[file:../DOT_StatsHelp.org::*Helper functions and integrity check][Helper functions and integrity check:1]]
-valency(        s ::MeanProc{𝐑,V} ) where{𝐑,V}    = V
-dimension(      s ::MeanProc{𝐑,V} ) where{𝐑,V}    = size( s.curr_true_μ )
-numo_stepsruns( s ::MeanProc{𝐑,V} ) where{𝐑,V}    = size( s.err2²       )
-numo_steps(     s ::MeanProc{𝐑,V} ) where{𝐑,V}    = numo_stepsruns(s) |> first
-numo_runs(      s ::MeanProc{𝐑,V} ) where{𝐑,V}    = numo_stepsruns(s) |> last
+valency(        s ::MeanProc_Full{𝐑,V} ) where{𝐑,V}    = V
+dimension(      s ::MeanProc_Full{𝐑,V} ) where{𝐑,V}    = size( s.curr_true_μ )
+numo_stepsruns( s ::MeanProc_Full{𝐑,V} ) where{𝐑,V}    = size( s.err2²       )
+numo_steps(     s ::MeanProc_Full{𝐑,V} ) where{𝐑,V}    = numo_stepsruns(s) |> first
+numo_runs(      s ::MeanProc_Full{𝐑,V} ) where{𝐑,V}    = numo_stepsruns(s) |> last
 # Helper functions and integrity check:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Helper functions and integrity check][Helper functions and integrity check:2]]
-function ␣integrity_check(s ::MeanProc{𝐑,V}) ::Nothing  where{𝐑,V}
+function ␣integrity_check(s ::MeanProc_Full{𝐑,V}) ::Nothing  where{𝐑,V}
 # Helper functions and integrity check:2 ends here
 
 # [[file:../DOT_StatsHelp.org::*Implementation][Implementation:1]]
@@ -173,7 +173,7 @@ end
 # Implementation:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Starting a new run: ~start_run!()~][Starting a new run: ~start_run!()~:1]]
-function start_run!(s      :: MeanProc{𝐑,V}
+function start_run!(s      :: MeanProc_Full{𝐑,V}
                     ;
                     true_μ :: Array{ℝ,V} ) ::Nothing  where{𝐑,V}
 # Starting a new run: ~start_run!()~:1 ends here
@@ -203,7 +203,7 @@ end #^ start_run!()
 # Implementation of ~start_run!()~:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Adding data of a step: ~record_step!()~][Adding data of a step: ~record_step!()~:1]]
-function record_step!(s ::MeanProc{𝐑,V}
+function record_step!(s ::MeanProc_Full{𝐑,V}
                       ;
                       𝐸 ::Array{ℝ,V} ) ::Nothing  where{𝐑,V}
 # Adding data of a step: ~record_step!()~:1 ends here
@@ -247,7 +247,7 @@ end #^ record_step!()
 # Implementation:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Finalizing a run: ~finalize_run!()~][Finalizing a run: ~finalize_run!()~:1]]
-function finalize_run!(s ::MeanProc{𝐑,V}) ::Nothing                  where{𝐑,V}
+function finalize_run!(s ::MeanProc_Full{𝐑,V}) ::Nothing                  where{𝐑,V}
 # Finalizing a run: ~finalize_run!()~:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Implementation][Implementation:1]]
@@ -268,7 +268,7 @@ end #^ finalize_run!()
 # Implementation:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Storage struct][Storage struct:1]]
-@kwdef struct MeanProc_Storage{V}
+@kwdef struct MeanProc_Full_Storage{V}
     dim          ::NTuple{V,Int}
     steps_runs   ::Tuple{Int,Int}
 
@@ -282,12 +282,12 @@ end #^ finalize_run!()
 end
 # Storage struct:1 ends here
 
-# [[file:../DOT_StatsHelp.org::*Constructor: ~MeanProc~ to ~MeanProc_Storage~][Constructor: ~MeanProc~ to ~MeanProc_Storage~:1]]
-function MeanProc_Storage(mp ::MeanProc{ℝ,V}) ::MeanProc_Storage{V} where{V}
+# [[file:../DOT_StatsHelp.org::*Constructor: ~MeanProc_Full~ to ~MeanProc_Full_Storage~][Constructor: ~MeanProc_Full~ to ~MeanProc_Full_Storage~:1]]
+function MeanProc_Full_Storage(mp ::MeanProc_Full{ℝ,V}) ::MeanProc_Full_Storage{V} where{V}
     dim                         = size( mp.curr_true_μ )
     steps_runs ::Tuple{Int,Int} = size( mp.err2²       )
 
-    return MeanProc_Storage{V}(;
+    return MeanProc_Full_Storage{V}(;
                            dim         = dim,
                            steps_runs  = steps_runs,
                            curr_true_μ = reshape(mp.curr_true_μ , (length(mp.curr_true_μ),) ),
@@ -298,11 +298,11 @@ function MeanProc_Storage(mp ::MeanProc{ℝ,V}) ::MeanProc_Storage{V} where{V}
                            emp_var     =         mp.emp_var
                            )
 end
-# Constructor: ~MeanProc~ to ~MeanProc_Storage~:1 ends here
+# Constructor: ~MeanProc_Full~ to ~MeanProc_Full_Storage~:1 ends here
 
-# [[file:../DOT_StatsHelp.org::*Constructor: ~MeanProc_Storage~ to ~MeanProc~][Constructor: ~MeanProc_Storage~ to ~MeanProc~:1]]
-function MeanProc(mpio ::MeanProc_Storage{V}) ::MeanProc{ℝ,V}    where{V}
-    return MeanProc{ℝ,V}(;
+# [[file:../DOT_StatsHelp.org::*Constructor: ~MeanProc_Full_Storage~ to ~MeanProc_Full~][Constructor: ~MeanProc_Full_Storage~ to ~MeanProc_Full~:1]]
+function MeanProc_Full(mpio ::MeanProc_Full_Storage{V}) ::MeanProc_Full{ℝ,V}    where{V}
+    return MeanProc_Full{ℝ,V}(;
                          curr_true_μ = reshape(mpio.curr_true_μ , mpio.dim       ),
                          curr_emp_μ  = reshape(mpio.curr_emp_μ  , mpio.dim       ),
                          err2²       = reshape(mpio.err2²       , mpio.steps_runs),
@@ -312,21 +312,21 @@ function MeanProc(mpio ::MeanProc_Storage{V}) ::MeanProc{ℝ,V}    where{V}
                          ␣ws         = Array{ℝ,V}( undef,  ((0 for j=1:V)...,)  )
                          )
 end
-# Constructor: ~MeanProc_Storage~ to ~MeanProc~:1 ends here
+# Constructor: ~MeanProc_Full_Storage~ to ~MeanProc_Full~:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*JSON-IO functions][JSON-IO functions:1]]
 using JSON3
 # JSON-IO functions:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*JSON-IO functions][JSON-IO functions:2]]
-function write_JSON(mp ::MeanProc{ℝ,V}) ::String      where{V}
-    return JSON3.write( MeanProc_Storage( mp ) )
+function write_JSON(mp ::MeanProc_Full{ℝ,V}) ::String      where{V}
+    return JSON3.write( MeanProc_Full_Storage( mp ) )
 end
 # JSON-IO functions:2 ends here
 
 # [[file:../DOT_StatsHelp.org::*JSON-IO functions][JSON-IO functions:3]]
-function read_JSON(json ::AbstractString; V ::Int) ::MeanProc
-    return MeanProc( JSON3.read(json, MeanProc_Storage{V}) )
+function read_JSON(json ::AbstractString; V ::Int) ::MeanProc_Full
+    return MeanProc_Full( JSON3.read(json, MeanProc_Full_Storage{V}) )
 end
 # JSON-IO functions:3 ends here
 
@@ -372,7 +372,7 @@ export MaxProc
 # [[file:../DOT_StatsHelp.org::*The max-approx process type: ~MaxProc{L}~][The max-approx process type: ~MaxProc{L}~:2]]
 mutable struct MaxProc{L}
     # consts
-    const 𝝅         ::NTuple{L,ℝ}   # percentile numbers, sorted increasingly (last one must be 1.0)
+    const 𝝅         ::NTuple{L,ℝ}   # tiles numbers, sorted increasingly (last one must be 1.0)
     const freqs     ::Array{ℝ,2}    #
     const steps     ::Int
     const runs      ::Int

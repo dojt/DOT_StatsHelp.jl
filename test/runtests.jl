@@ -42,7 +42,7 @@ end
 # Generic test based on ~JET.jl~:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Set up testset][Set up testset:1]]
-@testset verbose=true "DOT_StatsHelp.jl testing: Test MeanProc{}" begin
+@testset verbose=true "DOT_StatsHelp.jl testing: Test MeanProc_Full{}" begin
 # Set up testset:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Test with valency 0][Test with valency 0:1]]
@@ -52,7 +52,7 @@ function test__meanestim_0(;runs=1:10,steps=2:4:20)
 
             data = 100*randn(curr_steps,curr_runs)
 
-            mp = MeanProc( () ; steps=curr_steps, runs=curr_runs, 𝐑)
+            mp = MeanProc_Full( () ; steps=curr_steps, runs=curr_runs, 𝐑)
 
             for run = 1:curr_runs
 
@@ -112,7 +112,7 @@ function test__meanestim_1(;runs=1:3:9,steps=2:5:12)
 
             data = [ randn(dim) for s=1:curr_steps, r=1:curr_runs ]
 
-            mp = MeanProc( (dim,) ; steps=curr_steps, runs=curr_runs, 𝐑)
+            mp = MeanProc_Full( (dim,) ; steps=curr_steps, runs=curr_runs, 𝐑)
 
             for run = 1:curr_runs
 
@@ -172,7 +172,7 @@ function test__meanestim_2(;runs=1:3:9,steps=2:5:12)
 
             data = [ randn(sz) for s=1:curr_steps, r=1:curr_runs ]
 
-            mp = MeanProc( (sz) ; steps=curr_steps, runs=curr_runs, 𝐑)
+            mp = MeanProc_Full( (sz) ; steps=curr_steps, runs=curr_runs, 𝐑)
 
             for run = 1:curr_runs
 
