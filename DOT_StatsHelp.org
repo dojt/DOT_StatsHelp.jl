@@ -303,10 +303,10 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
        function MeanProc_Full(dimension ::NTuple{V,Int}
-                         ;
-                         steps :: Int,
-                         runs  :: Int,
-                         𝐑     :: Type{<:Real} = ℝ)  ::MeanProc_Full     where{V}
+                              ;
+                              steps :: Int,
+                              runs  :: Int,
+                              𝐑     :: Type{<:Real} = ℝ)  ::MeanProc_Full     where{V}
      #+END_SRC
 
 **** Implementation
@@ -803,7 +803,7 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
         end #^ testset
       #+END_SRC
 
-** DOING [1/7] Mean-estimation with a quantile over runs
+** DOING [3/8] Mean-estimation with a quantile over runs
 *** Description
 
     Data points are added with runs as /inner/ loop and steps as /outer/ loop.  Over the runs, only a given
@@ -826,9 +826,13 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
 
 **** Fields and inner constructor
 
-      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
+        numo_steps   ::Int         #                      no need-to-know, just for pest control
+
         #            Input for run
+        δ            ::ℝ           #                      the quantile
         true_μ       ::ℝ           #                      constant over runs!
+        ε₀           ::ℝ           # correction for `true_μ` close to 0
 
         #            Output of run
         curr_emp_μ   ::Vector{𝐑}   #                      length: `runs`
@@ -837,35 +841,166 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
         err          ::Vector{ℝ}   # relative error       length: `runs`
         emp_var      ::Vector{𝐑}   #                      length: `runs`
 
+        ␣π           ::Vector{Int} # permutation          length: `runs`
+
         #             Counters
         𝐫            ::Ref{Int}    # index of current run (i.e., 0 ⪮ before first run)
         𝐬            ::Ref{Int}    # index of current step (i.e., 0 ⪮ before first step)
 
-        #
-        # Convenience constructor -- not for the user
-        #
-        function
-        MeanProc_Full{𝐑}(;
-                   true_μ ::ℝ, curr_emp_μ ::Vector{𝐑},
-                         emp_var ::Vector{𝐑}, err ::Vector{ℝ}) where{𝐑}
-            new(true_μ, curr_emp_μ, err, emp_var,
-                0,0)
-        end
+        <<""" Struct MenProc_Qtl convenience constructor """>> ;
+      #+END_SRC
+
+      That's it.
+
+      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
+        end #^ struct MeanProc_Qtl
+      #+END_SRC
+
+***** Convenience constructor -- *not* for the user!
+
+     #+CAPTION: « ~Struct MenProc_Qtl convenience constructor~ »
+     #+NAME:   """ Struct MenProc_Qtl convenience constructor """
+     #+BEGIN_SRC julia   :tangle no               :noweb no-export :noweb-prefix no
+       function MeanProc_Full{𝐑}(δ ::ℝ
+                                 ;
+                                 numo_steps ::Int, true_μ ::ℝ,
+                                 curr_emp_μ ::Vector{𝐑}, emp_var ::Vector{𝐑}, err ::Vector{ℝ},
+                                 ␣π ::Vector{Int}, ε₀ ::ℝ                                     ) where{𝐑}
+
+           new(numo_steps,
+               δ, true_μ, ε₀,
+               curr_emp_μ, err, emp_var, ␣π,
+               0,0)
+       end
+       #+END_SRC
+
+*** ToTST User-facing constructor
+
+     #+BEGIN_SRC julia   :tangle src/Rydberg.jl   :noweb no-export :noweb-prefix no
+       function MeanProc_Qtl(δ      :: ℝ
+                             ;
+                             true_μ :: ℝ,
+                             runs   :: Int,
+                             steps  :: Int,
+                             𝐑      :: Type{<:Real} = ℝ,
+                             ε₀     :: ℝ            = 1e-6)
+     #+END_SRC
+
+**** Implementation
+
+      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+        @assert 0 < δ < 1
+        @assert isfinite(true_μ)
+        @assert runs ≥ 2
+        @assert 0 ≤ ε₀ < 0.1
+
+        curr_emp_μ    = zeros( 𝐑,          runs)
+        emp_var       = zeros( 𝐑,          runs)
+        err           = Vector{ℝ  }(undef, runs)
+        ␣π            = Vector{Int}(undef, runs)
+
+        s = MeanProc_Qtl{𝐑}(δ ; numo_steps=steps, true_μ, curr_emp_μ, err, ␣π, ε₀)
+        ␣integrity_check(s)
+        return s
+      #+END_SRC
+
+      That's it!
+
+      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+        end #^ MeanProc_Qtl constructor
+      #+END_SRC
+
+*** ToTST Helper functions and integrity check
+
+      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
+       numo_runs(s ::MeanProc_Qtl{𝐑} ) where{𝐑}    = length(s.curr_emp_μ)
+     #+END_SRC
+
+     _Data integrity check_ that throws an exception if there's a problem (otherwise returns nothing).
+
+     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+       function ␣integrity_check(s ::MeanProc_Qtl{𝐑}) ::Nothing  where{𝐑}
+     #+END_SRC
+
+**** Implementation
+      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
+        @assert isfinite( s.true_μ )
+        @assert 0 < s.δ  < 1
+        @assert 0 ≤ s.ε₀ < 0.1
+
+        let runs   = numo_runs(s)
+
+            @assert runs  ≥ 2
+
+            @assert 0 ≤ s.𝐫[] ≤ runs
+            @assert 0 ≤ s.𝐬[] ≤ s.numo_steps
+            @assert s.𝐬[] ≥ 1 || s.𝐫[] == 0
+
+            @assert size( s.curr_emp_μ ) == (runs,)
+            @assert size( s.err        ) == (runs,)
+            @assert size( s.emp_var    ) == (runs,)
+            @assert size( s.␣π         ) == (runs,)
+        end #^ let
+        return nothing
       #+END_SRC
 
       #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
-        end
+        end #^ ␣integrity_check(::MeanProc_Qtl)
       #+END_SRC
 
-*** TODO User-facing constructor
 *** TODO Starting a new step: ~start_step!()~
-*** TODO Adding a data point: ~record_run!()~
+*** DOING Adding a data point: ~record_run!()~
+
+     #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
+       function record_run!( s ::MeanProc_Qtl{𝐑}
+                             ;
+                             𝐸 ::ℝ                ) ::Nothing  where{𝐑}
+           @assert isfinite(𝐸)
+           @assert s.𝐬[] ≥ 1
+           @assert s.𝐫[] < numo_runs(s)
+
+           let
+               ( ;
+                 δ, true_μ,
+                 curr_emp_μ,
+                 err,
+                 emp_var,
+                 ␣π,
+                 𝐫, 𝐬          ) = s
+
+               𝐫[] += 1
+
+               𝑟 = 𝐫[]
+               𝑠 = 𝐬[]
+
+
+               curr_emp_μ[𝑟] = ( 𝑠⋅curr_emp_μ[𝑟] + 𝐸 )/( 𝑠 + 1 )
+               𝛥             = abs( curr_emp_μ[𝑟] − true_μ )
+               err[       𝑟] = 𝛥 / ( abs(μ) + s.ε₀ )
+               rebiased      = (s.numo_steps−1) ⋅ emp_var[𝑟]              # add bias
+               emp_var[   𝑟] = (
+                                 𝑠 ⋅ (   rebiased  / (𝑠+1)    +   𝛥^2   )
+                               ) / (s.numo_steps−1)                       # remove bias
+           end
+
+       end
+     #+END_SRC
 
      <<¤CONTINUE HERE>>
 
 *** TODO Finalizing a step: ~finalize_step!()~
+
+     #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
+       lo = floor(Int, (δ   )⋅runs )
+       hi = ceil( Int, (δ +1)⋅runs )
+
+       sortperm!( ␣π, err  ;  alg = PartialQuickSort( lo:hi ) )
+        𝐬[] += 1
+     #+END_SRC
+
 *** TODO Storage and JSON export-import
 *** TODO Tests
+
 
 * CONT [0/9] Statistics of max-approximating processes
 ** In-Tst Helper-functions for frequencies
