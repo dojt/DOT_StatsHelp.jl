@@ -9,7 +9,7 @@
 #+PROPERTY: header-args :eval never :comments link :exports code
 #+SEQ_TODO: TODO DOING CONT In-Tst ARGH ↘️ | ToTST DONE
 
-You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
+You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
 
 
 * Copyright Notice
@@ -76,7 +76,7 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
     4, /Assessing Quantum Advantage/.
 
 
-* ↘️ [0/2] Task Lists and Progress Reports
+* ↘️ TASK LISTS and PROGRESS REPORTS
 ** [6/7] Max-approximating process
 
      + [X] Get started
@@ -94,11 +94,11 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
 
      + [X] Acknowledge funding: NeQst WP4
 
-     + [ ] Remove this section, [[*Task Lists and Progress Reports]]
+     + [ ] Remove this section, [[*TASK LISTS and PROGRESS REPORTS]]
 
 
 
-* ↘️ [0/1] Setup of the Package and Tests
+* Setup of the Package and Tests
 ** File headers
 
     #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
@@ -183,13 +183,15 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
      #+END_SRC
 
 
-* Statistics of mean-estimating processes
+* ↘️ Statistics of mean-estimating processes
+
+
 ** Mean estimation with all values for runs
 *** Description
 
     Data points are added with runs as outer loop and steps as inner loop.  The data of all runs is stored.
 
-*** The mean process type: ~MeanProc_Full{𝐑,V}~                <<¤MP-full--struct>>
+*** The mean process type: ~MeanProc_Full{𝐑,V}~                   <<¤MP-full--struct>>
 
      The following basic type is made available to the user:
 
@@ -379,8 +381,7 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
         end
       #+END_SRC
 
-*** Starting a new run: ~start_run!()~
-     <<mp-start>>
+*** Starting a new run: ~start_run!()~                            <<mp-start>>
 
      When a new run starts, the true mean has to be recorded, the indices 𝐫 and 𝐬 for run and step, resp., have to
      be set up, and the empirical data has to be initialized.
@@ -501,8 +502,7 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
         end #^ record_step!()
       #+END_SRC
 
-*** Finalizing a run: ~finalize_run!()~
-     <<mp-finalize>>
+*** Finalizing a run: ~finalize_run!()~                           <<mp-finalize>>
 
      The ~finalize_run!()~ function must be called after all data points have been added.  It removes the bias
      from the empirical variance.
@@ -600,7 +600,7 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
         end
       #+END_SRC
 
-*** Tests for the mean process
+*** Tests for the all-vals mean process
 **** Set up testset
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
@@ -803,7 +803,8 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
         end #^ testset
       #+END_SRC
 
-** DOING [3/8] Mean-estimation with a quantile over runs
+
+** ↘️ [6/9] Mean-estimation with a quantile over runs
 *** Description
 
     Data points are added with runs as /inner/ loop and steps as /outer/ loop.  Over the runs, only a given
@@ -827,25 +828,29 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
 **** Fields and inner constructor
 
       #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
-        numo_steps   ::Int         #                      no need-to-know, just for pest control
+        numo_steps      ::Int         #                      no need-to-know, just pest control
 
-        #            Input for run
-        δ            ::ℝ           #                      the quantile
-        true_μ       ::ℝ           #                      constant over runs!
-        ε₀           ::ℝ           # correction for `true_μ` close to 0
+        #               Input for run
+        δ               ::ℝ           #                      the quantile
+        true_μ          ::ℝ           #                      constant over runs!
+        ε₀              ::ℝ           # correction for `true_μ` close to 0
 
-        #            Output of run
-        curr_emp_μ   ::Vector{𝐑}   #                      length: `runs`
+        #               Result of step
+        curr_emp_μ      ::Vector{𝐑}   #                      length: `runs`
+        err             ::Vector{ℝ}   # relative error       length: `runs`
+        emp_var         ::Vector{𝐑}   #                      length: `runs`
 
-        #            Overall output
-        err          ::Vector{ℝ}   # relative error       length: `runs`
-        emp_var      ::Vector{𝐑}   #                      length: `runs`
+        #               Overall output
+        err_quants      ::Vector{ℝ}   # the quantiles        length: `steps`
+        err_minmax      ::Vector{ℝ}   #                      length: `steps`
+        emp_var_minmax  ::Vector{ℝ}   #                      length: `steps`
 
-        ␣π           ::Vector{Int} # permutation          length: `runs`
+        #               Work space over steps
+        ␣π              ::Vector{Int} # permutation          length: `runs`
 
-        #             Counters
-        𝐫            ::Ref{Int}    # index of current run (i.e., 0 ⪮ before first run)
-        𝐬            ::Ref{Int}    # index of current step (i.e., 0 ⪮ before first step)
+        #               Counters
+        𝐫               ::Ref{Int}    # index of current run (i.e., 0 ⪮ before first run)
+        𝐬               ::Ref{Int}    # index of current step (i.e., 0 ⪮ before first step)
 
         <<""" Struct MenProc_Qtl convenience constructor """>> ;
       #+END_SRC
@@ -858,25 +863,30 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
 
 ***** Convenience constructor -- *not* for the user!
 
-     #+CAPTION: « ~Struct MenProc_Qtl convenience constructor~ »
-     #+NAME:   """ Struct MenProc_Qtl convenience constructor """
-     #+BEGIN_SRC julia   :tangle no               :noweb no-export :noweb-prefix no
-       function MeanProc_Full{𝐑}(δ ::ℝ
-                                 ;
-                                 numo_steps ::Int, true_μ ::ℝ,
-                                 curr_emp_μ ::Vector{𝐑}, emp_var ::Vector{𝐑}, err ::Vector{ℝ},
-                                 ␣π ::Vector{Int}, ε₀ ::ℝ                                     ) where{𝐑}
+       This only adds the 0-inits for the references 𝐫, 𝐬.
 
-           new(numo_steps,
-               δ, true_μ, ε₀,
-               curr_emp_μ, err, emp_var, ␣π,
-               0,0)
-       end
-       #+END_SRC
+       #+CAPTION: « ~Struct MenProc_Qtl convenience constructor~ »
+       #+NAME:   """ Struct MenProc_Qtl convenience constructor """
+       #+BEGIN_SRC julia   :tangle no               :noweb no-export :noweb-prefix no
+         function
+             MeanProc_Full{𝐑}(  δ ::ℝ
+                                ;
+                                numo_steps ::Int, true_μ ::ℝ, ε₀ ::ℝ,
+                                curr_emp_μ ::Vector{𝐑}, emp_var ::Vector{𝐑}, err ::Vector{ℝ}, ␣π ::Vector{Int},
+                                err_quants ::Vector{ℝ}, err_minmax ::Vector{ℝ}, emp_var_minmax ::Vector{ℝ}
+                             ) where{𝐑}
+
+             new(numo_steps,
+                 δ, true_μ, ε₀,
+                 curr_emp_μ, err, emp_var, ␣π,
+                 err_quants, err_minmax, emp_var_minmax,
+                 0,0)
+         end
+         #+END_SRC
 
 *** ToTST User-facing constructor
 
-     #+BEGIN_SRC julia   :tangle src/Rydberg.jl   :noweb no-export :noweb-prefix no
+     #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
        function MeanProc_Qtl(δ      :: ℝ
                              ;
                              true_μ :: ℝ,
@@ -894,12 +904,19 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
         @assert runs ≥ 2
         @assert 0 ≤ ε₀ < 0.1
 
-        curr_emp_μ    = zeros( 𝐑,          runs)
-        emp_var       = zeros( 𝐑,          runs)
-        err           = Vector{ℝ  }(undef, runs)
-        ␣π            = Vector{Int}(undef, runs)
+        curr_emp_μ     = zeros( 𝐑,          runs)
+        emp_var        = zeros( 𝐑,          runs)
+        err            = Vector{ℝ  }(undef, runs)
+        ␣π             = collect(1:runs)
 
-        s = MeanProc_Qtl{𝐑}(δ ; numo_steps=steps, true_μ, curr_emp_μ, err, ␣π, ε₀)
+
+        err_quants     = ℝ[] ; sizehint!(err_quants    ,steps)
+        err_minmax     = ℝ[] ; sizehint!(err_minmax    ,steps)
+        emp_var_minmax = ℝ[] ; sizehint!(emp_var_minmax,steps)
+
+        s = MeanProc_Qtl{𝐑}(δ ; ε₀, numo_steps=steps, true_μ,
+                            curr_emp_μ, err, ␣π,
+                            err_quants, err_minmax, emp_var_minmax)
         ␣integrity_check(s)
         return s
       #+END_SRC
@@ -913,7 +930,8 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
 *** ToTST Helper functions and integrity check
 
       #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
-       numo_runs(s ::MeanProc_Qtl{𝐑} ) where{𝐑}    = length(s.curr_emp_μ)
+       numo_runs(s ::MeanProc_Qtl{𝐑} ) where{𝐑}     = length(s.curr_emp_μ)
+       numo_steps(s ::MeanProc_Qtl{𝐑} ) where{𝐑}    = s.numo_steps
      #+END_SRC
 
      _Data integrity check_ that throws an exception if there's a problem (otherwise returns nothing).
@@ -929,17 +947,25 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
         @assert 0 ≤ s.ε₀ < 0.1
 
         let runs   = numo_runs(s)
+            steps  = numo_steps(s)
 
             @assert runs  ≥ 2
 
             @assert 0 ≤ s.𝐫[] ≤ runs
-            @assert 0 ≤ s.𝐬[] ≤ s.numo_steps
+            @assert 0 ≤ s.𝐬[] ≤ steps
             @assert s.𝐬[] ≥ 1 || s.𝐫[] == 0
 
-            @assert size( s.curr_emp_μ ) == (runs,)
-            @assert size( s.err        ) == (runs,)
-            @assert size( s.emp_var    ) == (runs,)
-            @assert size( s.␣π         ) == (runs,)
+            @assert size( s.curr_emp_μ     ) == (runs,)
+            @assert size( s.err            ) == (runs,)
+            @assert size( s.emp_var        ) == (runs,)
+            @assert size( s.␣π             ) == (runs,)
+
+            @assert size( s.err_quants     ) ==
+                    size( s.err_minmax     ) ==
+                    size( s.emp_var_minmax )
+
+            @assert s.𝐬[]-1 ≤ length(s.err_quants) ≤ s.𝐬[] ??????????????????????????
+
         end #^ let
         return nothing
       #+END_SRC
@@ -948,13 +974,33 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
         end #^ ␣integrity_check(::MeanProc_Qtl)
       #+END_SRC
 
-*** TODO Starting a new step: ~start_step!()~
-*** DOING Adding a data point: ~record_run!()~
+*** ToTST Starting a new step: ~start_step!()~
+
+     #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
+       function start_step!(s ::MeanProc_Qtl{𝐑}) ::Nothing
+
+           ␣integrity_check(s)
+
+
+           if    s.𝐬[] > 0         @assert s.𝐫[] == numo_runs(s)
+           else                    @assert s.𝐫[] == 0               end
+
+           s.𝐬[] += 1            ; @assert s.𝐬[] ≤ numo_steps(s)
+           s.𝐫[]  = 0
+
+           nothing;
+       end #^ start_run!()
+     #+END_SRC
+
+*** ToTST Adding a data point: ~record_run!()~
 
      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
        function record_run!( s ::MeanProc_Qtl{𝐑}
                              ;
-                             𝐸 ::ℝ                ) ::Nothing  where{𝐑}
+                             𝐸 ::ℝ              ) ::Nothing  where{𝐑}
+
+           ␣integrity_check(s)
+
            @assert isfinite(𝐸)
            @assert s.𝐬[] ≥ 1
            @assert s.𝐫[] < numo_runs(s)
@@ -965,7 +1011,6 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
                  curr_emp_μ,
                  err,
                  emp_var,
-                 ␣π,
                  𝐫, 𝐬          ) = s
 
                𝐫[] += 1
@@ -974,32 +1019,151 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
                𝑠 = 𝐬[]
 
 
-               curr_emp_μ[𝑟] = ( 𝑠⋅curr_emp_μ[𝑟] + 𝐸 )/( 𝑠 + 1 )
-               𝛥             = abs( curr_emp_μ[𝑟] − true_μ )
-               err[       𝑟] = 𝛥 / ( abs(μ) + s.ε₀ )
-               rebiased      = (s.numo_steps−1) ⋅ emp_var[𝑟]              # add bias
-               emp_var[   𝑟] = (
-                                 𝑠 ⋅ (   rebiased  / (𝑠+1)    +   𝛥^2   )
-                               ) / (s.numo_steps−1)                       # remove bias
-           end
+               let old_μ = curr_emp_μ[𝑟],
 
-       end
+                   emp_var[𝑟] =
+                       if      𝑠 == 1      𝐑(0)
+                       elseif  𝑠 == 2      (old_μ − (old_μ+𝐸)/2)^2 + (𝐸 − (old_μ+𝐸)/2)^2
+                       else
+                           old_emp_var = emp_var[𝑟] ⋅ (𝑠-1)/𝐑(𝑠-2)
+                           old_emp_var +  abs²(old_μ − 𝐸)/𝑠
+                       end
+               end #^ let
+
+
+               curr_emp_μ[𝑟] = ( (𝑠-1)⋅curr_emp_μ[𝑟] + 𝐸 ) / 𝑠
+
+
+               let 𝛥 = abs( curr_emp_μ[𝑟] − true_μ )
+
+                   err[𝑟] = 𝛥 / ( abs(true_μ) + s.ε₀ )
+
+               end
+           end #^ let
+       end #^ record_run!()
      #+END_SRC
 
-     <<¤CONTINUE HERE>>
+*** ToTST Finalizing a step: ~finalize_step!()~
 
-*** TODO Finalizing a step: ~finalize_step!()~
+     This version of ~finalize...()~ returns the quantile.
 
      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
-       lo = floor(Int, (δ   )⋅runs )
-       hi = ceil( Int, (δ +1)⋅runs )
+       function finalize_step!(s ::MeanProc_Qtl{𝐑}) ::ℝ     where{𝐑}
 
-       sortperm!( ␣π, err  ;  alg = PartialQuickSort( lo:hi ) )
-        𝐬[] += 1
+           ␣integrity_check(s)
+
+
+           let
+               ( ;
+                 δ, true_μ,
+                 curr_emp_μ,
+                 err,
+                 emp_var,
+                 ␣π,
+                 𝐫, 𝐬          ) = s
+
+               push!(s.err_quants    ,
+                     let lo = floor(Int, (δ   )⋅runs ),
+                         hi = ceil( Int, (δ +1)⋅runs )
+
+                         sortperm!( ␣π, err  ;  alg = PartialQuickSort( lo:hi ) )
+                     end
+                     )
+
+               push!(          s.err_minmax               ,
+                         extrema(err)                      )
+
+               push!(          s.emp_var_minmax           ,
+                         extrema(emp_var) |> Tuple{ℝ,ℝ}    )
+
+
+               𝐬[] += 1
+
+           end #^ let
+
+           ␣integrity_check(s)
+
+           return s.err_quants[end]
+       end #^ finalize_step!()
      #+END_SRC
 
 *** TODO Storage and JSON export-import
 *** TODO Tests
+
+*** TODO Tests for the quantile mean process
+**** TODO Set up testset
+
+      #+BEGIN_SRC julia :tangle test/runtests.jl
+        @testset verbose=true "DOT_StatsHelp.jl testing: Test MeanProc_Qtl{}" begin
+      #+END_SRC
+
+**** TODO The test
+
+      #+BEGIN_SRC julia :tangle test/runtests.jl
+        function test__meanestim_qtl(;runs=1:10,steps=2:4:20)
+            for 𝐑 ∈ (Double64,Float64)
+                for (curr_runs,curr_steps) in Iterators.product(runs,steps)
+
+                    data = 100*randn(curr_steps,curr_runs)
+
+                    mp = MeanProc_Full( () ; steps=curr_steps, runs=curr_runs, 𝐑)
+
+                    for run = 1:curr_runs
+
+                        start_run!(mp ; true_μ = fill(0.0) )
+
+                        for step = 1:curr_steps
+                            record_step!(mp ; 𝐸 = fill(data[step,run]) )
+                            @test curr_emp_μ(mp)[]  ≈ mean( @view data[1:step,run] )
+                        end
+                        finalize_run!(mp)
+
+                        @test emp_var(mp;run)         ≈ var(  @view data[:,run] )
+
+                        for step=1:curr_steps
+                            @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> abs²
+                        end
+                        @test all(
+                            err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
+                            for step=1:curr_steps
+                                )
+                        @test all(
+                            err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
+                        for step=1:curr_steps
+                            )
+
+                    end #^ for run
+
+                    if 𝐑 == Float64
+                        jsonstr = write_JSON(mp)
+                        mp2     = read_JSON(jsonstr;V=0)
+
+                        @test mp.curr_true_μ  == mp2.curr_true_μ
+                        @test mp.curr_emp_μ   == mp2.curr_emp_μ
+                        @test mp.err2²        == mp2.err2²
+                        @test mp.err1         == mp2.err1
+                        @test mp.err∞         == mp2.err∞
+                        @test mp.emp_var      == mp2.emp_var
+                    end
+
+                end #^ for curr_...
+            end #^ for 𝐑
+        end #^ test__meanestim_0()
+      #+END_SRC
+
+      Run it:
+
+      #+BEGIN_SRC julia :tangle test/runtests.jl
+        @testset "Valency-0 tests" begin
+            test__meanestim_0()
+        end
+      #+END_SRC
+
+**** End of testset
+
+      #+BEGIN_SRC julia :tangle test/runtests.jl
+        end #^ testset
+      #+END_SRC
 
 
 * CONT [0/9] Statistics of max-approximating processes
@@ -1298,17 +1462,19 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]]
        end #^ record_step!()
      #+END_SRC
 
-** In-Tst Finalizing a run: ~finalize_run!()~
-     <<max-finalize>>
+** In-Tst Finalizing a run: ~finalize_run!()~                  <<max-finalize>>
+
+    This version of ~finalize...()~ returns the maximum.
+
 
      #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
-       function finalize_run!(s ::MaxProc{L}) ::Nothing         where{L}
+       function finalize_run!(s ::MaxProc{L}) ::ℝ         where{L}
            ␣integrity_check(s)
 
            @assert s.𝐬 == numo_steps(s)
            @assert 0 ≤ s.curr_max
 
-           nothing; # ... else needs to be done
+           return s.curr_max
        end #^ finalize_run!()
      #+END_SRC
 

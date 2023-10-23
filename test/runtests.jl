@@ -227,6 +227,72 @@ end
 end #^ testset
 # End of testset:1 ends here
 
+# [[file:../DOT_StatsHelp.org::*Set up testset][Set up testset:1]]
+@testset verbose=true "DOT_StatsHelp.jl testing: Test MeanProc_Qtl{}" begin
+# Set up testset:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*The test][The test:1]]
+function test__meanestim_qtl(;runs=1:10,steps=2:4:20)
+    for 𝐑 ∈ (Double64,Float64)
+        for (curr_runs,curr_steps) in Iterators.product(runs,steps)
+
+            data = 100*randn(curr_steps,curr_runs)
+
+            mp = MeanProc_Full( () ; steps=curr_steps, runs=curr_runs, 𝐑)
+
+            for run = 1:curr_runs
+
+                start_run!(mp ; true_μ = fill(0.0) )
+
+                for step = 1:curr_steps
+                    record_step!(mp ; 𝐸 = fill(data[step,run]) )
+                    @test curr_emp_μ(mp)[]  ≈ mean( @view data[1:step,run] )
+                end
+                finalize_run!(mp)
+
+                @test emp_var(mp;run)         ≈ var(  @view data[:,run] )
+
+                for step=1:curr_steps
+                    @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> abs²
+                end
+                @test all(
+                    err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
+                    for step=1:curr_steps
+                        )
+                @test all(
+                    err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
+                for step=1:curr_steps
+                    )
+
+            end #^ for run
+
+            if 𝐑 == Float64
+                jsonstr = write_JSON(mp)
+                mp2     = read_JSON(jsonstr;V=0)
+
+                @test mp.curr_true_μ  == mp2.curr_true_μ
+                @test mp.curr_emp_μ   == mp2.curr_emp_μ
+                @test mp.err2²        == mp2.err2²
+                @test mp.err1         == mp2.err1
+                @test mp.err∞         == mp2.err∞
+                @test mp.emp_var      == mp2.emp_var
+            end
+
+        end #^ for curr_...
+    end #^ for 𝐑
+end #^ test__meanestim_0()
+# The test:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*The test][The test:2]]
+@testset "Valency-0 tests" begin
+    test__meanestim_0()
+end
+# The test:2 ends here
+
+# [[file:../DOT_StatsHelp.org::*End of testset][End of testset:1]]
+end #^ testset
+# End of testset:1 ends here
+
 # [[file:../DOT_StatsHelp.org::*Main testing function][Main testing function:1]]
 function test__xtiles()
 

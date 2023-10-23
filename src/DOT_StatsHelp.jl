@@ -50,13 +50,13 @@ export finalize_run!
 export MeanProc_Full_Storage, write_JSON, read_JSON
 # Module definition, import, and recurrent exports:3 ends here
 
-# [[file:../DOT_StatsHelp.org::*The mean process type: ~MeanProc_Full{𝐑,V}~][The mean process type: ~MeanProc_Full{𝐑,V}~:1]]
+# [[file:../DOT_StatsHelp.org::*The mean process type: ~MeanProc_Full{𝐑,V}~ <<¤MP-full--struct>>][The mean process type: ~MeanProc_Full{𝐑,V}~                   <<¤MP-full--struct>>:1]]
 export MeanProc_Full
-# The mean process type: ~MeanProc_Full{𝐑,V}~:1 ends here
+# The mean process type: ~MeanProc_Full{𝐑,V}~                   <<¤MP-full--struct>>:1 ends here
 
-# [[file:../DOT_StatsHelp.org::*The mean process type: ~MeanProc_Full{𝐑,V}~][The mean process type: ~MeanProc_Full{𝐑,V}~:2]]
+# [[file:../DOT_StatsHelp.org::*The mean process type: ~MeanProc_Full{𝐑,V}~ <<¤MP-full--struct>>][The mean process type: ~MeanProc_Full{𝐑,V}~                   <<¤MP-full--struct>>:2]]
 struct MeanProc_Full{𝐑 <: Real, V}              # `V` is an integer: the valency of the tensor
-# The mean process type: ~MeanProc_Full{𝐑,V}~:2 ends here
+# The mean process type: ~MeanProc_Full{𝐑,V}~                   <<¤MP-full--struct>>:2 ends here
 
 # [[file:../DOT_StatsHelp.org::*Fields and inner constructor][Fields and inner constructor:1]]
 #            Input for run
@@ -109,10 +109,10 @@ curr_emp_μ(s ::MeanProc_Full{𝐑,V})                     where{𝐑,V} = ( @as
 
 # [[file:../DOT_StatsHelp.org::*User-facing constructor for ~MeanProc_Full~][User-facing constructor for ~MeanProc_Full~:1]]
 function MeanProc_Full(dimension ::NTuple{V,Int}
-                  ;
-                  steps :: Int,
-                  runs  :: Int,
-                  𝐑     :: Type{<:Real} = ℝ)  ::MeanProc_Full     where{V}
+                       ;
+                       steps :: Int,
+                       runs  :: Int,
+                       𝐑     :: Type{<:Real} = ℝ)  ::MeanProc_Full     where{V}
 # User-facing constructor for ~MeanProc_Full~:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Implementation][Implementation:1]]
@@ -172,11 +172,11 @@ function ␣integrity_check(s ::MeanProc_Full{𝐑,V}) ::Nothing  where{𝐑,V}
 end
 # Implementation:1 ends here
 
-# [[file:../DOT_StatsHelp.org::*Starting a new run: ~start_run!()~][Starting a new run: ~start_run!()~:1]]
+# [[file:../DOT_StatsHelp.org::*Starting a new run: ~start_run!()~ <<mp-start>>][Starting a new run: ~start_run!()~                            <<mp-start>>:1]]
 function start_run!(s      :: MeanProc_Full{𝐑,V}
                     ;
                     true_μ :: Array{ℝ,V} ) ::Nothing  where{𝐑,V}
-# Starting a new run: ~start_run!()~:1 ends here
+# Starting a new run: ~start_run!()~                            <<mp-start>>:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Implementation of ~start_run!()~][Implementation of ~start_run!()~:1]]
 ␣integrity_check(s)
@@ -246,9 +246,9 @@ nothing;
 end #^ record_step!()
 # Implementation:1 ends here
 
-# [[file:../DOT_StatsHelp.org::*Finalizing a run: ~finalize_run!()~][Finalizing a run: ~finalize_run!()~:1]]
+# [[file:../DOT_StatsHelp.org::*Finalizing a run: ~finalize_run!()~ <<mp-finalize>>][Finalizing a run: ~finalize_run!()~                           <<mp-finalize>>:1]]
 function finalize_run!(s ::MeanProc_Full{𝐑,V}) ::Nothing                  where{𝐑,V}
-# Finalizing a run: ~finalize_run!()~:1 ends here
+# Finalizing a run: ~finalize_run!()~                           <<mp-finalize>>:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Implementation][Implementation:1]]
 ␣integrity_check(s)
@@ -329,6 +329,240 @@ function read_JSON(json ::AbstractString; V ::Int) ::MeanProc_Full
     return MeanProc_Full( JSON3.read(json, MeanProc_Full_Storage{V}) )
 end
 # JSON-IO functions:3 ends here
+
+# [[file:../DOT_StatsHelp.org::*The type ~MeanProc_Qtl{𝐑}~][The type ~MeanProc_Qtl{𝐑}~:1]]
+export MeanProc_Qtl
+struct MeanProc_Qtl{𝐑 <: Real}
+# The type ~MeanProc_Qtl{𝐑}~:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*Fields and inner constructor][Fields and inner constructor:1]]
+numo_steps      ::Int         #                      no need-to-know, just pest control
+
+#               Input for run
+δ               ::ℝ           #                      the quantile
+true_μ          ::ℝ           #                      constant over runs!
+ε₀              ::ℝ           # correction for `true_μ` close to 0
+
+#               Result of step
+curr_emp_μ      ::Vector{𝐑}   #                      length: `runs`
+err             ::Vector{ℝ}   # relative error       length: `runs`
+emp_var         ::Vector{𝐑}   #                      length: `runs`
+
+#               Overall output
+err_quants      ::Vector{ℝ}   # the quantiles        length: `steps`
+err_minmax      ::Vector{ℝ}   #                      length: `steps`
+emp_var_minmax  ::Vector{ℝ}   #                      length: `steps`
+
+#               Work space over steps
+␣π              ::Vector{Int} # permutation          length: `runs`
+
+#               Counters
+𝐫               ::Ref{Int}    # index of current run (i.e., 0 ⪮ before first run)
+𝐬               ::Ref{Int}    # index of current step (i.e., 0 ⪮ before first step)
+
+function
+    MeanProc_Full{𝐑}(  δ ::ℝ
+                       ;
+                       numo_steps ::Int, true_μ ::ℝ, ε₀ ::ℝ,
+                       curr_emp_μ ::Vector{𝐑}, emp_var ::Vector{𝐑}, err ::Vector{ℝ}, ␣π ::Vector{Int},
+                       err_quants ::Vector{ℝ}, err_minmax ::Vector{ℝ}, emp_var_minmax ::Vector{ℝ}
+                    ) where{𝐑}
+
+    new(numo_steps,
+        δ, true_μ, ε₀,
+        curr_emp_μ, err, emp_var, ␣π,
+        err_quants, err_minmax, emp_var_minmax,
+        0,0)
+end ;
+# Fields and inner constructor:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*Fields and inner constructor][Fields and inner constructor:2]]
+end #^ struct MeanProc_Qtl
+# Fields and inner constructor:2 ends here
+
+# [[file:../DOT_StatsHelp.org::*User-facing constructor][User-facing constructor:1]]
+function MeanProc_Qtl(δ      :: ℝ
+                      ;
+                      true_μ :: ℝ,
+                      runs   :: Int,
+                      steps  :: Int,
+                      𝐑      :: Type{<:Real} = ℝ,
+                      ε₀     :: ℝ            = 1e-6)
+# User-facing constructor:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*Implementation][Implementation:1]]
+@assert 0 < δ < 1
+@assert isfinite(true_μ)
+@assert runs ≥ 2
+@assert 0 ≤ ε₀ < 0.1
+
+curr_emp_μ     = zeros( 𝐑,          runs)
+emp_var        = zeros( 𝐑,          runs)
+err            = Vector{ℝ  }(undef, runs)
+␣π             = collect(1:runs)
+
+
+err_quants     = ℝ[] ; sizehint!(err_quants    ,steps)
+err_minmax     = ℝ[] ; sizehint!(err_minmax    ,steps)
+emp_var_minmax = ℝ[] ; sizehint!(emp_var_minmax,steps)
+
+s = MeanProc_Qtl{𝐑}(δ ; ε₀, numo_steps=steps, true_μ,
+                    curr_emp_μ, err, ␣π,
+                    err_quants, err_minmax, emp_var_minmax)
+␣integrity_check(s)
+return s
+# Implementation:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*Implementation][Implementation:2]]
+end #^ MeanProc_Qtl constructor
+# Implementation:2 ends here
+
+# [[file:../DOT_StatsHelp.org::*Helper functions and integrity check][Helper functions and integrity check:1]]
+numo_runs(s ::MeanProc_Qtl{𝐑} ) where{𝐑}     = length(s.curr_emp_μ)
+numo_steps(s ::MeanProc_Qtl{𝐑} ) where{𝐑}    = s.numo_steps
+# Helper functions and integrity check:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*Helper functions and integrity check][Helper functions and integrity check:2]]
+function ␣integrity_check(s ::MeanProc_Qtl{𝐑}) ::Nothing  where{𝐑}
+# Helper functions and integrity check:2 ends here
+
+# [[file:../DOT_StatsHelp.org::*Implementation][Implementation:1]]
+@assert isfinite( s.true_μ )
+@assert 0 < s.δ  < 1
+@assert 0 ≤ s.ε₀ < 0.1
+
+let runs   = numo_runs(s)
+    steps  = numo_steps(s)
+
+    @assert runs  ≥ 2
+
+    @assert 0 ≤ s.𝐫[] ≤ runs
+    @assert 0 ≤ s.𝐬[] ≤ steps
+    @assert s.𝐬[] ≥ 1 || s.𝐫[] == 0
+
+    @assert size( s.curr_emp_μ     ) == (runs,)
+    @assert size( s.err            ) == (runs,)
+    @assert size( s.emp_var        ) == (runs,)
+    @assert size( s.␣π             ) == (runs,)
+
+    @assert size( s.err_quants     ) ==
+            size( s.err_minmax     ) ==
+            size( s.emp_var_minmax )
+
+    @assert s.𝐬[]-1 ≤ length(s.err_quants) ≤ s.𝐬[] ??????????????????????????
+
+end #^ let
+return nothing
+# Implementation:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*Implementation][Implementation:2]]
+end #^ ␣integrity_check(::MeanProc_Qtl)
+# Implementation:2 ends here
+
+# [[file:../DOT_StatsHelp.org::*Starting a new step: ~start_step!()~][Starting a new step: ~start_step!()~:1]]
+function start_step!(s ::MeanProc_Qtl{𝐑}) ::Nothing
+
+    ␣integrity_check(s)
+
+
+    if    s.𝐬[] > 0         @assert s.𝐫[] == numo_runs(s)
+    else                    @assert s.𝐫[] == 0               end
+
+    s.𝐬[] += 1            ; @assert s.𝐬[] ≤ numo_steps(s)
+    s.𝐫[]  = 0
+
+    nothing;
+end #^ start_run!()
+# Starting a new step: ~start_step!()~:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*Adding a data point: ~record_run!()~][Adding a data point: ~record_run!()~:1]]
+function record_run!( s ::MeanProc_Qtl{𝐑}
+                      ;
+                      𝐸 ::ℝ              ) ::Nothing  where{𝐑}
+
+    ␣integrity_check(s)
+
+    @assert isfinite(𝐸)
+    @assert s.𝐬[] ≥ 1
+    @assert s.𝐫[] < numo_runs(s)
+
+    let
+        ( ;
+          δ, true_μ,
+          curr_emp_μ,
+          err,
+          emp_var,
+          𝐫, 𝐬          ) = s
+
+        𝐫[] += 1
+
+        𝑟 = 𝐫[]
+        𝑠 = 𝐬[]
+
+
+        let old_μ = curr_emp_μ[𝑟],
+
+            emp_var[𝑟] =
+                if      𝑠 == 1      𝐑(0)
+                elseif  𝑠 == 2      (old_μ − (old_μ+𝐸)/2)^2 + (𝐸 − (old_μ+𝐸)/2)^2
+                else
+                    old_emp_var = emp_var[𝑟] ⋅ (𝑠-1)/𝐑(𝑠-2)
+                    old_emp_var +  abs²(old_μ − 𝐸)/𝑠
+                end
+        end #^ let
+
+
+        curr_emp_μ[𝑟] = ( (𝑠-1)⋅curr_emp_μ[𝑟] + 𝐸 ) / 𝑠
+
+
+        let 𝛥 = abs( curr_emp_μ[𝑟] − true_μ )
+
+            err[𝑟] = 𝛥 / ( abs(true_μ) + s.ε₀ )
+
+        end
+    end #^ let
+end #^ record_run!()
+# Adding a data point: ~record_run!()~:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*Finalizing a step: ~finalize_step!()~][Finalizing a step: ~finalize_step!()~:1]]
+function finalize_step!(s ::MeanProc_Qtl{𝐑}) ::ℝ     where{𝐑}
+
+    ␣integrity_check(s)
+
+
+    let
+        ( ;
+          δ, true_μ,
+          curr_emp_μ,
+          err,
+          emp_var,
+          ␣π,
+          𝐫, 𝐬          ) = s
+
+        push!(s.err_quants    ,
+              let lo = floor(Int, (δ   )⋅runs ),
+                  hi = ceil( Int, (δ +1)⋅runs )
+
+                  sortperm!( ␣π, err  ;  alg = PartialQuickSort( lo:hi ) )
+              end
+              )
+
+        push!(          s.err_minmax               ,
+                  extrema(err)                      )
+
+        push!(          s.emp_var_minmax           ,
+                  extrema(emp_var) |> Tuple{ℝ,ℝ}    )
+
+
+        𝐬[] += 1
+
+    end #^ let
+
+    ␣integrity_check(s)
+
+    return s.err_quants[end]
+end #^ finalize_step!()
+# Finalizing a step: ~finalize_step!()~:1 ends here
 
 # [[file:../DOT_StatsHelp.org::␣xtiles_make()][␣xtiles_make()]]
 function ␣xtiles_make(_𝝅) ::Tuple
@@ -476,16 +710,16 @@ function record_step!(s ::MaxProc{L}
 end #^ record_step!()
 # Adding data of a step: ~record_step!()~:1 ends here
 
-# [[file:../DOT_StatsHelp.org::*Finalizing a run: ~finalize_run!()~][Finalizing a run: ~finalize_run!()~:1]]
-function finalize_run!(s ::MaxProc{L}) ::Nothing         where{L}
+# [[file:../DOT_StatsHelp.org::*Finalizing a run: ~finalize_run!()~ <<max-finalize>>][Finalizing a run: ~finalize_run!()~                  <<max-finalize>>:1]]
+function finalize_run!(s ::MaxProc{L}) ::ℝ         where{L}
     ␣integrity_check(s)
 
     @assert s.𝐬 == numo_steps(s)
     @assert 0 ≤ s.curr_max
 
-    nothing; # ... else needs to be done
+    return s.curr_max
 end #^ finalize_run!()
-# Finalizing a run: ~finalize_run!()~:1 ends here
+# Finalizing a run: ~finalize_run!()~                  <<max-finalize>>:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*End of module][End of module:1]]
 end #^ module SPSA_Shift
