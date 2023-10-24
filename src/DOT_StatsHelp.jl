@@ -368,11 +368,12 @@ function
                        err_quants ::Vector{ℝ}, err_minmax ::Vector{ℝ}, emp_var_minmax ::Vector{ℝ}
                     ) where{𝐑}
 
-    new(numo_steps,
-        δ, true_μ, ε₀,
-        curr_emp_μ, err, emp_var, ␣π,
-        err_quants, err_minmax, emp_var_minmax,
-        0,0)
+    new{𝐑}(numo_steps,
+           δ, true_μ, ε₀,
+           curr_emp_μ, err, emp_var,
+           err_quants, err_minmax, emp_var_minmax,
+           ␣π,
+           0,0)
 end ;
 # Fields and inner constructor:1 ends here
 
@@ -407,7 +408,7 @@ err_minmax     = ℝ[] ; sizehint!(err_minmax    ,steps)
 emp_var_minmax = ℝ[] ; sizehint!(emp_var_minmax,steps)
 
 s = MeanProc_Qtl{𝐑}(δ ; ε₀, numo_steps=steps, true_μ,
-                    curr_emp_μ, err, ␣π,
+                    curr_emp_μ, emp_var, err, ␣π,
                     err_quants, err_minmax, emp_var_minmax)
 ␣integrity_check(s)
 return s
@@ -449,7 +450,7 @@ let runs   = numo_runs(s)
             size( s.err_minmax     ) ==
             size( s.emp_var_minmax )
 
-    @assert s.𝐬[]-1 ≤ length(s.err_quants) ≤ s.𝐬[] ??????????????????????????
+    @assert (s.𝐬[]-1,) ≤ size(s.err_quants) ≤ (s.𝐬[],) # ??????????????????????????
 
 end #^ let
 return nothing
@@ -460,7 +461,7 @@ end #^ ␣integrity_check(::MeanProc_Qtl)
 # Implementation:2 ends here
 
 # [[file:../DOT_StatsHelp.org::*Starting a new step: ~start_step!()~][Starting a new step: ~start_step!()~:1]]
-function start_step!(s ::MeanProc_Qtl{𝐑}) ::Nothing
+function start_step!(s ::MeanProc_Qtl{𝐑}) ::Nothing        where{𝐑}
 
     ␣integrity_check(s)
 
@@ -500,7 +501,7 @@ function record_run!( s ::MeanProc_Qtl{𝐑}
         𝑠 = 𝐬[]
 
 
-        let old_μ = curr_emp_μ[𝑟],
+        let old_μ = curr_emp_μ[𝑟]
 
             emp_var[𝑟] =
                 if      𝑠 == 1      𝐑(0)
@@ -531,6 +532,7 @@ function finalize_step!(s ::MeanProc_Qtl{𝐑}) ::ℝ     where{𝐑}
 
 
     let
+        runs              = numo_runs(s)
         ( ;
           δ, true_μ,
           curr_emp_μ,
@@ -538,6 +540,7 @@ function finalize_step!(s ::MeanProc_Qtl{𝐑}) ::ℝ     where{𝐑}
           emp_var,
           ␣π,
           𝐫, 𝐬          ) = s
+
 
         push!(s.err_quants    ,
               let lo = floor(Int, (δ   )⋅runs ),
@@ -552,9 +555,6 @@ function finalize_step!(s ::MeanProc_Qtl{𝐑}) ::ℝ     where{𝐑}
 
         push!(          s.emp_var_minmax           ,
                   extrema(emp_var) |> Tuple{ℝ,ℝ}    )
-
-
-        𝐬[] += 1
 
     end #^ let
 

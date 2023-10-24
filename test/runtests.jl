@@ -232,54 +232,69 @@ end #^ testset
 # Set up testset:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*The test][The test:1]]
-function test__meanestim_qtl(;runs=1:10,steps=2:4:20)
-    for 𝐑 ∈ (Double64,Float64)
-        for (curr_runs,curr_steps) in Iterators.product(runs,steps)
+function test__meanestim_qtl(;runs=100:777:10_000,steps=2:4:20)
 
-            data = 100*randn(curr_steps,curr_runs)
+    δ  = 0.123
+    ε₀ = 1e-3
 
-            mp = MeanProc_Full( () ; steps=curr_steps, runs=curr_runs, 𝐑)
+    for true_μ ∈ (1.0, 1e-10)
+        for 𝐑 ∈ (Double64,Float64)
+            for (curr_runs,curr_steps) in Iterators.product(runs,steps)
 
-            for run = 1:curr_runs
+                data = ones(curr_steps,curr_runs)/true_μ + 100*randn(curr_steps,curr_runs)
+                μ    = [ mean( @view data[1:step,run]   )  for step=1:curr_steps, run=1:curr_runs ]
+                var  = [ var(  @view data[1:step,run]   )  for step=1:curr_steps, run=1:curr_runs ]
+                Δ    = abs².( μ .− true_μ )
+                rerr = Δ ./( true_μ + ε₀ )
 
-                start_run!(mp ; true_μ = fill(0.0) )
+                pcnt = [ percentile( @view rerr[step,:] )  for step=1:curr_steps ]
+                erex = [ extrema(    @view rerr[step,:] )  for step=1:curr_steps ]
+                varex= [ extrema(    @view var[step,:]  )  for step=1:curr_steps ]
 
+                mp = MeanProc_Qtl(δ
+                                  ;
+                                  true_μ, ε₀,
+                                  runs   = curr_runs
+                                  steps  = curr_steps,
+                                  𝐑)
                 for step = 1:curr_steps
-                    record_step!(mp ; 𝐸 = fill(data[step,run]) )
-                    @test curr_emp_μ(mp)[]  ≈ mean( @view data[1:step,run] )
-                end
-                finalize_run!(mp)
 
-                @test emp_var(mp;run)         ≈ var(  @view data[:,run] )
 
-                for step=1:curr_steps
-                    @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> abs²
-                end
-                @test all(
-                    err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
-                    for step=1:curr_steps
-                        )
-                @test all(
-                    err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
-                for step=1:curr_steps
-                    )
+                    start_step!(mp)
 
-            end #^ for run
+                    for run = 1:curr_runs
 
-            if 𝐑 == Float64
-                jsonstr = write_JSON(mp)
-                mp2     = read_JSON(jsonstr;V=0)
+                        record_run!(mp ; 𝐸 = data[step,run] )
 
-                @test mp.curr_true_μ  == mp2.curr_true_μ
-                @test mp.curr_emp_μ   == mp2.curr_emp_μ
-                @test mp.err2²        == mp2.err2²
-                @test mp.err1         == mp2.err1
-                @test mp.err∞         == mp2.err∞
-                @test mp.emp_var      == mp2.emp_var
-            end
 
-        end #^ for curr_...
-    end #^ for 𝐑
+                        @test mp.curr_emp_μ[mp.𝐫[]] ≈ μ[   step,run]
+                        @test mp.err[       mp.𝐫[]] ≈ rerr[step,run]
+                        @test mp.emp_var[   mp.𝐫[]] ≈ var[ step,run]
+                    end #^ for (runs)
+
+                    finalize_step!(mp)
+
+                    @test mp.err_quants[    step] ≈ pcnt[ step]
+                    @test mp.err_minmax[    step] ≈ erex[ step]
+                    @test mp.emp_var_minmax[step] ≈ varex[step]
+
+                end #^ for (steps)
+
+                # if 𝐑 == Float64
+                #     jsonstr = write_JSON(mp)
+                #     mp2     = read_JSON(jsonstr;V=0)
+                #
+                #     @test mp.curr_true_μ  == mp2.curr_true_μ
+                #     @test mp.curr_emp_μ   == mp2.curr_emp_μ
+                #     @test mp.err2²        == mp2.err2²
+                #     @test mp.err1         == mp2.err1
+                #     @test mp.err∞         == mp2.err∞
+                #     @test mp.emp_var      == mp2.emp_var
+                # end
+
+            end #^ for curr_...
+        end #^ for 𝐑
+    end #^ for true_μ
 end #^ test__meanestim_0()
 # The test:1 ends here
 

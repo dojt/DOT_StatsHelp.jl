@@ -876,14 +876,16 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
                                 err_quants ::Vector{ℝ}, err_minmax ::Vector{ℝ}, emp_var_minmax ::Vector{ℝ}
                              ) where{𝐑}
 
-             new(numo_steps,
-                 δ, true_μ, ε₀,
-                 curr_emp_μ, err, emp_var, ␣π,
-                 err_quants, err_minmax, emp_var_minmax,
-                 0,0)
+             new{𝐑}(numo_steps,
+                    δ, true_μ, ε₀,
+                    curr_emp_μ, err, emp_var,
+                    err_quants, err_minmax, emp_var_minmax,
+                    ␣π,
+                    0,0)
          end
          #+END_SRC
 
+*** TODO Usage
 *** ToTST User-facing constructor
 
      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
@@ -915,7 +917,7 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
         emp_var_minmax = ℝ[] ; sizehint!(emp_var_minmax,steps)
 
         s = MeanProc_Qtl{𝐑}(δ ; ε₀, numo_steps=steps, true_μ,
-                            curr_emp_μ, err, ␣π,
+                            curr_emp_μ, emp_var, err, ␣π,
                             err_quants, err_minmax, emp_var_minmax)
         ␣integrity_check(s)
         return s
@@ -964,7 +966,7 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
                     size( s.err_minmax     ) ==
                     size( s.emp_var_minmax )
 
-            @assert s.𝐬[]-1 ≤ length(s.err_quants) ≤ s.𝐬[] ??????????????????????????
+            @assert (s.𝐬[]-1,) ≤ size(s.err_quants) ≤ (s.𝐬[],) # ??????????????????????????
 
         end #^ let
         return nothing
@@ -977,7 +979,7 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
 *** ToTST Starting a new step: ~start_step!()~
 
      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
-       function start_step!(s ::MeanProc_Qtl{𝐑}) ::Nothing
+       function start_step!(s ::MeanProc_Qtl{𝐑}) ::Nothing        where{𝐑}
 
            ␣integrity_check(s)
 
@@ -1019,7 +1021,7 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
                𝑠 = 𝐬[]
 
 
-               let old_μ = curr_emp_μ[𝑟],
+               let old_μ = curr_emp_μ[𝑟]
 
                    emp_var[𝑟] =
                        if      𝑠 == 1      𝐑(0)
@@ -1054,6 +1056,7 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
 
 
            let
+               runs              = numo_runs(s)
                ( ;
                  δ, true_μ,
                  curr_emp_μ,
@@ -1061,6 +1064,7 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
                  emp_var,
                  ␣π,
                  𝐫, 𝐬          ) = s
+
 
                push!(s.err_quants    ,
                      let lo = floor(Int, (δ   )⋅runs ),
@@ -1076,9 +1080,6 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
                push!(          s.emp_var_minmax           ,
                          extrema(emp_var) |> Tuple{ℝ,ℝ}    )
 
-
-               𝐬[] += 1
-
            end #^ let
 
            ␣integrity_check(s)
@@ -1088,66 +1089,79 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
      #+END_SRC
 
 *** TODO Storage and JSON export-import
-*** TODO Tests
-
-*** TODO Tests for the quantile mean process
-**** TODO Set up testset
+*** DOING Tests for the quantile mean process
+**** Set up testset
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
         @testset verbose=true "DOT_StatsHelp.jl testing: Test MeanProc_Qtl{}" begin
       #+END_SRC
 
-**** TODO The test
+**** DOING The test
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
-        function test__meanestim_qtl(;runs=1:10,steps=2:4:20)
-            for 𝐑 ∈ (Double64,Float64)
-                for (curr_runs,curr_steps) in Iterators.product(runs,steps)
+        function test__meanestim_qtl(;runs=100:777:10_000,steps=2:4:20)
 
-                    data = 100*randn(curr_steps,curr_runs)
+            δ  = 0.123
+            ε₀ = 1e-3
 
-                    mp = MeanProc_Full( () ; steps=curr_steps, runs=curr_runs, 𝐑)
+            for true_μ ∈ (1.0, 1e-10)
+                for 𝐑 ∈ (Double64,Float64)
+                    for (curr_runs,curr_steps) in Iterators.product(runs,steps)
 
-                    for run = 1:curr_runs
+                        data = ones(curr_steps,curr_runs)/true_μ + 100*randn(curr_steps,curr_runs)
+                        μ    = [ mean( @view data[1:step,run]   )  for step=1:curr_steps, run=1:curr_runs ]
+                        var  = [ var(  @view data[1:step,run]   )  for step=1:curr_steps, run=1:curr_runs ]
+                        Δ    = abs².( μ .− true_μ )
+                        rerr = Δ ./( true_μ + ε₀ )
 
-                        start_run!(mp ; true_μ = fill(0.0) )
+                        pcnt = [ percentile( @view rerr[step,:] )  for step=1:curr_steps ]
+                        erex = [ extrema(    @view rerr[step,:] )  for step=1:curr_steps ]
+                        varex= [ extrema(    @view var[step,:]  )  for step=1:curr_steps ]
 
+                        mp = MeanProc_Qtl(δ
+                                          ;
+                                          true_μ, ε₀,
+                                          runs   = curr_runs
+                                          steps  = curr_steps,
+                                          𝐑)
                         for step = 1:curr_steps
-                            record_step!(mp ; 𝐸 = fill(data[step,run]) )
-                            @test curr_emp_μ(mp)[]  ≈ mean( @view data[1:step,run] )
-                        end
-                        finalize_run!(mp)
 
-                        @test emp_var(mp;run)         ≈ var(  @view data[:,run] )
 
-                        for step=1:curr_steps
-                            @test  err2²(mp;run,step) ≈ mean( data[1:step,run] ) |> abs²
-                        end
-                        @test all(
-                            err1(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
-                            for step=1:curr_steps
-                                )
-                        @test all(
-                            err∞(mp;run,step)         ≈ mean( data[1:step,run] ) |> abs
-                        for step=1:curr_steps
-                            )
+                            start_step!(mp)
 
-                    end #^ for run
+                            for run = 1:curr_runs
 
-                    if 𝐑 == Float64
-                        jsonstr = write_JSON(mp)
-                        mp2     = read_JSON(jsonstr;V=0)
+                                record_run!(mp ; 𝐸 = data[step,run] )
 
-                        @test mp.curr_true_μ  == mp2.curr_true_μ
-                        @test mp.curr_emp_μ   == mp2.curr_emp_μ
-                        @test mp.err2²        == mp2.err2²
-                        @test mp.err1         == mp2.err1
-                        @test mp.err∞         == mp2.err∞
-                        @test mp.emp_var      == mp2.emp_var
-                    end
 
-                end #^ for curr_...
-            end #^ for 𝐑
+                                @test mp.curr_emp_μ[mp.𝐫[]] ≈ μ[   step,run]
+                                @test mp.err[       mp.𝐫[]] ≈ rerr[step,run]
+                                @test mp.emp_var[   mp.𝐫[]] ≈ var[ step,run]
+                            end #^ for (runs)
+
+                            finalize_step!(mp)
+
+                            @test mp.err_quants[    step] ≈ pcnt[ step]
+                            @test mp.err_minmax[    step] ≈ erex[ step]
+                            @test mp.emp_var_minmax[step] ≈ varex[step]
+
+                        end #^ for (steps)
+
+                        # if 𝐑 == Float64
+                        #     jsonstr = write_JSON(mp)
+                        #     mp2     = read_JSON(jsonstr;V=0)
+                        #
+                        #     @test mp.curr_true_μ  == mp2.curr_true_μ
+                        #     @test mp.curr_emp_μ   == mp2.curr_emp_μ
+                        #     @test mp.err2²        == mp2.err2²
+                        #     @test mp.err1         == mp2.err1
+                        #     @test mp.err∞         == mp2.err∞
+                        #     @test mp.emp_var      == mp2.emp_var
+                        # end
+
+                    end #^ for curr_...
+                end #^ for 𝐑
+            end #^ for true_μ
         end #^ test__meanestim_0()
       #+END_SRC
 
@@ -1491,10 +1505,7 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
 
 
 
-* End of the Org File
-
-I'm saying good-bye with some well-meant file-local Emacs variables!
-
+* EOOF
 # Local Variables:
 # fill-column: 115
 # End:
