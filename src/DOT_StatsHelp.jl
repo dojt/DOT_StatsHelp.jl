@@ -44,19 +44,17 @@ using LinearAlgebra: norm2, norm1, normInf as norm∞, norm_sqr as norm2²,
 # Module definition, import, and recurrent exports:2 ends here
 
 # [[file:../DOT_StatsHelp.org::*Module definition, import, and recurrent exports][Module definition, import, and recurrent exports:3]]
-export start_run!
-export record_step!
-export finalize_run!
+export MeanProc_Full
+export start_run!, record_step!, finalize_run!
 export MeanProc_Full_Storage, write_JSON, read_JSON
+
+export MeanProc_Qtl
+export start_step!, record_run!, finalize_step!
 # Module definition, import, and recurrent exports:3 ends here
 
 # [[file:../DOT_StatsHelp.org::*The mean process type: ~MeanProc_Full{𝐑,V}~ <<¤MP-full--struct>>][The mean process type: ~MeanProc_Full{𝐑,V}~                   <<¤MP-full--struct>>:1]]
-export MeanProc_Full
-# The mean process type: ~MeanProc_Full{𝐑,V}~                   <<¤MP-full--struct>>:1 ends here
-
-# [[file:../DOT_StatsHelp.org::*The mean process type: ~MeanProc_Full{𝐑,V}~ <<¤MP-full--struct>>][The mean process type: ~MeanProc_Full{𝐑,V}~                   <<¤MP-full--struct>>:2]]
 struct MeanProc_Full{𝐑 <: Real, V}              # `V` is an integer: the valency of the tensor
-# The mean process type: ~MeanProc_Full{𝐑,V}~                   <<¤MP-full--struct>>:2 ends here
+# The mean process type: ~MeanProc_Full{𝐑,V}~                   <<¤MP-full--struct>>:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Fields and inner constructor][Fields and inner constructor:1]]
 #            Input for run
@@ -331,9 +329,12 @@ end
 # JSON-IO functions:3 ends here
 
 # [[file:../DOT_StatsHelp.org::*The type ~MeanProc_Qtl{𝐑}~][The type ~MeanProc_Qtl{𝐑}~:1]]
-export MeanProc_Qtl
-struct MeanProc_Qtl{𝐑 <: Real}
+const ℝ² = Tuple{ℝ,ℝ}
 # The type ~MeanProc_Qtl{𝐑}~:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*The type ~MeanProc_Qtl{𝐑}~][The type ~MeanProc_Qtl{𝐑}~:2]]
+struct MeanProc_Qtl{𝐑 <: Real}
+# The type ~MeanProc_Qtl{𝐑}~:2 ends here
 
 # [[file:../DOT_StatsHelp.org::*Fields and inner constructor][Fields and inner constructor:1]]
 numo_steps      ::Int         #                      no need-to-know, just pest control
@@ -350,8 +351,8 @@ emp_var         ::Vector{𝐑}   #                      length: `runs`
 
 #               Overall output
 err_quants      ::Vector{ℝ}   # the quantiles        length: `steps`
-err_minmax      ::Vector{ℝ}   #                      length: `steps`
-emp_var_minmax  ::Vector{ℝ}   #                      length: `steps`
+err_minmax      ::Vector{ℝ²}  #                      length: `steps`
+emp_var_minmax  ::Vector{ℝ²}  #                      length: `steps`
 
 #               Work space over steps
 ␣π              ::Vector{Int} # permutation          length: `runs`
@@ -361,12 +362,12 @@ emp_var_minmax  ::Vector{ℝ}   #                      length: `steps`
 𝐬               ::Ref{Int}    # index of current step (i.e., 0 ⪮ before first step)
 
 function
-    MeanProc_Full{𝐑}(  δ ::ℝ
-                       ;
-                       numo_steps ::Int, true_μ ::ℝ, ε₀ ::ℝ,
-                       curr_emp_μ ::Vector{𝐑}, emp_var ::Vector{𝐑}, err ::Vector{ℝ}, ␣π ::Vector{Int},
-                       err_quants ::Vector{ℝ}, err_minmax ::Vector{ℝ}, emp_var_minmax ::Vector{ℝ}
-                    ) where{𝐑}
+    MeanProc_Qtl{𝐑}(  δ ::ℝ
+                      ;
+                      numo_steps ::Int, true_μ ::ℝ, ε₀ ::ℝ,
+                      curr_emp_μ ::Vector{𝐑}, emp_var ::Vector{𝐑}, err ::Vector{ℝ}, ␣π ::Vector{Int},
+                      err_quants ::Vector{ℝ}, err_minmax ::Vector{ℝ²}, emp_var_minmax ::Vector{ℝ²}
+                   ) where{𝐑}
 
     new{𝐑}(numo_steps,
            δ, true_μ, ε₀,
@@ -397,15 +398,15 @@ function MeanProc_Qtl(δ      :: ℝ
 @assert runs ≥ 2
 @assert 0 ≤ ε₀ < 0.1
 
-curr_emp_μ     = zeros( 𝐑,          runs)
-emp_var        = zeros( 𝐑,          runs)
+curr_emp_μ     = zeros( 𝐑,          runs) ::Vector{𝐑}
+emp_var        = zeros( 𝐑,          runs) ::Vector{𝐑}
 err            = Vector{ℝ  }(undef, runs)
 ␣π             = collect(1:runs)
 
 
-err_quants     = ℝ[] ; sizehint!(err_quants    ,steps)
-err_minmax     = ℝ[] ; sizehint!(err_minmax    ,steps)
-emp_var_minmax = ℝ[] ; sizehint!(emp_var_minmax,steps)
+err_quants     = ℝ[]  ; sizehint!(err_quants    ,steps)
+err_minmax     = ℝ²[] ; sizehint!(err_minmax    ,steps)
+emp_var_minmax = ℝ²[] ; sizehint!(emp_var_minmax,steps)
 
 s = MeanProc_Qtl{𝐑}(δ ; ε₀, numo_steps=steps, true_μ,
                     curr_emp_μ, emp_var, err, ␣π,
@@ -522,10 +523,23 @@ function record_run!( s ::MeanProc_Qtl{𝐑}
 
         end
     end #^ let
+    nothing;
 end #^ record_run!()
 # Adding a data point: ~record_run!()~:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*Finalizing a step: ~finalize_step!()~][Finalizing a step: ~finalize_step!()~:1]]
+struct ␣Concat_Vect <: AbstractVector{ℝ}
+    val ::Vector{ℝ}
+    idx ::Vector{Int}
+end
+
+import Base: size, length, getindex
+size(     cv ::␣Concat_Vect             ) = (length(cv.idx),)
+length(   cv ::␣Concat_Vect             ) = length(cv.idx)
+getindex( cv ::␣Concat_Vect, i ::Integer) = cv.val[cv.idx[i]] ;
+
+using Statistics: _quantile
+
 function finalize_step!(s ::MeanProc_Qtl{𝐑}) ::ℝ     where{𝐑}
 
     ␣integrity_check(s)
@@ -543,10 +557,11 @@ function finalize_step!(s ::MeanProc_Qtl{𝐑}) ::ℝ     where{𝐑}
 
 
         push!(s.err_quants    ,
-              let lo = floor(Int, (δ   )⋅runs ),
-                  hi = ceil( Int, (δ +1)⋅runs )
-
+              let lo = floor(Int,   δ⋅runs ),
+                  hi = ceil( Int, 1+δ⋅runs )
                   sortperm!( ␣π, err  ;  alg = PartialQuickSort( lo:hi ) )
+                  err_␣π = ␣Concat_Vect(err,␣π)
+                  _quantile(err_␣π, δ)
               end
               )
 
