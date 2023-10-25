@@ -794,7 +794,7 @@ You are here: [[¤CONTINUE HERE]]
       #+END_SRC
 
 
-** ↘️ [6/9] Mean estimation with a quantile over runs
+** ↘️ [0/3] Mean estimation with a quantile over runs
 *** Description
 
     Data points are added with runs as /inner/ loop and steps as /outer/ loop.  Over the runs, only a given
@@ -802,7 +802,7 @@ You are here: [[¤CONTINUE HERE]]
 
     Data points are vanilla real numbers (i.e., valency-0 tensors, but not of tensor type).
 
-*** ToTST The type ~MeanProc_Qtl{𝐑}~
+*** The type ~MeanProc_Qtl{𝐑}~
 
      We will define the type of quantiles; first a convenient shortcut:
 
@@ -847,7 +847,7 @@ You are here: [[¤CONTINUE HERE]]
         𝐫               ::Ref{Int}    # index of current run (i.e., 0 ⪮ before first run)
         𝐬               ::Ref{Int}    # index of current step (i.e., 0 ⪮ before first step)
 
-        <<""" Struct MenProc_Qtl convenience constructor """>> ;
+        <<""" Struct MeanProc_Qtl convenience constructor """>> ;
       #+END_SRC
 
       That's it.
@@ -860,8 +860,8 @@ You are here: [[¤CONTINUE HERE]]
 
        This only adds the 0-inits for the references 𝐫, 𝐬.
 
-       #+CAPTION: « ~Struct MenProc_Qtl convenience constructor~ »
-       #+NAME:   """ Struct MenProc_Qtl convenience constructor """
+       #+CAPTION: « ~Struct MeanProc_Qtl convenience constructor~ »
+       #+NAME:   """ Struct MeanProc_Qtl convenience constructor """
        #+BEGIN_SRC julia   :tangle no               :noweb no-export :noweb-prefix no
          function
              MeanProc_Qtl{𝐑}(  δ ::ℝ
@@ -881,7 +881,7 @@ You are here: [[¤CONTINUE HERE]]
          #+END_SRC
 
 *** TODO Usage
-*** ToTST User-facing constructor
+*** User-facing constructor
 
      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
        function MeanProc_Qtl(δ      :: ℝ
@@ -924,7 +924,7 @@ You are here: [[¤CONTINUE HERE]]
         end #^ MeanProc_Qtl constructor
       #+END_SRC
 
-*** ToTST Helper functions and integrity check
+*** Helper functions and integrity check
 
       #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
        numo_runs(s ::MeanProc_Qtl{𝐑} ) where{𝐑}     = length(s.curr_emp_μ)
@@ -971,7 +971,7 @@ You are here: [[¤CONTINUE HERE]]
         end #^ ␣integrity_check(::MeanProc_Qtl)
       #+END_SRC
 
-*** ToTST Starting a new step: ~start_step!()~
+*** Starting a new step: ~start_step!()~
 
      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
        function start_step!(s ::MeanProc_Qtl{𝐑}) ::Nothing        where{𝐑}
@@ -989,7 +989,7 @@ You are here: [[¤CONTINUE HERE]]
        end #^ start_run!()
      #+END_SRC
 
-*** ToTST Adding a data point: ~record_run!()~
+*** Adding a data point: ~record_run!()~
 
      #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
        function record_run!( s ::MeanProc_Qtl{𝐑}
@@ -1043,7 +1043,7 @@ You are here: [[¤CONTINUE HERE]]
        end #^ record_run!()
      #+END_SRC
 
-*** ToTST Finalizing a step: ~finalize_step!()~
+*** Finalizing a step: ~finalize_step!()~
 
      This version of ~finalize...()~ returns the quantile.
      #+BEGIN_CENTER
