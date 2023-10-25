@@ -9,6 +9,8 @@
 #+PROPERTY: header-args :eval never :comments link :exports code
 #+SEQ_TODO: TODO DOING CONT In-Tst ARGH ↘️ | ToTST DONE
 
+You are here: [[¤CONTINUE HERE]]
+
 * Copyright Notice
 
    The following copyright notice applies to this Org-file, as well as the Julia source file generated from it.
@@ -74,6 +76,7 @@
 
 
 * ↘️ TASK LISTS and PROGRESS REPORTS
+   <<¤CONTINUE HERE>>
 ** [0/1] Generally
 
      + [ ] Make better docs -- together with exports
@@ -87,7 +90,6 @@
      + [ ] Write the [[summary][Summary]]
 
      + [ ] Remove this section, [[*TASK LISTS and PROGRESS REPORTS]]
-
 
 
 * Setup of the Package and Tests
