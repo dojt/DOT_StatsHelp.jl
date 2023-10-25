@@ -9,9 +9,6 @@
 #+PROPERTY: header-args :eval never :comments link :exports code
 #+SEQ_TODO: TODO DOING CONT In-Tst ARGH ↘️ | ToTST DONE
 
-You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
-
-
 * Copyright Notice
 
    The following copyright notice applies to this Org-file, as well as the Julia source file generated from it.
@@ -77,22 +74,17 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
 
 
 * ↘️ TASK LISTS and PROGRESS REPORTS
-** [6/7] Max-approximating process
+** [0/1] Generally
 
-     + [X] Get started
-     + [X] Make frequencies helper ~Xtiles~
-     + [X] Make unit tests for frequencies helper
+     + [ ] Make better docs -- together with exports
 
-     + [X] Copy interface defs from Mean Estim
-     + [X] Take it from there
-     + [X] Get JET.jl-based testing running
+** [0/1] Max-approximating process
+
      + [ ] Make unit tests
 
-** [1/3] Finally, ...
+** [0/2] Finally, ...
 
      + [ ] Write the [[summary][Summary]]
-
-     + [X] Acknowledge funding: NeQst WP4
 
      + [ ] Remove this section, [[*TASK LISTS and PROGRESS REPORTS]]
 
