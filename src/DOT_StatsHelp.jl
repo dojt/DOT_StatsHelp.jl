@@ -501,15 +501,17 @@ function record_run!( s ::MeanProc_Qtl{𝐑}
         𝑟 = 𝐫[]
         𝑠 = 𝐬[]
 
-
+        # new_unbiased_emp_var =
+        # = [  (𝐬-1) ⋅ old_biased_emp_var  / 𝐬        +   (𝐬-1) ⋅ | curr_emp_μ - 𝐸 |² / 𝐬²  ]⋅𝐬/(𝐬-1)
+        # =            old_biased_emp_var             +           | curr_emp_μ - 𝐸 |² / 𝐬
+        # =          old_unbiased_emp_var⋅(𝐬-2)/(𝐬-1) +           | curr_emp_μ - 𝐸 |² / 𝐬
         let old_μ = curr_emp_μ[𝑟]
 
             emp_var[𝑟] =
                 if      𝑠 == 1      𝐑(0)
-                elseif  𝑠 == 2      (old_μ − (old_μ+𝐸)/2)^2 + (𝐸 − (old_μ+𝐸)/2)^2
                 else
-                    old_emp_var = emp_var[𝑟] ⋅ (𝑠-1)/𝐑(𝑠-2)
-                    old_emp_var +  abs²(old_μ − 𝐸)/𝑠
+                    old_biased_emp_var  = emp_var[𝑟] ⋅ (𝑠-2)/𝐑(𝑠-1)
+                    old_biased_emp_var  +  abs²(old_μ − 𝐸) / 𝑠
                 end
         end #^ let
 
@@ -565,12 +567,11 @@ function finalize_step!(s ::MeanProc_Qtl{𝐑}) ::ℝ     where{𝐑}
               end
               )
 
-        push!(          s.err_minmax               ,
-                  extrema(err)                      )
+        push!(        s.err_minmax             ,
+                extrema(err)                    )
 
-        push!(          s.emp_var_minmax           ,
-                  extrema(emp_var) |> Tuple{ℝ,ℝ}    )
-
+        push!(        s.emp_var_minmax         ,
+                extrema(emp_var) |> Tuple{ℝ,ℝ}  )
     end #^ let
 
     ␣integrity_check(s)

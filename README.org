@@ -21,11 +21,15 @@ Unfortunately, GitHub renders Org only incompletely.  To view the literate sourc
 /Time goes up!/
 
 
-** *v0.3.2*  Fixed typo in exports
+** *v0.4.0*  New stats: MeanProc_Qtl for on-line quantile estimation
 
     + Todo: *Document it!* In particular, mention that the work space and the r,s indices are lost from exporting
       to JSON and re-importing -- so this is cannot be used for /interrupting/ a stats collection process.
 
+    + Tidy up code
+
+
+** *v0.3.2*  Fixed typo in exports
 
 ** *v0.3.1*  Exposing JSON-compatible struct to user
 

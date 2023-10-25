@@ -800,7 +800,7 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
       #+END_SRC
 
 
-** ↘️ [6/9] Mean-estimation with a quantile over runs
+** ↘️ [6/9] Mean estimation with a quantile over runs
 *** Description
 
     Data points are added with runs as /inner/ loop and steps as /outer/ loop.  Over the runs, only a given
@@ -1021,15 +1021,17 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
                𝑟 = 𝐫[]
                𝑠 = 𝐬[]
 
-
+               # new_unbiased_emp_var =
+               # = [  (𝐬-1) ⋅ old_biased_emp_var  / 𝐬        +   (𝐬-1) ⋅ | curr_emp_μ - 𝐸 |² / 𝐬²  ]⋅𝐬/(𝐬-1)
+               # =            old_biased_emp_var             +           | curr_emp_μ - 𝐸 |² / 𝐬
+               # =          old_unbiased_emp_var⋅(𝐬-2)/(𝐬-1) +           | curr_emp_μ - 𝐸 |² / 𝐬
                let old_μ = curr_emp_μ[𝑟]
 
                    emp_var[𝑟] =
                        if      𝑠 == 1      𝐑(0)
-                       elseif  𝑠 == 2      (old_μ − (old_μ+𝐸)/2)^2 + (𝐸 − (old_μ+𝐸)/2)^2
                        else
-                           old_emp_var = emp_var[𝑟] ⋅ (𝑠-1)/𝐑(𝑠-2)
-                           old_emp_var +  abs²(old_μ − 𝐸)/𝑠
+                           old_biased_emp_var  = emp_var[𝑟] ⋅ (𝑠-2)/𝐑(𝑠-1)
+                           old_biased_emp_var  +  abs²(old_μ − 𝐸) / 𝑠
                        end
                end #^ let
 
@@ -1085,12 +1087,11 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
                      end
                      )
 
-               push!(          s.err_minmax               ,
-                         extrema(err)                      )
+               push!(        s.err_minmax             ,
+                       extrema(err)                    )
 
-               push!(          s.emp_var_minmax           ,
-                         extrema(emp_var) |> Tuple{ℝ,ℝ}    )
-
+               push!(        s.emp_var_minmax         ,
+                       extrema(emp_var) |> Tuple{ℝ,ℝ}  )
            end #^ let
 
            ␣integrity_check(s)
@@ -1113,91 +1114,79 @@ You're here: [[¤CONTINUE HERE][¤CONTINUE HERE]] <<¤CONTINUE HERE>>
        getindex( cv ::␣Concat_Vect, i ::Integer) = cv.val[cv.idx[i]]
      #+END_SRC
 
-
 *** TODO Storage and JSON export-import
-*** DOING Tests for the quantile mean process
+*** ↘️ Tests for the quantile mean process
 **** Set up testset
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
         @testset verbose=true "DOT_StatsHelp.jl testing: Test MeanProc_Qtl{}" begin
       #+END_SRC
 
-**** In-Tst The test
+**** DOING The test
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
-        function test__meanestim_qtl(;runs=100:777:1_000,steps=4:4:4)
+        function test__meanestim_qtl(;runs=10:71:400,steps=4:4:20)
 
             δ  = 0.123
-            ε₀ = 1e-3
 
-            for true_μ ∈ (1.0, 1e-10)
-                for 𝐑 ∈ (Double64,Float64)
-                    for (curr_runs,curr_steps) in Iterators.product(runs,steps)
+            for ε₀ ∈ (1e-3, 1e-7)
+                for true_μ ∈ (1.0, 1e-10)
+                    for 𝐑 ∈ (Double64,Float64)
+                        for (curr_runs,curr_steps) in Iterators.product(runs,steps)
 
-                        data = ones(curr_steps,curr_runs)/true_μ + 100*randn(curr_steps,curr_runs)
-                        μ    = [ mean( @view data[1:step,run]   )  for step=1:curr_steps, run=1:curr_runs ]
-                        vari = [ var(  @view data[1:step,run]   )  for step=1:curr_steps, run=1:curr_runs ]
-                        Δ    = abs.( μ .− true_μ )
-                        rerr = Δ ./( true_μ + ε₀ )
+                            data = ones(curr_steps,curr_runs)/true_μ + 100*randn(curr_steps,curr_runs)
+                            μ    = [ mean( @view data[1:step,run]   )  for step=1:curr_steps, run=1:curr_runs ]
+                            vari = [ var(  @view data[1:step,run]   )  for step=1:curr_steps, run=1:curr_runs ]
+                            Δ    = abs.( μ .− true_μ )
+                            rerr = Δ ./( true_μ + ε₀ )
 
-                        pcnt = [ quantile((@view rerr[step,:]),δ)  for step=1:curr_steps ]
-                        erex = [ extrema(  @view rerr[step,:]   )  for step=1:curr_steps ]
-                        varex= [ extrema(  @view vari[step,:]   )  for step=1:curr_steps ]
+                            pcnt = [ quantile((@view rerr[step,:]),δ)  for step=1:curr_steps ]
+                            erex = [ extrema(  @view rerr[step,:]   )  for step=1:curr_steps ]
+                            varex= [ extrema(  @view vari[step,:]   )  for step=1:curr_steps ]
 
-                        mp = MeanProc_Qtl(δ
-                                          ;
-                                          true_μ, ε₀,
-                                          runs   = curr_runs,
-                                          steps  = curr_steps,
-                                          𝐑)
-                        for step = 1:curr_steps
+                            mp = MeanProc_Qtl(δ
+                                              ;
+                                              true_μ, ε₀,
+                                              runs   = curr_runs,
+                                              steps  = curr_steps,
+                                              𝐑)
+                            for step = 1:curr_steps
 
+                                start_step!(mp)
 
-                            start_step!(mp)
+                                for run = 1:curr_runs
 
-                            for run = 1:curr_runs
+                                    record_run!(mp ; 𝐸 = data[step,run] )
 
-                                record_run!(mp ; 𝐸 = data[step,run] )
+                                    @test mp.curr_emp_μ[ mp.𝐫[]] ≈ μ[   step,run]
+                                    @test mp.err[        mp.𝐫[]] ≈ rerr[step,run]
+                                    if step ≥ 2
+                                        @test mp.emp_var[mp.𝐫[]] ≈ vari[step,run]    rtol=1e-4
+                                    end
+                                end #^ for (runs)
 
-                                @test mp.curr_emp_μ[mp.𝐫[]] ≈ μ[   step,run]
-                                @test mp.err[       mp.𝐫[]] ≈ rerr[step,run]
+                                finalize_step!(mp)
+
+                                @test mp.err_quants[step] ≈ pcnt[step]
+                                @test all( a≈b
+                                           for (a,b) ∈ zip(mp.err_minmax[step],erex[step])
+                                         )
                                 if step ≥ 2
-                          #ARGH                                    @test mp.emp_var[   mp.𝐫[]] ≈ vari[step,run]
+                                    @test first(mp.emp_var_minmax[step]) ≈ first(varex[step])    rtol=1e-3
+                                    @test last( mp.emp_var_minmax[step]) ≈ last( varex[step])    rtol=1e-3
                                 end
-                            end #^ for (runs)
-
-                            finalize_step!(mp)
-
-                            @test mp.err_quants[    step] ≈ pcnt[ step]
-                            @test all( a≈b for (a,b) ∈ zip(mp.err_minmax[    step],erex[ step]) )
-                         #ARGH                            @test all( a≈b for (a,b) ∈ zip(mp.emp_var_minmax[step],varex[step]) )
-
-                        end #^ for (steps)
-
-                        # if 𝐑 == Float64
-                        #     jsonstr = write_JSON(mp)
-                        #     mp2     = read_JSON(jsonstr;V=0)
-                        #
-                        #     @test mp.curr_true_μ  == mp2.curr_true_μ
-                        #     @test mp.curr_emp_μ   == mp2.curr_emp_μ
-                        #     @test mp.err2²        == mp2.err2²
-                        #     @test mp.err1         == mp2.err1
-                        #     @test mp.err∞         == mp2.err∞
-                        #     @test mp.emp_var      == mp2.emp_var
-                        # end
-
-                    end #^ for curr_...
-                end #^ for 𝐑
-            end #^ for true_μ
+                            end #^ for (steps)
+                        end #^ for curr_...
+                    end #^ for 𝐑
+                end #^ for true_μ
+            end #^ for ε₀
         end #^ test__meanestim_0()
       #+END_SRC
 
       Run it:
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
-        @testset "Valency-0 tests" begin
-            test__meanestim_qtl()
-        end
+        test__meanestim_qtl()
       #+END_SRC
 
 **** End of testset

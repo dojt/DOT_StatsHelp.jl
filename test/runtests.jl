@@ -232,77 +232,66 @@ end #^ testset
 # Set up testset:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*The test][The test:1]]
-function test__meanestim_qtl(;runs=100:777:1_000,steps=4:4:4)
+function test__meanestim_qtl(;runs=10:71:400,steps=4:4:20)
 
     δ  = 0.123
-    ε₀ = 1e-3
 
-    for true_μ ∈ (1.0, 1e-10)
-        for 𝐑 ∈ (Double64,Float64)
-            for (curr_runs,curr_steps) in Iterators.product(runs,steps)
+    for ε₀ ∈ (1e-3, 1e-7)
+        for true_μ ∈ (1.0, 1e-10)
+            for 𝐑 ∈ (Double64,Float64)
+                for (curr_runs,curr_steps) in Iterators.product(runs,steps)
 
-                data = ones(curr_steps,curr_runs)/true_μ + 100*randn(curr_steps,curr_runs)
-                μ    = [ mean( @view data[1:step,run]   )  for step=1:curr_steps, run=1:curr_runs ]
-                vari = [ var(  @view data[1:step,run]   )  for step=1:curr_steps, run=1:curr_runs ]
-                Δ    = abs.( μ .− true_μ )
-                rerr = Δ ./( true_μ + ε₀ )
+                    data = ones(curr_steps,curr_runs)/true_μ + 100*randn(curr_steps,curr_runs)
+                    μ    = [ mean( @view data[1:step,run]   )  for step=1:curr_steps, run=1:curr_runs ]
+                    vari = [ var(  @view data[1:step,run]   )  for step=1:curr_steps, run=1:curr_runs ]
+                    Δ    = abs.( μ .− true_μ )
+                    rerr = Δ ./( true_μ + ε₀ )
 
-                pcnt = [ quantile((@view rerr[step,:]),δ)  for step=1:curr_steps ]
-                erex = [ extrema(  @view rerr[step,:]   )  for step=1:curr_steps ]
-                varex= [ extrema(  @view vari[step,:]   )  for step=1:curr_steps ]
+                    pcnt = [ quantile((@view rerr[step,:]),δ)  for step=1:curr_steps ]
+                    erex = [ extrema(  @view rerr[step,:]   )  for step=1:curr_steps ]
+                    varex= [ extrema(  @view vari[step,:]   )  for step=1:curr_steps ]
 
-                mp = MeanProc_Qtl(δ
-                                  ;
-                                  true_μ, ε₀,
-                                  runs   = curr_runs,
-                                  steps  = curr_steps,
-                                  𝐑)
-                for step = 1:curr_steps
+                    mp = MeanProc_Qtl(δ
+                                      ;
+                                      true_μ, ε₀,
+                                      runs   = curr_runs,
+                                      steps  = curr_steps,
+                                      𝐑)
+                    for step = 1:curr_steps
 
+                        start_step!(mp)
 
-                    start_step!(mp)
+                        for run = 1:curr_runs
 
-                    for run = 1:curr_runs
+                            record_run!(mp ; 𝐸 = data[step,run] )
 
-                        record_run!(mp ; 𝐸 = data[step,run] )
+                            @test mp.curr_emp_μ[ mp.𝐫[]] ≈ μ[   step,run]
+                            @test mp.err[        mp.𝐫[]] ≈ rerr[step,run]
+                            if step ≥ 2
+                                @test mp.emp_var[mp.𝐫[]] ≈ vari[step,run]    rtol=1e-4
+                            end
+                        end #^ for (runs)
 
-                        @test mp.curr_emp_μ[mp.𝐫[]] ≈ μ[   step,run]
-                        @test mp.err[       mp.𝐫[]] ≈ rerr[step,run]
+                        finalize_step!(mp)
+
+                        @test mp.err_quants[step] ≈ pcnt[step]
+                        @test all( a≈b
+                                   for (a,b) ∈ zip(mp.err_minmax[step],erex[step])
+                                 )
                         if step ≥ 2
-                  #ARGH                                    @test mp.emp_var[   mp.𝐫[]] ≈ vari[step,run]
+                            @test first(mp.emp_var_minmax[step]) ≈ first(varex[step])    rtol=1e-3
+                            @test last( mp.emp_var_minmax[step]) ≈ last( varex[step])    rtol=1e-3
                         end
-                    end #^ for (runs)
-
-                    finalize_step!(mp)
-
-                    @test mp.err_quants[    step] ≈ pcnt[ step]
-                    @test all( a≈b for (a,b) ∈ zip(mp.err_minmax[    step],erex[ step]) )
-                 #ARGH                            @test all( a≈b for (a,b) ∈ zip(mp.emp_var_minmax[step],varex[step]) )
-
-                end #^ for (steps)
-
-                # if 𝐑 == Float64
-                #     jsonstr = write_JSON(mp)
-                #     mp2     = read_JSON(jsonstr;V=0)
-                #
-                #     @test mp.curr_true_μ  == mp2.curr_true_μ
-                #     @test mp.curr_emp_μ   == mp2.curr_emp_μ
-                #     @test mp.err2²        == mp2.err2²
-                #     @test mp.err1         == mp2.err1
-                #     @test mp.err∞         == mp2.err∞
-                #     @test mp.emp_var      == mp2.emp_var
-                # end
-
-            end #^ for curr_...
-        end #^ for 𝐑
-    end #^ for true_μ
+                    end #^ for (steps)
+                end #^ for curr_...
+            end #^ for 𝐑
+        end #^ for true_μ
+    end #^ for ε₀
 end #^ test__meanestim_0()
 # The test:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*The test][The test:2]]
-@testset "Valency-0 tests" begin
-    test__meanestim_qtl()
-end
+test__meanestim_qtl()
 # The test:2 ends here
 
 # [[file:../DOT_StatsHelp.org::*End of testset][End of testset:1]]
