@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-10-30 Mon 17:48 -->
+<!-- 2023-10-30 Mon 18:20 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Julia Package That Helps With Statistics For Random Processes</title>
@@ -233,101 +233,101 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org8201922">1. Copyright Notice</a></li>
-<li><a href="#org5ba6c6d">2. <span class="todo __">↘️</span> <code>[0/2]</code> What's This Module/Project/File About?</a>
+<li><a href="#orgf7af8bf">1. Copyright Notice</a></li>
+<li><a href="#org2c0c03c">2. <span class="todo __">↘️</span> <code>[0/2]</code> What's This Module/Project/File About?</a>
 <ul>
-<li><a href="#org3e9fa29">2.1. <span class="todo TODO">TODO</span> Summary of what this software does <code>[0/1]</code>               </a></li>
-<li><a href="#orge069326">2.2. <span class="todo CONT">CONT</span> High-level usage instructions <code>[1/2]</code>                    </a>
+<li><a href="#orgf685ade">2.1. <span class="todo TODO">TODO</span> Summary of what this software does <code>[0/1]</code>               </a></li>
+<li><a href="#org84822ab">2.2. <span class="todo CONT">CONT</span> High-level usage instructions <code>[1/2]</code>                    </a>
 <ul>
-<li><a href="#org3198c19">2.2.1. <span class="todo TODO">TODO</span> General blah blah</a></li>
-<li><a href="#org9b92945">2.2.2. <span class="done ToTST">ToTST</span> Steps and runs</a></li>
+<li><a href="#orga2ce724">2.2.1. <span class="todo TODO">TODO</span> General blah blah</a></li>
+<li><a href="#org63030c6">2.2.2. <span class="done ToTST">ToTST</span> Steps and runs</a></li>
 </ul>
 </li>
-<li><a href="#org6861690">2.3. Literate programming</a></li>
-<li><a href="#orgfaea785">2.4. Acknowledgments</a></li>
+<li><a href="#org7b76108">2.3. Literate programming</a></li>
+<li><a href="#orgcef6980">2.4. Acknowledgments</a></li>
 </ul>
 </li>
-<li><a href="#org9eee307">3. <span class="todo __">↘️</span> TASK LISTS and PROGRESS REPORTS</a>
+<li><a href="#org3eca6ba">3. <span class="todo __">↘️</span> TASK LISTS and PROGRESS REPORTS</a>
 <ul>
-<li><a href="#org6432f24">3.1. <code>[0/1]</code> Generally</a></li>
-<li><a href="#orgbe07f0e">3.2. <code>[0/1]</code> Max-approximating process</a></li>
-<li><a href="#orga7b8507">3.3. <code>[0/2]</code> Finally, &#x2026;</a></li>
+<li><a href="#orgae40be8">3.1. <code>[0/1]</code> Generally</a></li>
+<li><a href="#org66e9c9f">3.2. <code>[0/1]</code> Max-approximating process</a></li>
+<li><a href="#org04a14a3">3.3. <code>[0/2]</code> Finally, &#x2026;</a></li>
 </ul>
 </li>
-<li><a href="#org9016635">4. Setup of the Package and Tests</a>
+<li><a href="#org269da3c">4. Setup of the Package and Tests</a>
 <ul>
-<li><a href="#orgbbd27e3">4.1. File headers</a></li>
-<li><a href="#orgcafb06c">4.2. Set up testing</a></li>
-<li><a href="#org085ab27">4.3. Module definition, import, and recurrent exports</a></li>
+<li><a href="#org74b2180">4.1. File headers</a></li>
+<li><a href="#org4ab4b60">4.2. Set up testing</a></li>
+<li><a href="#org98024e1">4.3. Module definition, import, and recurrent exports</a></li>
 </ul>
 </li>
-<li><a href="#orgacacf2c">5. <span class="todo __">↘️</span> Statistics of mean-estimating processes</a>
+<li><a href="#org8df8e8b">5. <span class="todo __">↘️</span> Statistics of mean-estimating processes</a>
 <ul>
-<li><a href="#org4e05488">5.1. Mean estimation with all values for runs</a>
+<li><a href="#orge2cd1b4">5.1. Mean estimation with all values for runs</a>
 <ul>
-<li><a href="#orgcd41f4e">5.1.1. Description</a></li>
-<li><a href="#orga2e976d">5.1.2. The mean process type: <code>MeanProc_Full{𝐑,V}</code>                   </a></li>
-<li><a href="#org0879a2d">5.1.3. Usage</a></li>
-<li><a href="#org2912178">5.1.4. User-facing constructor for <code>MeanProc_Full</code></a></li>
-<li><a href="#org5f8cffb">5.1.5. Helper functions and integrity check</a></li>
-<li><a href="#orgaa159ce">5.1.6. Starting a new run: <code>start_run!()</code>                            </a></li>
-<li><a href="#orge20466e">5.1.7. Adding data of a step: <code>record_step!()</code></a></li>
-<li><a href="#org156da6d">5.1.8. Finalizing a run: <code>finalize_run!()</code>                           </a></li>
-<li><a href="#org7b0bfb5">5.1.9. Storage and JSON export-import</a></li>
-<li><a href="#org546acf2">5.1.10. Tests for the all-vals mean process</a></li>
+<li><a href="#org341c3eb">5.1.1. Description</a></li>
+<li><a href="#org993fa59">5.1.2. The mean process type: <code>MeanProc_Full{𝐑,V}</code>                   </a></li>
+<li><a href="#org6f29400">5.1.3. Usage</a></li>
+<li><a href="#org1e48b49">5.1.4. User-facing constructor for <code>MeanProc_Full</code></a></li>
+<li><a href="#org6f33c0b">5.1.5. Helper functions and integrity check</a></li>
+<li><a href="#org38f99a0">5.1.6. Starting a new run: <code>start_run!()</code>                            </a></li>
+<li><a href="#orgb3a3245">5.1.7. Adding data of a step: <code>record_step!()</code></a></li>
+<li><a href="#org0deaad3">5.1.8. Finalizing a run: <code>finalize_run!()</code>                           </a></li>
+<li><a href="#org4a1ea15">5.1.9. Storage and JSON export-import</a></li>
+<li><a href="#org4f34a4e">5.1.10. Tests for the all-vals mean process</a></li>
 </ul>
 </li>
-<li><a href="#org49e5189">5.2. <span class="todo __">↘️</span> <code>[1/3]</code> Mean estimation with a quantile over runs</a>
+<li><a href="#org8282f75">5.2. <span class="todo __">↘️</span> <code>[0/1]</code> Mean estimation with a quantile over runs</a>
 <ul>
-<li><a href="#orgf9cb655">5.2.1. Description</a></li>
-<li><a href="#orgf4316c0">5.2.2. The type <code>MeanProc_Qtl{𝐑}</code></a></li>
-<li><a href="#org818c7f8">5.2.3. <span class="todo TODO">TODO</span> Usage</a></li>
-<li><a href="#orgbd174d2">5.2.4. User-facing constructor</a></li>
-<li><a href="#org79ece35">5.2.5. Helper functions and integrity check</a></li>
-<li><a href="#org1caeaf9">5.2.6. Starting a new step: <code>start_step!()</code></a></li>
-<li><a href="#org0eb4a47">5.2.7. Adding a data point: <code>record_run!()</code></a></li>
-<li><a href="#orge538f24">5.2.8. Finalizing a step: <code>finalize_step!()</code></a></li>
-<li><a href="#org334c45b">5.2.9. <span class="done ToTST">ToTST</span> Storage and JSON export-import</a></li>
-<li><a href="#orgde54013">5.2.10. <span class="todo __">↘️</span> Tests for the quantile mean process</a></li>
+<li><a href="#org9becd63">5.2.1. Description</a></li>
+<li><a href="#org2842bb4">5.2.2. The type <code>MeanProc_Qtl{𝐑}</code></a></li>
+<li><a href="#orgf93dfb1">5.2.3. <span class="todo TODO">TODO</span> Usage</a></li>
+<li><a href="#org9c5675a">5.2.4. User-facing constructor</a></li>
+<li><a href="#org9d12a6a">5.2.5. Helper functions and integrity check</a></li>
+<li><a href="#orgcde50f9">5.2.6. Starting a new step: <code>start_step!()</code></a></li>
+<li><a href="#org894ae61">5.2.7. Adding a data point: <code>record_run!()</code></a></li>
+<li><a href="#org9366f99">5.2.8. Finalizing a step: <code>finalize_step!()</code></a></li>
+<li><a href="#org1589817">5.2.9. Storage and JSON export-import</a></li>
+<li><a href="#orgd412222">5.2.10. Tests for the quantile mean process</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgbe0024e">6. <span class="todo CONT">CONT</span> <code>[0/9]</code> Statistics of max-approximating processes</a>
+<li><a href="#org82e15b8">6. <span class="todo CONT">CONT</span> <code>[0/9]</code> Statistics of max-approximating processes</a>
 <ul>
-<li><a href="#orgbfb1088">6.1. <span class="todo In_Tst">In-Tst</span> Helper-functions for frequencies</a>
+<li><a href="#org2892298">6.1. <span class="todo In_Tst">In-Tst</span> Helper-functions for frequencies</a>
 <ul>
-<li><a href="#org4eb8646">6.1.1. Description</a></li>
-<li><a href="#orgb0a3882">6.1.2. Create tiles tuple</a></li>
-<li><a href="#org77d1d54">6.1.3. Store a data point</a></li>
-<li><a href="#org5e7f7d1">6.1.4. Let's test it!</a></li>
+<li><a href="#orgaaf5ec3">6.1.1. Description</a></li>
+<li><a href="#org5760db6">6.1.2. Create tiles tuple</a></li>
+<li><a href="#org33742f0">6.1.3. Store a data point</a></li>
+<li><a href="#org7d8a00e">6.1.4. Let's test it!</a></li>
 </ul>
 </li>
-<li><a href="#org2cbcf15">6.2. <span class="todo In_Tst">In-Tst</span> The max-approx process type: <code>MaxProc{L}</code></a></li>
-<li><a href="#org176b46e">6.3. <span class="todo TODO">TODO</span> Usage</a></li>
-<li><a href="#orge8a489b">6.4. <span class="todo In_Tst">In-Tst</span> User-facing constructor for <code>MaxApprox</code></a>
+<li><a href="#org5943250">6.2. <span class="todo In_Tst">In-Tst</span> The max-approx process type: <code>MaxProc{L}</code></a></li>
+<li><a href="#org43b42ab">6.3. <span class="todo TODO">TODO</span> Usage</a></li>
+<li><a href="#org8232425">6.4. <span class="todo In_Tst">In-Tst</span> User-facing constructor for <code>MaxApprox</code></a>
 <ul>
-<li><a href="#org120c516">6.4.1. Implementation</a></li>
+<li><a href="#orgbccffce">6.4.1. Implementation</a></li>
 </ul>
 </li>
-<li><a href="#orgf353aac">6.5. <span class="todo In_Tst">In-Tst</span> Helper functions and integrity check</a></li>
-<li><a href="#org743f417">6.6. <span class="todo In_Tst">In-Tst</span> Starting a new run: <code>start_run!()</code></a></li>
-<li><a href="#orgdd258f1">6.7. <span class="todo In_Tst">In-Tst</span> Adding data of a step: <code>record_step!()</code></a></li>
-<li><a href="#orgeae415c">6.8. <span class="todo In_Tst">In-Tst</span> Finalizing a run: <code>finalize_run!()</code>                  </a></li>
-<li><a href="#orgc03286d">6.9. <span class="todo TODO">TODO</span> Tests for the max process</a></li>
+<li><a href="#orgc2cd3c0">6.5. <span class="todo In_Tst">In-Tst</span> Helper functions and integrity check</a></li>
+<li><a href="#org36e8a6f">6.6. <span class="todo In_Tst">In-Tst</span> Starting a new run: <code>start_run!()</code></a></li>
+<li><a href="#orge0b43e8">6.7. <span class="todo In_Tst">In-Tst</span> Adding data of a step: <code>record_step!()</code></a></li>
+<li><a href="#orgce91885">6.8. <span class="todo In_Tst">In-Tst</span> Finalizing a run: <code>finalize_run!()</code>                  </a></li>
+<li><a href="#orgf036f7a">6.9. <span class="todo TODO">TODO</span> Tests for the max process</a></li>
 </ul>
 </li>
-<li><a href="#org12847b4">7. End of module</a></li>
-<li><a href="#org05594e6">8. EOOF</a></li>
+<li><a href="#org8246b16">7. End of module</a></li>
+<li><a href="#orgf2dfff2">8. EOOF</a></li>
 </ul>
 </div>
 </div>
 <p>
-You are here: <a href="#orged792fd">3</a>
+You are here: <a href="#org0c51891">3</a>
 </p>
 
-<div id="outline-container-org8201922" class="outline-2">
-<h2 id="org8201922"><span class="section-number-2">1.</span> Copyright Notice</h2>
+<div id="outline-container-orgf7af8bf" class="outline-2">
+<h2 id="orgf7af8bf"><span class="section-number-2">1.</span> Copyright Notice</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 The following copyright notice applies to this Org-file, as well as the Julia source file generated from it.
@@ -360,22 +360,22 @@ The following copyright notice applies to this Org-file, as well as the Julia so
 </div>
 
 
-<div id="outline-container-org5ba6c6d" class="outline-2">
-<h2 id="org5ba6c6d"><span class="section-number-2">2.</span> <span class="todo __">↘️</span> <code>[0/2]</code> What's This Module/Project/File About?</h2>
+<div id="outline-container-org2c0c03c" class="outline-2">
+<h2 id="org2c0c03c"><span class="section-number-2">2.</span> <span class="todo __">↘️</span> <code>[0/2]</code> What's This Module/Project/File About?</h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-org3e9fa29" class="outline-3">
-<h3 id="org3e9fa29"><span class="section-number-3">2.1.</span> <span class="todo TODO">TODO</span> Summary of what this software does <code>[0/1]</code>               <a id="orgaac1b62"></a></h3>
+<div id="outline-container-orgf685ade" class="outline-3">
+<h3 id="orgf685ade"><span class="section-number-3">2.1.</span> <span class="todo TODO">TODO</span> Summary of what this software does <code>[0/1]</code>               <a id="org6c50858"></a></h3>
 </div>
-<div id="outline-container-orge069326" class="outline-3">
-<h3 id="orge069326"><span class="section-number-3">2.2.</span> <span class="todo CONT">CONT</span> High-level usage instructions <code>[1/2]</code>                    <a id="org869b411"></a></h3>
+<div id="outline-container-org84822ab" class="outline-3">
+<h3 id="org84822ab"><span class="section-number-3">2.2.</span> <span class="todo CONT">CONT</span> High-level usage instructions <code>[1/2]</code>                    <a id="org3d48db2"></a></h3>
 <div class="outline-text-3" id="text-2-2">
 </div>
-<div id="outline-container-org3198c19" class="outline-4">
-<h4 id="org3198c19"><span class="section-number-4">2.2.1.</span> <span class="todo TODO">TODO</span> General blah blah</h4>
+<div id="outline-container-orga2ce724" class="outline-4">
+<h4 id="orga2ce724"><span class="section-number-4">2.2.1.</span> <span class="todo TODO">TODO</span> General blah blah</h4>
 </div>
-<div id="outline-container-org9b92945" class="outline-4">
-<h4 id="org9b92945"><span class="section-number-4">2.2.2.</span> <span class="done ToTST">ToTST</span> Steps and runs</h4>
+<div id="outline-container-org63030c6" class="outline-4">
+<h4 id="org63030c6"><span class="section-number-4">2.2.2.</span> <span class="done ToTST">ToTST</span> Steps and runs</h4>
 <div class="outline-text-4" id="text-2-2-2">
 <p>
 The fundamental idea is to run a random process for so-and-so many <i>steps</i>, collecting information about its
@@ -387,12 +387,12 @@ The user must stick to the following order of instructions for using the types d
 </p>
 
 <ol class="org-ol">
-<li>create an object of the type using a constructor (<a href="#orgfd17ac5">mean</a>, <a href="#org08cf836">max</a>)</li>
+<li>create an object of the type using a constructor (<a href="#org13a69c9">mean</a>, <a href="#orgfa8d8d3">max</a>)</li>
 <li>For each run:
 <ol class="org-ol">
-<li>Start a new run using the <code>start_run!()</code> functions (<a href="#orgdb2bc4a">mean</a>, <a href="#org6a099e0">max</a>)</li>
-<li>Fill run with data using the <code>record_step!()</code> function repeatedly, once for every step (<a href="#org3140fb6">mean</a>, <a href="#org768d8da">max</a>)</li>
-<li>Call the <code>finalize_run!()</code> functions to for tidying up the run <a href="#org1d4a8a2">(mean</a>, <a href="#org979e079">max</a>)</li>
+<li>Start a new run using the <code>start_run!()</code> functions (<a href="#org3dd4e16">mean</a>, <a href="#orga91779d">max</a>)</li>
+<li>Fill run with data using the <code>record_step!()</code> function repeatedly, once for every step (<a href="#org10b4c5a">mean</a>, <a href="#org042b1b2">max</a>)</li>
+<li>Call the <code>finalize_run!()</code> functions to for tidying up the run <a href="#org181bea8">(mean</a>, <a href="#org118483e">max</a>)</li>
 <li>Retrieve the stats that are overwritten in each run <br />
 (e.g., the empirical mean in for mean-estimating processes is kept only for the current run)</li>
 </ol></li>
@@ -403,8 +403,8 @@ The user must stick to the following order of instructions for using the types d
 </div>
 </div>
 
-<div id="outline-container-org6861690" class="outline-3">
-<h3 id="org6861690"><span class="section-number-3">2.3.</span> Literate programming</h3>
+<div id="outline-container-org7b76108" class="outline-3">
+<h3 id="org7b76108"><span class="section-number-3">2.3.</span> Literate programming</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 This document is a "literate program", i.e., plain text interspersed with actual Julia programming language
@@ -418,8 +418,8 @@ document structure.  This makes orientation in the source code so much easier �
 </div>
 </div>
 
-<div id="outline-container-orgfaea785" class="outline-3">
-<h3 id="orgfaea785"><span class="section-number-3">2.4.</span> Acknowledgments</h3>
+<div id="outline-container-orgcef6980" class="outline-3">
+<h3 id="orgcef6980"><span class="section-number-3">2.4.</span> Acknowledgments</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 The author was partly funded by <b>Norges Forskningsråd</b> through the <a href="https://www.sintef.no/en/projects/2022/neqst-quantum-computing-applied-to-industrial-optimization-problems/">NeQst</a> project: <i>Quantum Computing Applied to
@@ -431,15 +431,15 @@ Industrial Optimization Problems,</i> project № 332023; part of this software 
 </div>
 
 
-<div id="outline-container-org9eee307" class="outline-2">
-<h2 id="org9eee307"><span class="section-number-2">3.</span> <span class="todo __">↘️</span> TASK LISTS and PROGRESS REPORTS</h2>
+<div id="outline-container-org3eca6ba" class="outline-2">
+<h2 id="org3eca6ba"><span class="section-number-2">3.</span> <span class="todo __">↘️</span> TASK LISTS and PROGRESS REPORTS</h2>
 <div class="outline-text-2" id="text-3">
 <p>
-<a id="orged792fd"></a>
+<a id="org0c51891"></a>
 </p>
 </div>
-<div id="outline-container-org6432f24" class="outline-3">
-<h3 id="org6432f24"><span class="section-number-3">3.1.</span> <code>[0/1]</code> Generally</h3>
+<div id="outline-container-orgae40be8" class="outline-3">
+<h3 id="orgae40be8"><span class="section-number-3">3.1.</span> <code>[0/1]</code> Generally</h3>
 <div class="outline-text-3" id="text-3-1">
 <ul class="org-ul">
 <li class="off"><code>[&#xa0;]</code> Make better docs &#x2013; together with exports</li>
@@ -447,8 +447,8 @@ Industrial Optimization Problems,</i> project № 332023; part of this software 
 </div>
 </div>
 
-<div id="outline-container-orgbe07f0e" class="outline-3">
-<h3 id="orgbe07f0e"><span class="section-number-3">3.2.</span> <code>[0/1]</code> Max-approximating process</h3>
+<div id="outline-container-org66e9c9f" class="outline-3">
+<h3 id="org66e9c9f"><span class="section-number-3">3.2.</span> <code>[0/1]</code> Max-approximating process</h3>
 <div class="outline-text-3" id="text-3-2">
 <ul class="org-ul">
 <li class="off"><code>[&#xa0;]</code> Make unit tests</li>
@@ -456,25 +456,25 @@ Industrial Optimization Problems,</i> project № 332023; part of this software 
 </div>
 </div>
 
-<div id="outline-container-orga7b8507" class="outline-3">
-<h3 id="orga7b8507"><span class="section-number-3">3.3.</span> <code>[0/2]</code> Finally, &#x2026;</h3>
+<div id="outline-container-org04a14a3" class="outline-3">
+<h3 id="org04a14a3"><span class="section-number-3">3.3.</span> <code>[0/2]</code> Finally, &#x2026;</h3>
 <div class="outline-text-3" id="text-3-3">
 <ul class="org-ul">
-<li class="off"><code>[&#xa0;]</code> Write the <a href="#orgaac1b62">Summary</a></li>
+<li class="off"><code>[&#xa0;]</code> Write the <a href="#org6c50858">Summary</a></li>
 
-<li class="off"><code>[&#xa0;]</code> Remove this section, <a href="#org9eee307">3</a></li>
+<li class="off"><code>[&#xa0;]</code> Remove this section, <a href="#org3eca6ba">3</a></li>
 </ul>
 </div>
 </div>
 </div>
 
 
-<div id="outline-container-org9016635" class="outline-2">
-<h2 id="org9016635"><span class="section-number-2">4.</span> Setup of the Package and Tests</h2>
+<div id="outline-container-org269da3c" class="outline-2">
+<h2 id="org269da3c"><span class="section-number-2">4.</span> Setup of the Package and Tests</h2>
 <div class="outline-text-2" id="text-4">
 </div>
-<div id="outline-container-orgbbd27e3" class="outline-3">
-<h3 id="orgbbd27e3"><span class="section-number-3">4.1.</span> File headers</h3>
+<div id="outline-container-org74b2180" class="outline-3">
+<h3 id="org74b2180"><span class="section-number-3">4.1.</span> File headers</h3>
 <div class="outline-text-3" id="text-4-1">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #006400; background-color: #ffffe0;">###########################################################################</span>
@@ -500,12 +500,12 @@ Industrial Optimization Problems,</i> project № 332023; part of this software 
 </div>
 </div>
 
-<div id="outline-container-orgcafb06c" class="outline-3">
-<h3 id="orgcafb06c"><span class="section-number-3">4.2.</span> Set up testing</h3>
+<div id="outline-container-org4ab4b60" class="outline-3">
+<h3 id="org4ab4b60"><span class="section-number-3">4.2.</span> Set up testing</h3>
 <div class="outline-text-3" id="text-4-2">
 </div>
 <ol class="org-ol">
-<li><a id="org6f566d1"></a>Importing things<br />
+<li><a id="org3694871"></a>Importing things<br />
 <div class="outline-text-5" id="text-4-2-0-1">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">using</span>  DOT_StatsHelp
@@ -526,7 +526,7 @@ Industrial Optimization Problems,</i> project № 332023; part of this software 
 </div>
 </li>
 
-<li><a id="orgea57831"></a>Generic test based on <code>JET.jl</code><br />
+<li><a id="org5950209"></a>Generic test based on <code>JET.jl</code><br />
 <div class="outline-text-5" id="text-4-2-0-2">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">using</span> JET
@@ -550,8 +550,8 @@ Industrial Optimization Problems,</i> project № 332023; part of this software 
 </ol>
 </div>
 
-<div id="outline-container-org085ab27" class="outline-3">
-<h3 id="org085ab27"><span class="section-number-3">4.3.</span> Module definition, import, and recurrent exports</h3>
+<div id="outline-container-org98024e1" class="outline-3">
+<h3 id="org98024e1"><span class="section-number-3">4.3.</span> Module definition, import, and recurrent exports</h3>
 <div class="outline-text-3" id="text-4-3">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">module</span> DOT_StatsHelp
@@ -592,16 +592,16 @@ Exports of functions with several methods
 </div>
 
 
-<div id="outline-container-orgacacf2c" class="outline-2">
-<h2 id="orgacacf2c"><span class="section-number-2">5.</span> <span class="todo __">↘️</span> Statistics of mean-estimating processes</h2>
+<div id="outline-container-org8df8e8b" class="outline-2">
+<h2 id="org8df8e8b"><span class="section-number-2">5.</span> <span class="todo __">↘️</span> Statistics of mean-estimating processes</h2>
 <div class="outline-text-2" id="text-5">
 </div>
-<div id="outline-container-org4e05488" class="outline-3">
-<h3 id="org4e05488"><span class="section-number-3">5.1.</span> Mean estimation with all values for runs</h3>
+<div id="outline-container-orge2cd1b4" class="outline-3">
+<h3 id="orge2cd1b4"><span class="section-number-3">5.1.</span> Mean estimation with all values for runs</h3>
 <div class="outline-text-3" id="text-5-1">
 </div>
-<div id="outline-container-orgcd41f4e" class="outline-4">
-<h4 id="orgcd41f4e"><span class="section-number-4">5.1.1.</span> Description</h4>
+<div id="outline-container-org341c3eb" class="outline-4">
+<h4 id="org341c3eb"><span class="section-number-4">5.1.1.</span> Description</h4>
 <div class="outline-text-4" id="text-5-1-1">
 <p>
 Data points are added with runs as outer loop and steps as inner loop.  The data of all runs is stored.
@@ -609,8 +609,8 @@ Data points are added with runs as outer loop and steps as inner loop.  The data
 </div>
 </div>
 
-<div id="outline-container-orga2e976d" class="outline-4">
-<h4 id="orga2e976d"><span class="section-number-4">5.1.2.</span> The mean process type: <code>MeanProc_Full{𝐑,V}</code>                   <a id="org243683b"></a></h4>
+<div id="outline-container-org993fa59" class="outline-4">
+<h4 id="org993fa59"><span class="section-number-4">5.1.2.</span> The mean process type: <code>MeanProc_Full{𝐑,V}</code>                   <a id="org9eddc49"></a></h4>
 <div class="outline-text-4" id="text-5-1-2">
 <p>
 An object of this exported type collects information about the stochastic convergence of the empirical mean of
@@ -631,7 +631,7 @@ Let's define it.
 </p>
 
 <ul class="org-ul">
-<li><code>𝐑</code> is the real-number type used for computations.  The user-facing <a href="#orgfd17ac5">constructor</a> defaults this to
+<li><code>𝐑</code> is the real-number type used for computations.  The user-facing <a href="#org13a69c9">constructor</a> defaults this to
 <code>NiceMath</code>'s <code>ℝ</code>, which, here is <code>Float64</code>.  If you are worried that cancellations affect the accuracy of
 the overall outcome, use something the package <code>DoubleFloats</code>, or even, if you're patient, <code>BigFloats</code>.</li>
 
@@ -641,7 +641,7 @@ for a vectors, <code>V</code> \(=2\) for matrices, etc.  With <code>V</code> \(=
 </div>
 
 <ol class="org-ol">
-<li><a id="org71e191f"></a>Fields and inner constructor<br />
+<li><a id="org0082ef2"></a>Fields and inner constructor<br />
 <div class="outline-text-5" id="text-5-1-2-1">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #006400; background-color: #ffffe0;">#            </span><span style="color: #006400; background-color: #ffffe0;">Input for run</span>
@@ -685,11 +685,11 @@ MeanProc_Full{&#119825;,V}(;
 </ol>
 </div>
 
-<div id="outline-container-org0879a2d" class="outline-4">
-<h4 id="org0879a2d"><span class="section-number-4">5.1.3.</span> Usage</h4>
+<div id="outline-container-org6f29400" class="outline-4">
+<h4 id="org6f29400"><span class="section-number-4">5.1.3.</span> Usage</h4>
 <div class="outline-text-4" id="text-5-1-3">
 <p>
-The <a href="#org869b411">high-level usage instructios</a> are above.  Note that the empirical mean of a run is not stored, it's
+The <a href="#org3d48db2">high-level usage instructios</a> are above.  Note that the empirical mean of a run is not stored, it's
 overwritten by the next run.
 </p>
 
@@ -736,17 +736,17 @@ of the inquiry functions make clear how that works:
 </p>
 
 <p>
-Don't forget that the empirical variance is only available after calling <a href="#org1d4a8a2"><code>finalize_run!()</code></a>
+Don't forget that the empirical variance is only available after calling <a href="#org181bea8"><code>finalize_run!()</code></a>
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org2912178" class="outline-4">
-<h4 id="org2912178"><span class="section-number-4">5.1.4.</span> User-facing constructor for <code>MeanProc_Full</code></h4>
+<div id="outline-container-org1e48b49" class="outline-4">
+<h4 id="org1e48b49"><span class="section-number-4">5.1.4.</span> User-facing constructor for <code>MeanProc_Full</code></h4>
 <div class="outline-text-4" id="text-5-1-4">
 <p>
-<a id="orgfd17ac5"></a>
+<a id="org13a69c9"></a>
 </p>
 
 <p>
@@ -770,7 +770,7 @@ The constructor takes the following arguments.
 </div>
 
 <ol class="org-ol">
-<li><a id="org68cdea9"></a>Implementation<br />
+<li><a id="org0553a05"></a>Implementation<br />
 <div class="outline-text-5" id="text-5-1-4-1">
 <div class="org-src-container">
 <pre class="src src-julia">curr_true_&#956;   = Array{&#8477;,V}(<span style="color: #008b8b;">undef</span>, dimension )
@@ -802,8 +802,8 @@ That's it!
 </ol>
 </div>
 
-<div id="outline-container-org5f8cffb" class="outline-4">
-<h4 id="org5f8cffb"><span class="section-number-4">5.1.5.</span> Helper functions and integrity check</h4>
+<div id="outline-container-org6f33c0b" class="outline-4">
+<h4 id="org6f33c0b"><span class="section-number-4">5.1.5.</span> Helper functions and integrity check</h4>
 <div class="outline-text-4" id="text-5-1-5">
 <p>
 The following helper functions are not exported, but can be used by the desperate user.
@@ -833,7 +833,7 @@ The following helper functions are not exported, but can be used by the desperat
 </div>
 
 <ol class="org-ol">
-<li><a id="org1e1a80a"></a>Implementation<br />
+<li><a id="org2589158"></a>Implementation<br />
 <div class="outline-text-5" id="text-5-1-5-1">
 <div class="org-src-container">
 <pre class="src src-julia">    <span style="color: #483d8b;">@assert</span> size( s.curr_true_&#956; ) == dimension(s) == size( s.curr_emp_&#956;  )
@@ -865,8 +865,8 @@ The following helper functions are not exported, but can be used by the desperat
 </ol>
 </div>
 
-<div id="outline-container-orgaa159ce" class="outline-4">
-<h4 id="orgaa159ce"><span class="section-number-4">5.1.6.</span> Starting a new run: <code>start_run!()</code>                            <a id="orgdb2bc4a"></a></h4>
+<div id="outline-container-org38f99a0" class="outline-4">
+<h4 id="org38f99a0"><span class="section-number-4">5.1.6.</span> Starting a new run: <code>start_run!()</code>                            <a id="org3dd4e16"></a></h4>
 <div class="outline-text-4" id="text-5-1-6">
 <p>
 When a new run starts, the true mean has to be recorded, the indices 𝐫 and 𝐬 for run and step, resp., have to
@@ -882,7 +882,7 @@ be set up, and the empirical data has to be initialized.
 </div>
 
 <ol class="org-ol">
-<li><a id="org0e9bebe"></a>Working with valency-0 tensors &#x2013; aka 0-dimensional arrays<br />
+<li><a id="org24bd2f6"></a>Working with valency-0 tensors &#x2013; aka 0-dimensional arrays<br />
 <div class="outline-text-5" id="text-5-1-6-1">
 <p>
 The Julia function <code>fill()</code> can create a valency-0 tensor (0-dimensional array) from a scalar:
@@ -931,7 +931,7 @@ Array{Float64, 0}
 </div>
 </li>
 
-<li><a id="org02a4463"></a>Implementation of <code>start_run!()</code><br />
+<li><a id="org84c9eae"></a>Implementation of <code>start_run!()</code><br />
 <div class="outline-text-5" id="text-5-1-6-2">
 <div class="org-src-container">
 <pre class="src src-julia">    &#9251;integrity_check(s)
@@ -962,11 +962,11 @@ Array{Float64, 0}
 </ol>
 </div>
 
-<div id="outline-container-orge20466e" class="outline-4">
-<h4 id="orge20466e"><span class="section-number-4">5.1.7.</span> Adding data of a step: <code>record_step!()</code></h4>
+<div id="outline-container-orgb3a3245" class="outline-4">
+<h4 id="orgb3a3245"><span class="section-number-4">5.1.7.</span> Adding data of a step: <code>record_step!()</code></h4>
 <div class="outline-text-4" id="text-5-1-7">
 <p>
-<a id="org3140fb6"></a>
+<a id="org10b4c5a"></a>
 </p>
 
 <div class="org-src-container">
@@ -978,7 +978,7 @@ Array{Float64, 0}
 </div>
 
 <ol class="org-ol">
-<li><a id="org3f7ed37"></a>Implementation<br />
+<li><a id="orgec879b5"></a>Implementation<br />
 <div class="outline-text-5" id="text-5-1-7-1">
 <div class="org-src-container">
 <pre class="src src-julia">&#9251;integrity_check(s)
@@ -1023,8 +1023,8 @@ s.&#119852;[] += 1            ; <span style="color: #483d8b;">@assert</span> s.&
 </ol>
 </div>
 
-<div id="outline-container-org156da6d" class="outline-4">
-<h4 id="org156da6d"><span class="section-number-4">5.1.8.</span> Finalizing a run: <code>finalize_run!()</code>                           <a id="org1d4a8a2"></a></h4>
+<div id="outline-container-org0deaad3" class="outline-4">
+<h4 id="org0deaad3"><span class="section-number-4">5.1.8.</span> Finalizing a run: <code>finalize_run!()</code>                           <a id="org181bea8"></a></h4>
 <div class="outline-text-4" id="text-5-1-8">
 <p>
 The <code>finalize_run!()</code> function must be called after all data points have been added.  It removes the bias
@@ -1038,7 +1038,7 @@ from the empirical variance.
 </div>
 
 <ol class="org-ol">
-<li><a id="org4f70d4e"></a>Implementation<br />
+<li><a id="org1e5eda5"></a>Implementation<br />
 <div class="outline-text-5" id="text-5-1-8-1">
 <div class="org-src-container">
 <pre class="src src-julia">    &#9251;integrity_check(s)
@@ -1061,12 +1061,12 @@ from the empirical variance.
 </li>
 </ol>
 </div>
-<div id="outline-container-org7b0bfb5" class="outline-4">
-<h4 id="org7b0bfb5"><span class="section-number-4">5.1.9.</span> Storage and JSON export-import</h4>
+<div id="outline-container-org4a1ea15" class="outline-4">
+<h4 id="org4a1ea15"><span class="section-number-4">5.1.9.</span> Storage and JSON export-import</h4>
 <div class="outline-text-4" id="text-5-1-9">
 </div>
 <ol class="org-ol">
-<li><a id="orgeafa73f"></a>Storage struct<br />
+<li><a id="org509773d"></a>Storage struct<br />
 <div class="outline-text-5" id="text-5-1-9-1">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #483d8b;">@kwdef</span> <span style="color: #a020f0;">struct</span> <span style="color: #228b22;">MeanProc_Full_Storage</span>{V}
@@ -1086,7 +1086,7 @@ from the empirical variance.
 </div>
 
 <ol class="org-ol">
-<li><a id="orga281412"></a>Constructor: <code>MeanProc_Full</code> to <code>MeanProc_Full_Storage</code><br />
+<li><a id="org4437189"></a>Constructor: <code>MeanProc_Full</code> to <code>MeanProc_Full_Storage</code><br />
 <div class="outline-text-6" id="text-5-1-9-1-1">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">MeanProc_Full_Storage</span>(mp ::<span style="color: #228b22;">MeanProc_Full</span>{&#8477;,V}) ::<span style="color: #228b22;">MeanProc_Full_Storage</span>{V} <span style="color: #a020f0;">where</span>{V}
@@ -1109,7 +1109,7 @@ from the empirical variance.
 </div>
 </li>
 
-<li><a id="org741912e"></a>Constructor: <code>MeanProc_Full_Storage</code> to <code>MeanProc_Full</code><br />
+<li><a id="org88f2d12"></a>Constructor: <code>MeanProc_Full_Storage</code> to <code>MeanProc_Full</code><br />
 <div class="outline-text-6" id="text-5-1-9-1-2">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">MeanProc_Full</span>(mpio ::<span style="color: #228b22;">MeanProc_Full_Storage</span>{V}) ::<span style="color: #228b22;">MeanProc_Full</span>{&#8477;,V}    <span style="color: #a020f0;">where</span>{V}
@@ -1130,7 +1130,7 @@ from the empirical variance.
 </ol>
 </li>
 
-<li><a id="org2954b14"></a>JSON-IO functions<br />
+<li><a id="orgf4698ed"></a>JSON-IO functions<br />
 <div class="outline-text-5" id="text-5-1-9-2">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">using</span> JSON3
@@ -1155,12 +1155,12 @@ from the empirical variance.
 </ol>
 </div>
 
-<div id="outline-container-org546acf2" class="outline-4">
-<h4 id="org546acf2"><span class="section-number-4">5.1.10.</span> Tests for the all-vals mean process</h4>
+<div id="outline-container-org4f34a4e" class="outline-4">
+<h4 id="org4f34a4e"><span class="section-number-4">5.1.10.</span> Tests for the all-vals mean process</h4>
 <div class="outline-text-4" id="text-5-1-10">
 </div>
 <ol class="org-ol">
-<li><a id="org22b0be7"></a>Set up testset<br />
+<li><a id="org4784adf"></a>Set up testset<br />
 <div class="outline-text-5" id="text-5-1-10-1">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #483d8b;">@testset</span> verbose=<span style="color: #008b8b;">true</span> <span style="color: #8b2252;">"DOT_StatsHelp.jl testing: Test MeanProc_Full{}"</span> <span style="color: #a020f0;">begin</span>
@@ -1169,7 +1169,7 @@ from the empirical variance.
 </div>
 </li>
 
-<li><a id="orgd70303c"></a>Test with valency 0<br />
+<li><a id="org267f86e"></a>Test with valency 0<br />
 <div class="outline-text-5" id="text-5-1-10-2">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">test__meanestim_0</span>(;runs=1:10,steps=2:4:20)
@@ -1237,7 +1237,7 @@ Run it:
 </div>
 </li>
 
-<li><a id="org7cc143f"></a>Test with valency 1<br />
+<li><a id="orgc92ad63"></a>Test with valency 1<br />
 <div class="outline-text-5" id="text-5-1-10-3">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">test__meanestim_1</span>(;runs=1:3:9,steps=2:5:12)
@@ -1307,7 +1307,7 @@ Run it:
 </div>
 </li>
 
-<li><a id="org55deb07"></a>Test with valency 2<br />
+<li><a id="org5dfed97"></a>Test with valency 2<br />
 <div class="outline-text-5" id="text-5-1-10-4">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">test__meanestim_2</span>(;runs=1:3:9,steps=2:5:12)
@@ -1377,7 +1377,7 @@ Run it:
 </div>
 </li>
 
-<li><a id="orgebf556b"></a>End of testset<br />
+<li><a id="org6a124a0"></a>End of testset<br />
 <div class="outline-text-5" id="text-5-1-10-5">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ testset</span>
@@ -1390,12 +1390,12 @@ Run it:
 </div>
 
 
-<div id="outline-container-org49e5189" class="outline-3">
-<h3 id="org49e5189"><span class="section-number-3">5.2.</span> <span class="todo __">↘️</span> <code>[1/3]</code> Mean estimation with a quantile over runs</h3>
+<div id="outline-container-org8282f75" class="outline-3">
+<h3 id="org8282f75"><span class="section-number-3">5.2.</span> <span class="todo __">↘️</span> <code>[0/1]</code> Mean estimation with a quantile over runs</h3>
 <div class="outline-text-3" id="text-5-2">
 </div>
-<div id="outline-container-orgf9cb655" class="outline-4">
-<h4 id="orgf9cb655"><span class="section-number-4">5.2.1.</span> Description</h4>
+<div id="outline-container-org9becd63" class="outline-4">
+<h4 id="org9becd63"><span class="section-number-4">5.2.1.</span> Description</h4>
 <div class="outline-text-4" id="text-5-2-1">
 <p>
 Data points are added with runs as <i>inner</i> loop and steps as <i>outer</i> loop.  Over the runs, only a given
@@ -1408,8 +1408,8 @@ Data points are vanilla real numbers (i.e., valency-0 tensors, but not of tensor
 </div>
 </div>
 
-<div id="outline-container-orgf4316c0" class="outline-4">
-<h4 id="orgf4316c0"><span class="section-number-4">5.2.2.</span> The type <code>MeanProc_Qtl{𝐑}</code></h4>
+<div id="outline-container-org2842bb4" class="outline-4">
+<h4 id="org2842bb4"><span class="section-number-4">5.2.2.</span> The type <code>MeanProc_Qtl{𝐑}</code></h4>
 <div class="outline-text-4" id="text-5-2-2">
 <p>
 We will define the type of quantiles; first a convenient shortcut:
@@ -1430,13 +1430,13 @@ The following basic type is exported:
 </div>
 
 <p>
-See <a href="#org243683b">text for <code>MeanProc_Full</code> for</a> explanations about the parameters <code>𝐑</code>; this type stores only real numbers
+See <a href="#org9eddc49">text for <code>MeanProc_Full</code> for</a> explanations about the parameters <code>𝐑</code>; this type stores only real numbers
 (i.e., valency-0 tensors).
 </p>
 </div>
 
 <ol class="org-ol">
-<li><a id="org93e2613"></a>Fields and inner constructor<br />
+<li><a id="org529c4ff"></a>Fields and inner constructor<br />
 <div class="outline-text-5" id="text-5-2-2-1">
 <div class="org-src-container">
 <pre class="src src-julia">numo_steps      ::<span style="color: #228b22;">Int</span>         <span style="color: #006400; background-color: #ffffe0;">#                      </span><span style="color: #006400; background-color: #ffffe0;">no need-to-know, just pest control</span>
@@ -1478,14 +1478,14 @@ That's it.
 </div>
 
 <ol class="org-ol">
-<li><a id="orgf8569b9"></a>Convenience constructor &#x2013; <b>not</b> for the user!<br />
+<li><a id="orgfd2adb4"></a>Convenience constructor &#x2013; <b>not</b> for the user!<br />
 <div class="outline-text-6" id="text-5-2-2-1-1">
 <p>
 This only adds the 0-inits for the references 𝐫, 𝐬.
 </p>
 
 <div class="org-src-container">
-<label class="org-src-name"><span class="listing-number">Listing 1: </span>« <code>Struct MeanProc_Qtl convenience constructor</code> »</label><pre class="src src-julia" id="org097bdf2"><span style="color: #a020f0;">function</span>
+<label class="org-src-name"><span class="listing-number">Listing 1: </span>« <code>Struct MeanProc_Qtl convenience constructor</code> »</label><pre class="src src-julia" id="orgb35f03c"><span style="color: #a020f0;">function</span>
     MeanProc_Qtl{&#119825;}(  &#948; ::<span style="color: #228b22;">&#8477;</span>
                       ;
                       numo_steps ::<span style="color: #228b22;">Int</span>, true_&#956; ::<span style="color: #228b22;">&#8477;</span>, &#949;&#8320; ::<span style="color: #228b22;">&#8477;</span>,
@@ -1509,11 +1509,11 @@ This only adds the 0-inits for the references 𝐫, 𝐬.
 </ol>
 </div>
 
-<div id="outline-container-org818c7f8" class="outline-4">
-<h4 id="org818c7f8"><span class="section-number-4">5.2.3.</span> <span class="todo TODO">TODO</span> Usage</h4>
+<div id="outline-container-orgf93dfb1" class="outline-4">
+<h4 id="orgf93dfb1"><span class="section-number-4">5.2.3.</span> <span class="todo TODO">TODO</span> Usage</h4>
 </div>
-<div id="outline-container-orgbd174d2" class="outline-4">
-<h4 id="orgbd174d2"><span class="section-number-4">5.2.4.</span> User-facing constructor</h4>
+<div id="outline-container-org9c5675a" class="outline-4">
+<h4 id="org9c5675a"><span class="section-number-4">5.2.4.</span> User-facing constructor</h4>
 <div class="outline-text-4" id="text-5-2-4">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">MeanProc_Qtl</span>(&#948;      :: <span style="color: #228b22;">&#8477;</span>
@@ -1528,7 +1528,7 @@ This only adds the 0-inits for the references 𝐫, 𝐬.
 </div>
 
 <ol class="org-ol">
-<li><a id="orgbbcbb33"></a>Implementation<br />
+<li><a id="orgbf2811a"></a>Implementation<br />
 <div class="outline-text-5" id="text-5-2-4-1">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #483d8b;">@assert</span> 0 &lt; &#948; &lt; 1
@@ -1567,8 +1567,8 @@ That's it!
 </ol>
 </div>
 
-<div id="outline-container-org79ece35" class="outline-4">
-<h4 id="org79ece35"><span class="section-number-4">5.2.5.</span> Helper functions and integrity check</h4>
+<div id="outline-container-org9d12a6a" class="outline-4">
+<h4 id="org9d12a6a"><span class="section-number-4">5.2.5.</span> Helper functions and integrity check</h4>
 <div class="outline-text-4" id="text-5-2-5">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #0000ff;">numo_runs</span>( s ::<span style="color: #228b22;">MeanProc_Qtl</span>{&#119825;} ) <span style="color: #a020f0;">where</span>{&#119825;}    = length(s.curr_emp_&#956;)
@@ -1587,7 +1587,7 @@ That's it!
 </div>
 
 <ol class="org-ol">
-<li><a id="org13d2553"></a>Implementation<br />
+<li><a id="org21a00e0"></a>Implementation<br />
 <div class="outline-text-5" id="text-5-2-5-1">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #483d8b;">@assert</span> isfinite( s.true_&#956; )
@@ -1628,8 +1628,8 @@ That's it!
 </ol>
 </div>
 
-<div id="outline-container-org1caeaf9" class="outline-4">
-<h4 id="org1caeaf9"><span class="section-number-4">5.2.6.</span> Starting a new step: <code>start_step!()</code></h4>
+<div id="outline-container-orgcde50f9" class="outline-4">
+<h4 id="orgcde50f9"><span class="section-number-4">5.2.6.</span> Starting a new step: <code>start_step!()</code></h4>
 <div class="outline-text-4" id="text-5-2-6">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">start_step!</span>(s ::<span style="color: #228b22;">MeanProc_Qtl</span>{&#119825;}) ::<span style="color: #228b22;">Nothing</span>        <span style="color: #a020f0;">where</span>{&#119825;}
@@ -1650,8 +1650,8 @@ That's it!
 </div>
 </div>
 
-<div id="outline-container-org0eb4a47" class="outline-4">
-<h4 id="org0eb4a47"><span class="section-number-4">5.2.7.</span> Adding a data point: <code>record_run!()</code></h4>
+<div id="outline-container-org894ae61" class="outline-4">
+<h4 id="org894ae61"><span class="section-number-4">5.2.7.</span> Adding a data point: <code>record_run!()</code></h4>
 <div class="outline-text-4" id="text-5-2-7">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">record_run!</span>( s ::<span style="color: #228b22;">MeanProc_Qtl</span>{&#119825;}
@@ -1708,8 +1708,8 @@ That's it!
 </div>
 </div>
 
-<div id="outline-container-orge538f24" class="outline-4">
-<h4 id="orge538f24"><span class="section-number-4">5.2.8.</span> Finalizing a step: <code>finalize_step!()</code></h4>
+<div id="outline-container-org9366f99" class="outline-4">
+<h4 id="org9366f99"><span class="section-number-4">5.2.8.</span> Finalizing a step: <code>finalize_step!()</code></h4>
 <div class="outline-text-4" id="text-5-2-8">
 <p>
 This version of <code>finalize...()</code> returns the quantile.
@@ -1766,7 +1766,7 @@ This function uses an undocumented Julia library function:  <code>Statistics._qu
 </div>
 
 <div class="org-src-container">
-<label class="org-src-name"><span class="listing-number">Listing 2: </span>« <code>Helper-type for concatenating vectors err and ␣π</code> »</label><pre class="src src-julia" id="org20c85af"><span style="color: #a020f0;">struct</span> <span style="color: #228b22;">&#9251;Concat_Vect</span> &lt;: <span style="color: #228b22;">AbstractVector</span>{&#8477;}
+<label class="org-src-name"><span class="listing-number">Listing 2: </span>« <code>Helper-type for concatenating vectors err and ␣π</code> »</label><pre class="src src-julia" id="org99eb15a"><span style="color: #a020f0;">struct</span> <span style="color: #228b22;">&#9251;Concat_Vect</span> &lt;: <span style="color: #228b22;">AbstractVector</span>{&#8477;}
     val ::<span style="color: #228b22;">Vector</span>{&#8477;}
     idx ::<span style="color: #228b22;">Vector</span>{Int}
 <span style="color: #a020f0;">end</span>
@@ -1780,12 +1780,12 @@ This function uses an undocumented Julia library function:  <code>Statistics._qu
 </div>
 </div>
 
-<div id="outline-container-org334c45b" class="outline-4">
-<h4 id="org334c45b"><span class="section-number-4">5.2.9.</span> <span class="done ToTST">ToTST</span> Storage and JSON export-import</h4>
+<div id="outline-container-org1589817" class="outline-4">
+<h4 id="org1589817"><span class="section-number-4">5.2.9.</span> Storage and JSON export-import</h4>
 <div class="outline-text-4" id="text-5-2-9">
 </div>
 <ol class="org-ol">
-<li><a id="org1b5e10f"></a>Storage struct<br />
+<li><a id="org27fc864"></a>Storage struct<br />
 <div class="outline-text-5" id="text-5-2-9-1">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #483d8b;">@kwdef</span> <span style="color: #a020f0;">struct</span> <span style="color: #228b22;">MeanProc_Qtl_Storage</span>
@@ -1808,7 +1808,7 @@ This function uses an undocumented Julia library function:  <code>Statistics._qu
 </div>
 
 <ol class="org-ol">
-<li><a id="orgb6e672e"></a>Constructor: <code>MeanProc_Qtl</code> to <code>MeanProc_Qtl_Storage</code><br />
+<li><a id="orga7db608"></a>Constructor: <code>MeanProc_Qtl</code> to <code>MeanProc_Qtl_Storage</code><br />
 <div class="outline-text-6" id="text-5-2-9-1-1">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">MeanProc_Qtl_Storage</span>(mp ::<span style="color: #228b22;">MeanProc_Qtl</span>{&#8477;}) ::<span style="color: #228b22;">MeanProc_Qtl_Storage</span>
@@ -1836,7 +1836,7 @@ This function uses an undocumented Julia library function:  <code>Statistics._qu
 </ol>
 </li>
 
-<li><a id="org445ba53"></a>JSON-IO functions<br />
+<li><a id="org8c35b9b"></a>JSON-IO functions<br />
 <div class="outline-text-5" id="text-5-2-9-2">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">using</span> JSON3
@@ -1869,12 +1869,12 @@ This function uses an undocumented Julia library function:  <code>Statistics._qu
 </ol>
 </div>
 
-<div id="outline-container-orgde54013" class="outline-4">
-<h4 id="orgde54013"><span class="section-number-4">5.2.10.</span> <span class="todo __">↘️</span> Tests for the quantile mean process</h4>
+<div id="outline-container-orgd412222" class="outline-4">
+<h4 id="orgd412222"><span class="section-number-4">5.2.10.</span> Tests for the quantile mean process</h4>
 <div class="outline-text-4" id="text-5-2-10">
 </div>
 <ol class="org-ol">
-<li><a id="org3e0ccd3"></a>Set up testset<br />
+<li><a id="org050a545"></a>Set up testset<br />
 <div class="outline-text-5" id="text-5-2-10-1">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #483d8b;">@testset</span> verbose=<span style="color: #008b8b;">true</span> <span style="color: #8b2252;">"DOT_StatsHelp.jl testing: Test MeanProc_Qtl{}"</span> <span style="color: #a020f0;">begin</span>
@@ -1883,7 +1883,7 @@ This function uses an undocumented Julia library function:  <code>Statistics._qu
 </div>
 </li>
 
-<li><a id="orga62f618"></a>The test<br />
+<li><a id="org0b96796"></a>The test<br />
 <div class="outline-text-5" id="text-5-2-10-2">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">test__meanestim_qtl</span>(;runs=10:71:400,steps=4:4:20)
@@ -1938,6 +1938,11 @@ This function uses an undocumented Julia library function:  <code>Statistics._qu
                         <span style="color: #a020f0;">end</span>
                     <span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ for (steps)</span>
 
+                    <span style="color: #483d8b;">@test</span> mp.numo_steps == curr_steps
+                    <span style="color: #483d8b;">@test</span> mp.&#119852;[]        == curr_steps
+                    <span style="color: #483d8b;">@test</span> mp.&#119851;[]        == curr_runs
+
+
                     <span style="color: #a020f0;">if</span> &#119825; == Float64
                         jsonstr  = write_JSON(mp)
                         mpio     = read_JSON_qtl(jsonstr)
@@ -1973,7 +1978,7 @@ Run it:
 </div>
 </li>
 
-<li><a id="org6db7124"></a>End of testset<br />
+<li><a id="orgd555b94"></a>End of testset<br />
 <div class="outline-text-5" id="text-5-2-10-3">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ testset</span>
@@ -1987,19 +1992,19 @@ Run it:
 </div>
 
 
-<div id="outline-container-orgbe0024e" class="outline-2">
-<h2 id="orgbe0024e"><span class="section-number-2">6.</span> <span class="todo CONT">CONT</span> <code>[0/9]</code> Statistics of max-approximating processes</h2>
+<div id="outline-container-org82e15b8" class="outline-2">
+<h2 id="org82e15b8"><span class="section-number-2">6.</span> <span class="todo CONT">CONT</span> <code>[0/9]</code> Statistics of max-approximating processes</h2>
 <div class="outline-text-2" id="text-6">
 </div>
-<div id="outline-container-orgbfb1088" class="outline-3">
-<h3 id="orgbfb1088"><span class="section-number-3">6.1.</span> <span class="todo In_Tst">In-Tst</span> Helper-functions for frequencies</h3>
+<div id="outline-container-org2892298" class="outline-3">
+<h3 id="org2892298"><span class="section-number-3">6.1.</span> <span class="todo In_Tst">In-Tst</span> Helper-functions for frequencies</h3>
 <div class="outline-text-3" id="text-6-1">
 </div>
-<div id="outline-container-org4eb8646" class="outline-4">
-<h4 id="org4eb8646"><span class="section-number-4">6.1.1.</span> Description</h4>
+<div id="outline-container-orgaaf5ec3" class="outline-4">
+<h4 id="orgaaf5ec3"><span class="section-number-4">6.1.1.</span> Description</h4>
 <div class="outline-text-4" id="text-6-1-1">
 <p>
-The function <code>␣xtiles_count!()</code> records frequencies: A call to the function <a href="#org8d5a92f"><code>␣xtiles_count!()</code></a> registers a
+The function <code>␣xtiles_count!()</code> records frequencies: A call to the function <a href="#org8368b82"><code>␣xtiles_count!()</code></a> registers a
 data point by increasing the frequency for the interval \(\left]\pi_{\ell-1},\pi_\ell\right]\) out of
 \(\ell=1,\dots,L\) to which it belongs (where \(\pi_0 := 0\)).
 </p>
@@ -2012,9 +2017,9 @@ We require that 1 is in the set of tiles, \(\pi\), but 0 isn't.
 This is how to use it.
 </p>
 <ul class="org-ul">
-<li>make a tiles tuple using the function <a href="#orgf036a8f"><code>␣xtiles_make()</code></a></li>
+<li>make a tiles tuple using the function <a href="#org02cc592"><code>␣xtiles_make()</code></a></li>
 <li>initialize the frequency vector with zeros</li>
-<li>repeatedly call  <a href="#org8d5a92f"><code>␣xtiles_count!()</code></a>, for every data point &#x2013; which must be in [0,1]</li>
+<li>repeatedly call  <a href="#org8368b82"><code>␣xtiles_count!()</code></a>, for every data point &#x2013; which must be in [0,1]</li>
 <li>the frequency vector will contain the frequencies.</li>
 </ul>
 
@@ -2060,15 +2065,15 @@ We require that 1 is in the set of tiles (but 0 isn't).
 </div>
 </div>
 
-<div id="outline-container-orgb0a3882" class="outline-4">
-<h4 id="orgb0a3882"><span class="section-number-4">6.1.2.</span> Create tiles tuple</h4>
+<div id="outline-container-org5760db6" class="outline-4">
+<h4 id="org5760db6"><span class="section-number-4">6.1.2.</span> Create tiles tuple</h4>
 <div class="outline-text-4" id="text-6-1-2">
 <p>
 <i>We require that 1 is in the set of tiles!</i>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-julia" id="orgf036a8f"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">&#9251;xtiles_make</span>(_&#120645;) ::<span style="color: #228b22;">Tuple</span>
+<pre class="src src-julia" id="org02cc592"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">&#9251;xtiles_make</span>(_&#120645;) ::<span style="color: #228b22;">Tuple</span>
     &#120645; = collect(_&#120645;)
     sort!(&#120645;)
 
@@ -2083,11 +2088,11 @@ We require that 1 is in the set of tiles (but 0 isn't).
 </div>
 </div>
 
-<div id="outline-container-org77d1d54" class="outline-4">
-<h4 id="org77d1d54"><span class="section-number-4">6.1.3.</span> Store a data point</h4>
+<div id="outline-container-org33742f0" class="outline-4">
+<h4 id="org33742f0"><span class="section-number-4">6.1.3.</span> Store a data point</h4>
 <div class="outline-text-4" id="text-6-1-3">
 <div class="org-src-container">
-<pre class="src src-julia" id="org8d5a92f"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">&#9251;xtiles_count!</span>(freqs ::<span style="color: #228b22;">AbstractArray</span>{&#8477;},
+<pre class="src src-julia" id="org8368b82"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">&#9251;xtiles_count!</span>(freqs ::<span style="color: #228b22;">AbstractArray</span>{&#8477;},
                         &#120645;     ::<span style="color: #228b22;">NTuple</span>{L,&#8477;}
                         ;
                         p     ::<span style="color: #228b22;">&#8477;</span>,
@@ -2111,12 +2116,12 @@ We require that 1 is in the set of tiles (but 0 isn't).
 </div>
 </div>
 
-<div id="outline-container-org5e7f7d1" class="outline-4">
-<h4 id="org5e7f7d1"><span class="section-number-4">6.1.4.</span> Let's test it!</h4>
+<div id="outline-container-org7d8a00e" class="outline-4">
+<h4 id="org7d8a00e"><span class="section-number-4">6.1.4.</span> Let's test it!</h4>
 <div class="outline-text-4" id="text-6-1-4">
 </div>
 <ol class="org-ol">
-<li><a id="orgb830987"></a>Main testing function<br />
+<li><a id="org723891e"></a>Main testing function<br />
 <div class="outline-text-5" id="text-6-1-4-1">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">function</span> <span style="color: #0000ff;">test__xtiles</span>()
@@ -2179,7 +2184,7 @@ We require that 1 is in the set of tiles (but 0 isn't).
 </div>
 </li>
 
-<li><a id="orge07e5b5"></a>Call the testing function<br />
+<li><a id="orgf823a1d"></a>Call the testing function<br />
 <div class="outline-text-5" id="text-6-1-4-2">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #483d8b;">@testset</span> verbose=<span style="color: #008b8b;">true</span> <span style="color: #8b2252;">"DOT_StatsHelp.jl testing: Test Xtiles helper"</span> <span style="color: #a020f0;">begin</span>
@@ -2193,8 +2198,8 @@ We require that 1 is in the set of tiles (but 0 isn't).
 </div>
 </div>
 
-<div id="outline-container-org2cbcf15" class="outline-3">
-<h3 id="org2cbcf15"><span class="section-number-3">6.2.</span> <span class="todo In_Tst">In-Tst</span> The max-approx process type: <code>MaxProc{L}</code></h3>
+<div id="outline-container-org5943250" class="outline-3">
+<h3 id="org5943250"><span class="section-number-3">6.2.</span> <span class="todo In_Tst">In-Tst</span> The max-approx process type: <code>MaxProc{L}</code></h3>
 <div class="outline-text-3" id="text-6-2">
 <p>
 The following basic type is made available to the user:
@@ -2234,14 +2239,14 @@ so far.
 </div>
 </div>
 
-<div id="outline-container-org176b46e" class="outline-3">
-<h3 id="org176b46e"><span class="section-number-3">6.3.</span> <span class="todo TODO">TODO</span> Usage</h3>
+<div id="outline-container-org43b42ab" class="outline-3">
+<h3 id="org43b42ab"><span class="section-number-3">6.3.</span> <span class="todo TODO">TODO</span> Usage</h3>
 </div>
-<div id="outline-container-orge8a489b" class="outline-3">
-<h3 id="orge8a489b"><span class="section-number-3">6.4.</span> <span class="todo In_Tst">In-Tst</span> User-facing constructor for <code>MaxApprox</code></h3>
+<div id="outline-container-org8232425" class="outline-3">
+<h3 id="org8232425"><span class="section-number-3">6.4.</span> <span class="todo In_Tst">In-Tst</span> User-facing constructor for <code>MaxApprox</code></h3>
 <div class="outline-text-3" id="text-6-4">
 <p>
-<a id="org08cf836"></a>
+<a id="orgfa8d8d3"></a>
 </p>
 
 <div class="org-src-container">
@@ -2262,8 +2267,8 @@ must include 1=100%,</b> but it must not include 0.</li>
 </ul>
 </div>
 
-<div id="outline-container-org120c516" class="outline-4">
-<h4 id="org120c516"><span class="section-number-4">6.4.1.</span> Implementation</h4>
+<div id="outline-container-orgbccffce" class="outline-4">
+<h4 id="orgbccffce"><span class="section-number-4">6.4.1.</span> Implementation</h4>
 <div class="outline-text-4" id="text-6-4-1">
 <div class="org-src-container">
 <pre class="src src-julia">    &#120645;     = &#9251;xtiles_make(_&#120645;)
@@ -2279,8 +2284,8 @@ must include 1=100%,</b> but it must not include 0.</li>
 </div>
 </div>
 
-<div id="outline-container-orgf353aac" class="outline-3">
-<h3 id="orgf353aac"><span class="section-number-3">6.5.</span> <span class="todo In_Tst">In-Tst</span> Helper functions and integrity check</h3>
+<div id="outline-container-orgc2cd3c0" class="outline-3">
+<h3 id="orgc2cd3c0"><span class="section-number-3">6.5.</span> <span class="todo In_Tst">In-Tst</span> Helper functions and integrity check</h3>
 <div class="outline-text-3" id="text-6-5">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #0000ff;">numo_stepsruns</span>( s ::<span style="color: #228b22;">MaxProc</span>{L} ) <span style="color: #a020f0;">where</span>{L}    = ( numo_steps(s) , numo_runs(s) )
@@ -2312,11 +2317,11 @@ must include 1=100%,</b> but it must not include 0.</li>
 </div>
 </div>
 
-<div id="outline-container-org743f417" class="outline-3">
-<h3 id="org743f417"><span class="section-number-3">6.6.</span> <span class="todo In_Tst">In-Tst</span> Starting a new run: <code>start_run!()</code></h3>
+<div id="outline-container-org36e8a6f" class="outline-3">
+<h3 id="org36e8a6f"><span class="section-number-3">6.6.</span> <span class="todo In_Tst">In-Tst</span> Starting a new run: <code>start_run!()</code></h3>
 <div class="outline-text-3" id="text-6-6">
 <p>
-<a id="org6a099e0"></a>
+<a id="orga91779d"></a>
 </p>
 
 <p>
@@ -2346,11 +2351,11 @@ be set up, and the empirical data has to be initialized.
 </div>
 </div>
 
-<div id="outline-container-orgdd258f1" class="outline-3">
-<h3 id="orgdd258f1"><span class="section-number-3">6.7.</span> <span class="todo In_Tst">In-Tst</span> Adding data of a step: <code>record_step!()</code></h3>
+<div id="outline-container-orge0b43e8" class="outline-3">
+<h3 id="orge0b43e8"><span class="section-number-3">6.7.</span> <span class="todo In_Tst">In-Tst</span> Adding data of a step: <code>record_step!()</code></h3>
 <div class="outline-text-3" id="text-6-7">
 <p>
-<a id="org768d8da"></a>
+<a id="org042b1b2"></a>
 </p>
 
 <div class="org-src-container">
@@ -2385,8 +2390,8 @@ be set up, and the empirical data has to be initialized.
 </div>
 </div>
 
-<div id="outline-container-orgeae415c" class="outline-3">
-<h3 id="orgeae415c"><span class="section-number-3">6.8.</span> <span class="todo In_Tst">In-Tst</span> Finalizing a run: <code>finalize_run!()</code>                  <a id="org979e079"></a></h3>
+<div id="outline-container-orgce91885" class="outline-3">
+<h3 id="orgce91885"><span class="section-number-3">6.8.</span> <span class="todo In_Tst">In-Tst</span> Finalizing a run: <code>finalize_run!()</code>                  <a id="org118483e"></a></h3>
 <div class="outline-text-3" id="text-6-8">
 <p>
 This version of <code>finalize...()</code> returns the maximum.
@@ -2407,14 +2412,14 @@ This version of <code>finalize...()</code> returns the maximum.
 </div>
 </div>
 
-<div id="outline-container-orgc03286d" class="outline-3">
-<h3 id="orgc03286d"><span class="section-number-3">6.9.</span> <span class="todo TODO">TODO</span> Tests for the max process</h3>
+<div id="outline-container-orgf036f7a" class="outline-3">
+<h3 id="orgf036f7a"><span class="section-number-3">6.9.</span> <span class="todo TODO">TODO</span> Tests for the max process</h3>
 </div>
 </div>
 
 
-<div id="outline-container-org12847b4" class="outline-2">
-<h2 id="org12847b4"><span class="section-number-2">7.</span> End of module</h2>
+<div id="outline-container-org8246b16" class="outline-2">
+<h2 id="org8246b16"><span class="section-number-2">7.</span> End of module</h2>
 <div class="outline-text-2" id="text-7">
 <div class="org-src-container">
 <pre class="src src-julia"><span style="color: #a020f0;">end</span> <span style="color: #006400; background-color: #ffffe0;">#</span><span style="color: #006400; background-color: #ffffe0;">^ module SPSA_Shift</span>
@@ -2429,8 +2434,8 @@ That's it!
 
 
 
-<div id="outline-container-org05594e6" class="outline-2">
-<h2 id="org05594e6"><span class="section-number-2">8.</span> EOOF</h2>
+<div id="outline-container-orgf2dfff2" class="outline-2">
+<h2 id="orgf2dfff2"><span class="section-number-2">8.</span> EOOF</h2>
 <div class="outline-text-2" id="text-8">
 </div>
 </div>
@@ -2451,7 +2456,7 @@ type in Julia.</p></div></div>
 <div id="postamble" class="status">
 <p class="date">Date: Tue Aug 29 18:48:35 CEST 2023</p>
 <p class="author">Author: Dirk Oliver Theis, University of Tartu, Estonia</p>
-<p class="date">Created: 2023-10-30 Mon 17:48</p>
+<p class="date">Created: 2023-10-30 Mon 18:20</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

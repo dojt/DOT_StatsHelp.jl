@@ -21,13 +21,15 @@ Unfortunately, GitHub renders Org only incompletely.  To view the literate sourc
 /Time goes up!/
 
 
-** *v0.5*  Added `MeanProc_Qtl_Storage` and JSON fns
+** *v0.5.1*  Added 2 tests
 
     + Todo: *Document it!* In particular, mention that the work space and the r,s indices are lost from exporting
       to JSON and re-importing -- so this is cannot be used for /interrupting/ a stats collection process.
 
     + Tidy up code
 
+
+** *v0.5.0*  Added `MeanProc_Qtl_Storage` and JSON fns
 
 ** *v0.4.0*  New stats: MeanProc_Qtl for on-line quantile estimation
 

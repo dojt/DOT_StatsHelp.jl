@@ -284,6 +284,11 @@ function test__meanestim_qtl(;runs=10:71:400,steps=4:4:20)
                         end
                     end #^ for (steps)
 
+                    @test mp.numo_steps == curr_steps
+                    @test mp.𝐬[]        == curr_steps
+                    @test mp.𝐫[]        == curr_runs
+
+
                     if 𝐑 == Float64
                         jsonstr  = write_JSON(mp)
                         mpio     = read_JSON_qtl(jsonstr)

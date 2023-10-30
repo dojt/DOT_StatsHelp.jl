@@ -797,7 +797,7 @@ You are here: [[¤CONTINUE HERE]]
       #+END_SRC
 
 
-** ↘️ [1/3] Mean estimation with a quantile over runs
+** ↘️ [0/1] Mean estimation with a quantile over runs
 *** Description
 
     Data points are added with runs as /inner/ loop and steps as /outer/ loop.  Over the runs, only a given
@@ -1110,7 +1110,7 @@ You are here: [[¤CONTINUE HERE]]
        getindex( cv ::␣Concat_Vect, i ::Integer) = cv.val[cv.idx[i]]
      #+END_SRC
 
-*** ToTST Storage and JSON export-import
+*** Storage and JSON export-import
 **** Storage struct
 
       #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
@@ -1180,7 +1180,7 @@ You are here: [[¤CONTINUE HERE]]
         end
       #+END_SRC
 
-*** ↘️ Tests for the quantile mean process
+*** Tests for the quantile mean process
 **** Set up testset
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
@@ -1241,6 +1241,11 @@ You are here: [[¤CONTINUE HERE]]
                                     @test last( mp.emp_var_minmax[step]) ≈ last( varex[step])    rtol=1e-3
                                 end
                             end #^ for (steps)
+
+                            @test mp.numo_steps == curr_steps
+                            @test mp.𝐬[]        == curr_steps
+                            @test mp.𝐫[]        == curr_runs
+
 
                             if 𝐑 == Float64
                                 jsonstr  = write_JSON(mp)
