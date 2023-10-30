@@ -46,10 +46,13 @@ using LinearAlgebra: norm2, norm1, normInf as norm∞, norm_sqr as norm2²,
 # [[file:../DOT_StatsHelp.org::*Module definition, import, and recurrent exports][Module definition, import, and recurrent exports:3]]
 export MeanProc_Full
 export start_run!, record_step!, finalize_run!
-export MeanProc_Full_Storage, write_JSON, read_JSON
+export MeanProc_Full_Storage
 
 export MeanProc_Qtl
 export start_step!, record_run!, finalize_step!
+export MeanProc_Qtl_Storage
+
+export  write_JSON, read_JSON_full, read_JSON_qtl
 # Module definition, import, and recurrent exports:3 ends here
 
 # [[file:../DOT_StatsHelp.org::*The mean process type: ~MeanProc_Full{𝐑,V}~ <<¤MP-full--struct>>][The mean process type: ~MeanProc_Full{𝐑,V}~                   <<¤MP-full--struct>>:1]]
@@ -323,7 +326,7 @@ end
 # JSON-IO functions:2 ends here
 
 # [[file:../DOT_StatsHelp.org::*JSON-IO functions][JSON-IO functions:3]]
-function read_JSON(json ::AbstractString; V ::Int) ::MeanProc_Full
+function read_JSON_full(json ::AbstractString; V ::Int) ::MeanProc_Full
     return MeanProc_Full( JSON3.read(json, MeanProc_Full_Storage{V}) )
 end
 # JSON-IO functions:3 ends here
@@ -420,7 +423,7 @@ end #^ MeanProc_Qtl constructor
 # Implementation:2 ends here
 
 # [[file:../DOT_StatsHelp.org::*Helper functions and integrity check][Helper functions and integrity check:1]]
-numo_runs(s ::MeanProc_Qtl{𝐑} ) where{𝐑}     = length(s.curr_emp_μ)
+numo_runs( s ::MeanProc_Qtl{𝐑} ) where{𝐑}    = length(s.curr_emp_μ)
 numo_steps(s ::MeanProc_Qtl{𝐑} ) where{𝐑}    = s.numo_steps
 # Helper functions and integrity check:1 ends here
 
@@ -579,6 +582,69 @@ function finalize_step!(s ::MeanProc_Qtl{𝐑}) ::ℝ     where{𝐑}
     return s.err_quants[end]
 end #^ finalize_step!()
 # Finalizing a step: ~finalize_step!()~:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*Storage struct][Storage struct:1]]
+@kwdef struct MeanProc_Qtl_Storage
+    steps_runs      ::Tuple{Int,Int}
+
+    δ               ::ℝ
+    ε₀              ::ℝ
+    true_μ          ::ℝ
+
+    curr_emp_μ      ::Vector{ℝ}   #    length `runs`
+    err             ::Vector{ℝ}   #    length `runs`
+    emp_var         ::Vector{ℝ}   #    length `runs`
+
+    err_quants      ::Vector{ℝ}   #    length: `steps`
+    err_minmax      ::Vector{ℝ²}  #    length: `steps`
+    emp_var_minmax  ::Vector{ℝ²}  #    length: `steps`
+end
+# Storage struct:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*Constructor: ~MeanProc_Qtl~ to ~MeanProc_Qtl_Storage~][Constructor: ~MeanProc_Qtl~ to ~MeanProc_Qtl_Storage~:1]]
+function MeanProc_Qtl_Storage(mp ::MeanProc_Qtl{ℝ}) ::MeanProc_Qtl_Storage
+    steps_runs ::Tuple{Int,Int} = (numo_steps(mp),numo_runs(mp))
+
+    return MeanProc_Qtl_Storage(;
+                           steps_runs     = steps_runs,
+                           δ              = mp.δ,
+                           ε₀             = mp.ε₀,
+                           true_μ         = mp.true_μ,
+
+                           curr_emp_μ     = mp.curr_emp_μ,
+                           err            = mp.err,
+                           emp_var        = mp.emp_var,
+
+                           err_quants     = mp.err_quants,
+                           err_minmax     = mp.err_minmax,
+                           emp_var_minmax = mp.emp_var_minmax
+                           )
+end
+# Constructor: ~MeanProc_Qtl~ to ~MeanProc_Qtl_Storage~:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*JSON-IO functions][JSON-IO functions:1]]
+using JSON3
+# JSON-IO functions:1 ends here
+
+# [[file:../DOT_StatsHelp.org::*JSON-IO functions][JSON-IO functions:2]]
+function write_JSON(mp ::MeanProc_Qtl{ℝ}) ::String
+    return JSON3.write( MeanProc_Qtl_Storage( mp ) )
+end
+# JSON-IO functions:2 ends here
+
+# [[file:../DOT_StatsHelp.org::*JSON-IO functions][JSON-IO functions:3]]
+function read_JSON_qtl(json ::AbstractString) ::MeanProc_Qtl_Storage
+    mpio = JSON3.read(json, MeanProc_Qtl_Storage)
+    (steps,runs) = mpio.steps_runs
+    @assert runs  == length(mpio.curr_emp_μ    )
+    @assert runs  == length(mpio.err           )
+    @assert runs  == length(mpio.emp_var       )
+    @assert steps == length(mpio.err_quants    )
+    @assert steps == length(mpio.err_minmax    )
+    @assert steps == length(mpio.emp_var_minmax)
+    return mpio
+end
+# JSON-IO functions:3 ends here
 
 # [[file:../DOT_StatsHelp.org::␣xtiles_make()][␣xtiles_make()]]
 function ␣xtiles_make(_𝝅) ::Tuple

@@ -82,7 +82,7 @@ function test__meanestim_0(;runs=1:10,steps=2:4:20)
 
             if 𝐑 == Float64
                 jsonstr = write_JSON(mp)
-                mp2     = read_JSON(jsonstr;V=0)
+                mp2     = read_JSON_full(jsonstr;V=0)
 
                 @test mp.curr_true_μ  == mp2.curr_true_μ
                 @test mp.curr_emp_μ   == mp2.curr_emp_μ
@@ -142,7 +142,7 @@ function test__meanestim_1(;runs=1:3:9,steps=2:5:12)
 
             if 𝐑 == Float64
                 jsonstr = write_JSON(mp)
-                mp2     = read_JSON(jsonstr;V=1)
+                mp2     = read_JSON_full(jsonstr;V=1)
 
                 @test mp.curr_true_μ  == mp2.curr_true_μ
                 @test mp.curr_emp_μ   == mp2.curr_emp_μ
@@ -202,7 +202,7 @@ function test__meanestim_2(;runs=1:3:9,steps=2:5:12)
 
             if 𝐑 == Float64
                 jsonstr = write_JSON(mp)
-                mp2     = read_JSON(jsonstr;V=2)
+                mp2     = read_JSON_full(jsonstr;V=2)
 
                 @test mp.curr_true_μ  == mp2.curr_true_μ
                 @test mp.curr_emp_μ   == mp2.curr_emp_μ
@@ -283,6 +283,23 @@ function test__meanestim_qtl(;runs=10:71:400,steps=4:4:20)
                             @test last( mp.emp_var_minmax[step]) ≈ last( varex[step])    rtol=1e-3
                         end
                     end #^ for (steps)
+
+                    if 𝐑 == Float64
+                        jsonstr  = write_JSON(mp)
+                        mpio     = read_JSON_qtl(jsonstr)
+
+                        @test mp.numo_steps     == first( mpio.steps_runs )
+                        @test length(mp.err)    == last(  mpio.steps_runs )
+                        @test mp.δ              == mpio.δ
+                        @test mp.ε₀             == mpio.ε₀
+                        @test mp.true_μ         == mpio.true_μ
+                        @test mp.curr_emp_μ     == mpio.curr_emp_μ
+                        @test mp.err            == mpio.err
+                        @test mp.emp_var        == mpio.emp_var
+                        @test mp.err_quants     == mpio.err_quants
+                        @test mp.err_minmax     == mpio.err_minmax
+                        @test mp.emp_var_minmax == mpio.emp_var_minmax
+                    end
                 end #^ for curr_...
             end #^ for 𝐑
         end #^ for true_μ

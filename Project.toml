@@ -1,7 +1,7 @@
 name = "DOT_StatsHelp"
 uuid = "8148c48a-b060-41fd-b68c-7c28d53d7f5a"
 authors = ["dojt <dotheis.work@gmail.com>"]
-version = "0.4.0"
+version = "0.5.0"
 
 [deps]
 DOT_NiceMath = "3e56a413-cb61-4004-9b36-fbc90ffc4c6e"
