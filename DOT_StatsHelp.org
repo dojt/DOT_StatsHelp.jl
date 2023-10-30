@@ -825,7 +825,7 @@ You are here: [[¤CONTINUE HERE]]
 **** Fields and inner constructor
 
       #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
-        numo_steps      ::Int         #                      no need-to-know, just pest control
+        numo_steps      ::Int         #                      total targeted number of steps
 
         #               Input for run
         δ               ::ℝ           #                      the quantile
@@ -1135,7 +1135,7 @@ You are here: [[¤CONTINUE HERE]]
 
        #+BEGIN_SRC julia   :tangle src/DOT_StatsHelp.jl   :noweb no-export :noweb-prefix no
          function MeanProc_Qtl_Storage(mp ::MeanProc_Qtl{ℝ}) ::MeanProc_Qtl_Storage
-             steps_runs ::Tuple{Int,Int} = (numo_steps(mp),numo_runs(mp))
+             steps_runs ::Tuple{Int,Int} = (mp.numo_steps,numo_runs(mp))
 
              return MeanProc_Qtl_Storage(;
                                     steps_runs     = steps_runs,
@@ -1170,12 +1170,22 @@ You are here: [[¤CONTINUE HERE]]
         function read_JSON_qtl(json ::AbstractString) ::MeanProc_Qtl_Storage
             mpio = JSON3.read(json, MeanProc_Qtl_Storage)
             (steps,runs) = mpio.steps_runs
+            @assert steps ≥  1  ;  @assert runs  ≥  1
+
             @assert runs  == length(mpio.curr_emp_μ    )
             @assert runs  == length(mpio.err           )
             @assert runs  == length(mpio.emp_var       )
-            @assert steps == length(mpio.err_quants    )
-            @assert steps == length(mpio.err_minmax    )
-            @assert steps == length(mpio.emp_var_minmax)
+
+            @assert length(mpio.err_quants    ) ==
+                    length(mpio.err_minmax    ) ==
+                    length(mpio.emp_var_minmax)
+
+            @assert length(mpio.err_quants)      ≤ steps
+            if      length(mpio.err_quants)      < steps
+                @error "JSON-reading MeanProc_Qtl_Storage with acutal numo steps == \
+                        $(length(mpio.err_quants)) <(!) $(steps) == target numo steps"
+            end
+
             return mpio
         end
       #+END_SRC
@@ -1248,20 +1258,45 @@ You are here: [[¤CONTINUE HERE]]
 
 
                             if 𝐑 == Float64
-                                jsonstr  = write_JSON(mp)
-                                mpio     = read_JSON_qtl(jsonstr)
+                                let
+                                    jsonstr  = write_JSON(mp)
+                                    mpio     = read_JSON_qtl(jsonstr)
 
-                                @test mp.numo_steps     == first( mpio.steps_runs )
-                                @test length(mp.err)    == last(  mpio.steps_runs )
-                                @test mp.δ              == mpio.δ
-                                @test mp.ε₀             == mpio.ε₀
-                                @test mp.true_μ         == mpio.true_μ
-                                @test mp.curr_emp_μ     == mpio.curr_emp_μ
-                                @test mp.err            == mpio.err
-                                @test mp.emp_var        == mpio.emp_var
-                                @test mp.err_quants     == mpio.err_quants
-                                @test mp.err_minmax     == mpio.err_minmax
-                                @test mp.emp_var_minmax == mpio.emp_var_minmax
+                                    @test mp.numo_steps     == first( mpio.steps_runs )
+                                    @test length(mp.err)    == last(  mpio.steps_runs )
+                                    @test mp.δ              == mpio.δ
+                                    @test mp.ε₀             == mpio.ε₀
+                                    @test mp.true_μ         == mpio.true_μ
+                                    @test mp.curr_emp_μ     == mpio.curr_emp_μ
+                                    @test mp.err            == mpio.err
+                                    @test mp.emp_var        == mpio.emp_var
+                                    @test mp.err_quants     == mpio.err_quants
+                                    @test mp.err_minmax     == mpio.err_minmax
+                                    @test mp.emp_var_minmax == mpio.emp_var_minmax
+                                end
+                                let
+                                    empty!(mp.err_quants)
+                                    empty!(mp.err_minmax)
+                                    empty!(mp.emp_var_minmax)
+
+                                    jsonstr  = write_JSON(mp)
+                                    mpio = @test_logs (
+                                        :error,
+                                        r"JSON-reading MeanProc_Qtl_Storage with acutal numo steps == 0 <"
+                                    )  read_JSON_qtl(jsonstr)
+
+                                    @test mp.numo_steps     == first( mpio.steps_runs )
+                                    @test length(mp.err)    == last(  mpio.steps_runs )
+                                    @test mp.δ              == mpio.δ
+                                    @test mp.ε₀             == mpio.ε₀
+                                    @test mp.true_μ         == mpio.true_μ
+                                    @test mp.curr_emp_μ     == mpio.curr_emp_μ
+                                    @test mp.err            == mpio.err
+                                    @test mp.emp_var        == mpio.emp_var
+                                    @test mp.err_quants     == mpio.err_quants
+                                    @test mp.err_minmax     == mpio.err_minmax
+                                    @test mp.emp_var_minmax == mpio.emp_var_minmax
+                                end
                             end
                         end #^ for curr_...
                     end #^ for 𝐑

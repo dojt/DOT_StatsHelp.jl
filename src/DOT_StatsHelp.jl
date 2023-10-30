@@ -340,7 +340,7 @@ struct MeanProc_Qtl{𝐑 <: Real}
 # The type ~MeanProc_Qtl{𝐑}~:2 ends here
 
 # [[file:../DOT_StatsHelp.org::*Fields and inner constructor][Fields and inner constructor:1]]
-numo_steps      ::Int         #                      no need-to-know, just pest control
+numo_steps      ::Int         #                      total targeted number of steps
 
 #               Input for run
 δ               ::ℝ           #                      the quantile
@@ -603,7 +603,7 @@ end
 
 # [[file:../DOT_StatsHelp.org::*Constructor: ~MeanProc_Qtl~ to ~MeanProc_Qtl_Storage~][Constructor: ~MeanProc_Qtl~ to ~MeanProc_Qtl_Storage~:1]]
 function MeanProc_Qtl_Storage(mp ::MeanProc_Qtl{ℝ}) ::MeanProc_Qtl_Storage
-    steps_runs ::Tuple{Int,Int} = (numo_steps(mp),numo_runs(mp))
+    steps_runs ::Tuple{Int,Int} = (mp.numo_steps,numo_runs(mp))
 
     return MeanProc_Qtl_Storage(;
                            steps_runs     = steps_runs,
@@ -636,12 +636,22 @@ end
 function read_JSON_qtl(json ::AbstractString) ::MeanProc_Qtl_Storage
     mpio = JSON3.read(json, MeanProc_Qtl_Storage)
     (steps,runs) = mpio.steps_runs
+    @assert steps ≥  1  ;  @assert runs  ≥  1
+
     @assert runs  == length(mpio.curr_emp_μ    )
     @assert runs  == length(mpio.err           )
     @assert runs  == length(mpio.emp_var       )
-    @assert steps == length(mpio.err_quants    )
-    @assert steps == length(mpio.err_minmax    )
-    @assert steps == length(mpio.emp_var_minmax)
+
+    @assert length(mpio.err_quants    ) ==
+            length(mpio.err_minmax    ) ==
+            length(mpio.emp_var_minmax)
+
+    @assert length(mpio.err_quants)      ≤ steps
+    if      length(mpio.err_quants)      < steps
+        @error "JSON-reading MeanProc_Qtl_Storage with acutal numo steps == \
+                $(length(mpio.err_quants)) <(!) $(steps) == target numo steps"
+    end
+
     return mpio
 end
 # JSON-IO functions:3 ends here

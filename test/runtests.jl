@@ -290,20 +290,45 @@ function test__meanestim_qtl(;runs=10:71:400,steps=4:4:20)
 
 
                     if 𝐑 == Float64
-                        jsonstr  = write_JSON(mp)
-                        mpio     = read_JSON_qtl(jsonstr)
+                        let
+                            jsonstr  = write_JSON(mp)
+                            mpio     = read_JSON_qtl(jsonstr)
 
-                        @test mp.numo_steps     == first( mpio.steps_runs )
-                        @test length(mp.err)    == last(  mpio.steps_runs )
-                        @test mp.δ              == mpio.δ
-                        @test mp.ε₀             == mpio.ε₀
-                        @test mp.true_μ         == mpio.true_μ
-                        @test mp.curr_emp_μ     == mpio.curr_emp_μ
-                        @test mp.err            == mpio.err
-                        @test mp.emp_var        == mpio.emp_var
-                        @test mp.err_quants     == mpio.err_quants
-                        @test mp.err_minmax     == mpio.err_minmax
-                        @test mp.emp_var_minmax == mpio.emp_var_minmax
+                            @test mp.numo_steps     == first( mpio.steps_runs )
+                            @test length(mp.err)    == last(  mpio.steps_runs )
+                            @test mp.δ              == mpio.δ
+                            @test mp.ε₀             == mpio.ε₀
+                            @test mp.true_μ         == mpio.true_μ
+                            @test mp.curr_emp_μ     == mpio.curr_emp_μ
+                            @test mp.err            == mpio.err
+                            @test mp.emp_var        == mpio.emp_var
+                            @test mp.err_quants     == mpio.err_quants
+                            @test mp.err_minmax     == mpio.err_minmax
+                            @test mp.emp_var_minmax == mpio.emp_var_minmax
+                        end
+                        let
+                            empty!(mp.err_quants)
+                            empty!(mp.err_minmax)
+                            empty!(mp.emp_var_minmax)
+
+                            jsonstr  = write_JSON(mp)
+                            mpio = @test_logs (
+                                :error,
+                                r"JSON-reading MeanProc_Qtl_Storage with acutal numo steps == 0 <"
+                            )  read_JSON_qtl(jsonstr)
+
+                            @test mp.numo_steps     == first( mpio.steps_runs )
+                            @test length(mp.err)    == last(  mpio.steps_runs )
+                            @test mp.δ              == mpio.δ
+                            @test mp.ε₀             == mpio.ε₀
+                            @test mp.true_μ         == mpio.true_μ
+                            @test mp.curr_emp_μ     == mpio.curr_emp_μ
+                            @test mp.err            == mpio.err
+                            @test mp.emp_var        == mpio.emp_var
+                            @test mp.err_quants     == mpio.err_quants
+                            @test mp.err_minmax     == mpio.err_minmax
+                            @test mp.emp_var_minmax == mpio.emp_var_minmax
+                        end
                     end
                 end #^ for curr_...
             end #^ for 𝐑
