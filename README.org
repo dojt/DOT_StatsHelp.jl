@@ -21,13 +21,15 @@ Unfortunately, GitHub renders Org only incompletely.  To view the literate sourc
 /Time goes up!/
 
 
-** *v0.5.2*  Fixed actual-num-steps < target-num-steps situation
+** *v0.5.3*  Steps,runs ==1 now allowed in ~MeanProc_Qtl~
 
     + Todo: *Document it!* In particular, mention that the work space and the r,s indices are lost from exporting
       to JSON and re-importing -- so this is cannot be used for /interrupting/ a stats collection process.
 
     + Tidy up code
 
+
+** *v0.5.2*  Fixed actual-num-steps < target-num-steps situation
 
 ** *v0.5.1*  Added 2 tests
 

@@ -398,7 +398,8 @@ function MeanProc_Qtl(δ      :: ℝ
 # [[file:../DOT_StatsHelp.org::*Implementation][Implementation:1]]
 @assert 0 < δ < 1
 @assert isfinite(true_μ)
-@assert runs ≥ 2
+@assert runs  ≥ 1
+@assert steps ≥ 1
 @assert 0 ≤ ε₀ < 0.1
 
 curr_emp_μ     = zeros( 𝐑,          runs) ::Vector{𝐑}
@@ -439,7 +440,7 @@ function ␣integrity_check(s ::MeanProc_Qtl{𝐑}) ::Nothing  where{𝐑}
 let runs   = numo_runs(s)
     steps  = numo_steps(s)
 
-    @assert runs  ≥ 2
+    @assert runs  ≥ 1
 
     @assert 0 ≤ s.𝐫[] ≤ runs
     @assert 0 ≤ s.𝐬[] ≤ steps

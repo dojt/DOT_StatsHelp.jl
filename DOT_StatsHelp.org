@@ -184,7 +184,6 @@ You are here: [[¤CONTINUE HERE]]
 
 * ↘️ Statistics of mean-estimating processes
 
-
 ** Mean estimation with all values for runs
 *** Description
 
@@ -900,7 +899,8 @@ You are here: [[¤CONTINUE HERE]]
       #+BEGIN_SRC julia :tangle src/DOT_StatsHelp.jl
         @assert 0 < δ < 1
         @assert isfinite(true_μ)
-        @assert runs ≥ 2
+        @assert runs  ≥ 1
+        @assert steps ≥ 1
         @assert 0 ≤ ε₀ < 0.1
 
         curr_emp_μ     = zeros( 𝐑,          runs) ::Vector{𝐑}
@@ -948,7 +948,7 @@ You are here: [[¤CONTINUE HERE]]
         let runs   = numo_runs(s)
             steps  = numo_steps(s)
 
-            @assert runs  ≥ 2
+            @assert runs  ≥ 1
 
             @assert 0 ≤ s.𝐫[] ≤ runs
             @assert 0 ≤ s.𝐬[] ≤ steps
@@ -1200,7 +1200,7 @@ You are here: [[¤CONTINUE HERE]]
 **** The test
 
       #+BEGIN_SRC julia :tangle test/runtests.jl
-        function test__meanestim_qtl(;runs=10:71:400,steps=4:4:20)
+        function test__meanestim_qtl(;runs=1:99:400,steps=1:4:21)
 
             δ  = 0.123
 

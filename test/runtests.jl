@@ -232,7 +232,7 @@ end #^ testset
 # Set up testset:1 ends here
 
 # [[file:../DOT_StatsHelp.org::*The test][The test:1]]
-function test__meanestim_qtl(;runs=10:71:400,steps=4:4:20)
+function test__meanestim_qtl(;runs=1:99:400,steps=1:4:21)
 
     δ  = 0.123
 
