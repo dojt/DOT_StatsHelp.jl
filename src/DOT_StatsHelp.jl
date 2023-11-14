@@ -627,8 +627,8 @@ end
 import Base: show
 function show(io::IO, sto ::MeanProc_Qtl_Storage)
     print(io, """
-              Steps               = $(sto.steps)
-              Runs                = $(sto.runs)
+              Steps               = $(first(sto.steps_runs))
+              Runs                = $(last(sto.steps_runs))
               δ                   = $(sto.δ             )
               ε₀                  = $(sto.ε₀            )
               true_μ              = $(sto.true_μ        )
