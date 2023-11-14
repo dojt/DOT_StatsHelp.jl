@@ -623,6 +623,26 @@ function MeanProc_Qtl_Storage(mp ::MeanProc_Qtl{ℝ}) ::MeanProc_Qtl_Storage
 end
 # Constructor: ~MeanProc_Qtl~ to ~MeanProc_Qtl_Storage~:1 ends here
 
+# [[file:../DOT_StatsHelp.org::*Pretty-printing ~MeanProc_Qtl_Storage~][Pretty-printing ~MeanProc_Qtl_Storage~:1]]
+import Base: show
+function show(io::IO, sto ::MeanProc_Qtl_Storage)
+    print(io, """
+              Steps               = $(sto.steps)
+              Runs                = $(sto.runs)
+              δ                   = $(sto.δ             )
+              ε₀                  = $(sto.ε₀            )
+              true_μ              = $(sto.true_μ        )
+              curr_emp_μ    [end] = $(sto.curr_emp_μ[end])
+              err           [end] = $(sto.err[end]      )
+              emp_var       [end] = $(sto.emp_var[end]  )
+              err_quants    [end] = $(sto.err_quants[end])
+              err_minmax    [end] = $(sto.err_minmax[end])
+              emp_var_minmax[end] = $(sto.emp_var_minmax[end])
+              """
+          )
+end
+# Pretty-printing ~MeanProc_Qtl_Storage~:1 ends here
+
 # [[file:../DOT_StatsHelp.org::*JSON-IO functions][JSON-IO functions:1]]
 using JSON3
 # JSON-IO functions:1 ends here
